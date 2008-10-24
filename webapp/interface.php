@@ -12,20 +12,27 @@ if (isset($_GET['platform'])) {
 else {
   $platform = get_newest_platform($platforms);
 }
-$pl = get_platform($platform);
+$plid = $db->singleQuery('SELECT plat_iface.id FROM plat_iface JOIN platforms ON plat_iface.platform=platforms.id '.
+                         'WHERE platform.platform="' . sqlesc($platform) . '" AND interface=' . $id, true);
 
-$cache = $id.'.'.$pl;
+$cache = $plid;
 
 if (!$smarty->is_cached('interface.tpl', $cache)) {
   $smarty->assign('platform', $platform);
   
   $smarty->assign('platforms', $platforms);
-  $smarty->assign('constants', $db->arrayQuery('SELECT comment, type, name, text AS value FROM members WHERE '.
-                                               'platform=' . $pl . ' AND interface=' . $id . ' AND kind="const" ORDER BY value'));
-  $smarty->assign('attributes', $db->arrayQuery('SELECT comment, text AS readonly, type, name FROM members WHERE '.
-                                                'platform=' . $pl . ' AND interface=' . $id . ' AND kind="attribute" ORDER BY name'));
-  $smarty->assign('methods', $db->arrayQuery('SELECT comment, type, name FROM members WHERE '.
-                                             'platform=' . $pl . ' AND interface=' . $id . ' AND kind="method" ORDER BY name'));
+  $smarty->assign('constants', $db->arrayQuery('SELECT id, comment, type, name, text AS value FROM members WHERE '.
+                                               'pint=' . $plid . ' AND kind="const" ORDER BY value'));
+  $smarty->assign('attributes', $db->arrayQuery('SELECT id, comment, text AS readonly, type, name FROM members WHERE '.
+                                                'pint=' . $plid . ' AND kind="attribute" ORDER BY name'));
+  $methods = $db->arrayQuery('SELECT id, comment, type, name FROM members WHERE '.
+                             'pint=' . $plid . ' AND kind="method" ORDER BY name');
+
+  foreach ($methods as $method) {
+    $methods['params'] = $db->singleQuery('SELECT type, name FROM parameters WHERE member=' .
+                                          $method['id'] . ' ORDER BY pos');
+  }
+  $smarty->assign('methods', $methods);
 }
 $smarty->display('interface.tpl', $cache);
 ?>
