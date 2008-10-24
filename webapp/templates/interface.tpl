@@ -34,21 +34,21 @@
   <h2><a name="constants">Constants</a></h2>
   {foreach from=$constants item="item"}
     <div class="code">
-      <pre class="comment">  {$item.comment}</pre>
+      <pre class="comment">{$item.comment}</pre>
       <span class="keyword">const</span> <span class="type">{$item.type}</span> <span class="name">{$item.name}</span> = <span class="value">{$item.value}</span>
     </div>
   {/foreach}
   <h2><a name="attributes">Attributes</a></h2>
   {foreach from=$attributes item="item"}
     <div class="code">
-      <pre class="comment">  {$item.comment}</pre>
+      <pre class="comment">{$item.comment}</pre>
       <span class="keyword">{$item.readonly} attribute</span> <span class="type">{$item.type}</span> <span class="name">{$item.name}</span>
     </div>
   {/foreach}
   <h2><a name="methods">Methods</a></h2>
   {foreach from=$methods item="item"}
     <div class="code">
-      <pre class="comment">  {$item.comment}</pre>
+      <pre class="comment">{$item.comment}</pre>
       <span class="type">{$item.type}</span> <span class="name">{$item.name}</span>({$item.paramcount}{foreach from=$item.params item="param" name="paramlist"}<span class="type">{$param.type}</span> <span class="name">{$param.name}</span>{if not $smarty.foreach.paramlist.last}, {/if}{/foreach})
     </div>
   {/foreach}
