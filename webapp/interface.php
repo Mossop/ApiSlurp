@@ -12,8 +12,7 @@ if (isset($_GET['platform'])) {
 else {
   $platform = get_newest_platform($platforms);
 }
-$plid = sql_single('SELECT plat_ifaces.id FROM plat_ifaces JOIN platforms ON plat_ifaces.platform=platforms.id '.
-                   'WHERE platforms.platform="' . sqlesc($platform) . '" AND interface=' . $id, true);
+$plid = get_plat_iface_id($id, $platform);
 
 $cache = $plid;
 

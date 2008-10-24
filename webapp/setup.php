@@ -29,28 +29,33 @@ class APISmarty extends Smarty {
   }
 }
 
+function error($title, $text) {
+  global $smarty;
+
+  $smarty->caching = false;
+
+  $smarty->assign('error', $title);
+  $smarty->assign('message', $text);
+  $smarty->display('error.tpl');
+  exit;
+}
+
 $smarty = new APISmarty();
 
 $smarty->assign('ROOT', $webroot);
 
 if (!is_file($dbpath)) {
-  $smarty->assign('error', 'No database');
-  $smarty->assign('message', 'The API database was not found.');
-  $smarty->display('error.tpl');
-  exit;
+  error('No database', 'The API database was not found.');
 }
 
 try {
   $dbres = sqlite_popen($dbpath);
 }
 catch (Exception $e) {
-  $smarty->assign('error', 'Corrupt database');
-  $smarty->assign('message', 'The database could not be opened: ' . $e->getMessage());
-  $smarty->display('error.tpl');
-  exit;
+  error('Corrupt database', 'The database could not be opened: ' . $e->getMessage());
 }
 
-$smarty->caching = true;
+$smarty->caching = false;
 
 function sqlesc($str) {
   return sqlite_escape_string($str);
@@ -59,13 +64,23 @@ function sqlesc($str) {
 function sql_array($query) {
   global $dbres;
 
-  return sqlite_array_query($dbres, $query);
+  $result = sqlite_array_query($dbres, $query);
+  if ($result === FALSE) {
+    error('Invalid SQL', 'This page attempted to run some invalid SQL: ' . $query . '<br />' . sqlite_error_string(sqlite_last_error($dbres)));
+  }
+
+  return $result;
 }
 
 function sql_single($query, $firstOnly = false) {
   global $dbres;
 
-  return sqlite_single_query($dbres, $query, $firstOnly);
+  $result = sqlite_single_query($dbres, $query, $firstOnly);
+  if ($result === FALSE) {
+    error('Invalid SQL', 'This page attempted to run some invalid SQL: ' . $query . '<br />' . sqlite_error_string(sqlite_last_error($dbres)));
+  }
+
+  return $result;
 }
 
 function get_newest_platform($names) {
@@ -73,14 +88,10 @@ function get_newest_platform($names) {
 }
 
 function get_platform($name) {
-  global $db;
-
   return sql_single('SELECT id FROM platforms WHERE platform="' . sqlesc($name) . '"', true);
 }
 
 function get_platform_names($interface = null) {
-  global $db;
-
   if ($interface == null) {
     return sql_single('SELECT platform FROM platforms');
   }
@@ -92,14 +103,10 @@ function get_platform_names($interface = null) {
 }
 
 function get_interface($name) {
-  global $db;
-
   return sql_single('SELECT id FROM interfaces WHERE interface="' . sqlesc($name) .'"', true);
 }
 
 function get_interface_names($platform = null) {
-  global $db;
-
   if ($platform === null) {
     return sql_single('SELECT interface FROM interfaces ORDER BY interface');
   }
@@ -108,6 +115,11 @@ function get_interface_names($platform = null) {
                       'plat_ifaces JOIN interfaces ON plat_ifaces.interface=interfaces.id '.
                       'WHERE platform=' . $platform . ' ORDER BY interfaces.interface');
   }
+}
+
+function get_plat_iface_id($iid, $platform) {
+  return sql_single('SELECT plat_ifaces.id FROM plat_ifaces JOIN platforms ON plat_ifaces.platform=platforms.id '.
+                    'WHERE platforms.platform="' . sqlesc($platform) . '" AND interface=' . $iid, true);
 }
 
 ?>

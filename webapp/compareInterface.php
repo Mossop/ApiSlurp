@@ -11,57 +11,84 @@ if ($newest == $platform1) {
   $platform2 = $newest;
 }
 
-$iid = get_interface($interface);
-$pl1 = get_platform($platform1);
-$pl2 = get_platform($platform2);
-$cache = $iid.'.'.$pl1.'.'.$pl2;
+$id = get_interface($interface);
+$pli1 = get_plat_iface_id($id, $platform1);
+$pli2 = get_plat_iface_id($id, $platform2);
+$cache = $pli1.'.'.$pli2;
 
-function member_compare($a, $b) {
+function member_name_compare($a, $b) {
   if ($a['name'] == $b['name']) {
     return 0;
   }
   return ($a['name'] < $b['name']) ? -1 : 1;
 }
 
-function get_items($iid, $pl1, $pl2, $type) {
-  global $db;
+function member_text_compare($a, $b) {
+  if ($a['new']['text'] == $b['new']['text']) {
+    return 0;
+  }
+  return ($a['new']['text'] < $b['new']['text']) ? -1 : 1;
+}
 
-  $new = $db->arrayQuery('SELECT m1.name AS name, m1.text AS text FROM '.
-                         '(SELECT * FROM members WHERE platform=' . $pl2 . ' AND interface=' . $iid . ' AND kind="' . sqlesc($type) . '") AS m1 '.
-               'LEFT JOIN (SELECT * FROM members WHERE platform=' . $pl1 . ' AND interface=' . $iid . ' AND kind="' . sqlesc($type) . '") AS m2 '.
-                         'ON m1.name=m2.name WHERE m2.name IS NULL');
-  $old = $db->arrayQuery('SELECT m1.name AS name, m1.text AS text FROM '.
-                         '(SELECT * FROM members WHERE platform=' . $pl1 . ' AND interface=' . $iid . ' AND kind="' . sqlesc($type) . '") AS m1 '.
-               'LEFT JOIN (SELECT * FROM members WHERE platform=' . $pl2 . ' AND interface=' . $iid . ' AND kind="' . sqlesc($type) . '") AS m2 '.
-                         'ON m1.name=m2.name WHERE m2.name IS NULL');
-  $mod = $db->arrayQuery('SELECT m1.name AS name, m1.text AS old, m2.text AS new FROM '.
-                         '(SELECT * FROM members WHERE platform=' . $pl1 . ' AND interface=' . $iid . ' AND kind="' . sqlesc($type) . '") AS m1 '.
-                    'JOIN (SELECT * FROM members WHERE platform=' . $pl2 . ' AND interface=' . $iid . ' AND kind="' . sqlesc($type) . '") AS m2 '.
-                         'ON m1.name=m2.name WHERE m1.hash<>m2.hash');
-  $sam = $db->arrayQuery('SELECT m1.name AS name, m1.text AS text FROM '.
-                         '(SELECT * FROM members WHERE platform=' . $pl1 . ' AND interface=' . $iid . ' AND kind="' . sqlesc($type) . '") AS m1 '.
-                    'JOIN (SELECT * FROM members WHERE platform=' . $pl2 . ' AND interface=' . $iid . ' AND kind="' . sqlesc($type) . '") AS m2 '.
-                         'ON m1.name=m2.name WHERE m1.hash=m2.hash');
+function map_array($mapping, $array) {
+  $result = array();
+
+  foreach ($mapping as $key => $newkey) {
+    $result[$newkey] = $array[$key];
+  }
+  return $result;
+}
+
+$constmap = array('id' => 'id', 'comment' => 'comment', 'type' => 'type', 'name' => 'name', 'value' => 'text');
+$attrmap = array('id' => 'id', 'comment' => 'comment', 'type' => 'type', 'name' => 'name', 'readonly' => 'text');
+$methmap = array('id' => 'id', 'comment' => 'comment', 'type' => 'type', 'name' => 'name');
+
+$oldmap = array('id' => 'oldid', 'name' => 'name', 'type' => 'oldtype', 'comment' => 'oldcomment', 'text' => 'oldtext');
+$newmap = array('id' => 'newid', 'name' => 'name', 'type' => 'newtype', 'comment' => 'newcomment', 'text' => 'newtext');
+
+function get_items($pli1, $pli2, $type, $mapping, $sortfunc) {
+  global $oldmap, $newmap;
+
+  $result = array();
+
+  $new = sql_array('SELECT m1.id AS id, m1.name AS name, m1.type AS type, m1.comment AS comment, m1.text AS text FROM '.
+                   '(SELECT * FROM members WHERE pint=' . $pli2 . ' AND kind="' . sqlesc($type) . '") AS m1 '.
+         'LEFT JOIN (SELECT * FROM members WHERE pint=' . $pli1 . ' AND kind="' . sqlesc($type) . '") AS m2 '.
+                   'ON m1.name=m2.name WHERE m2.name IS NULL');
+  $old = sql_array('SELECT m1.id AS id, m1.name AS name, m1.type AS type, m1.comment AS comment, m1.text AS text FROM '.
+                   '(SELECT * FROM members WHERE pint=' . $pli1 . ' AND kind="' . sqlesc($type) . '") AS m1 '.
+         'LEFT JOIN (SELECT * FROM members WHERE pint=' . $pli2 . ' AND kind="' . sqlesc($type) . '") AS m2 '.
+                   'ON m1.name=m2.name WHERE m2.name IS NULL');
+  $mod = sql_array('SELECT m1.id AS oldid, m1.name AS name, m1.type AS oldtype, m1.comment AS oldcomment, m1.text AS oldtext, '.
+                   'm2.id AS newid, m2.type AS newtype, m2.comment AS newcomment, m2.text AS newtext FROM '.
+                   '(SELECT * FROM members WHERE pint=' . $pli1 . ' AND kind="' . sqlesc($type) . '") AS m1 '.
+              'JOIN (SELECT * FROM members WHERE pint=' . $pli2 . ' AND kind="' . sqlesc($type) . '") AS m2 '.
+                   'ON m1.name=m2.name WHERE m1.hash<>m2.hash');
+  $sam = sql_array('SELECT m1.id AS oldid, m1.name AS name, m1.type AS oldtype, m1.comment AS oldcomment, m1.text AS oldtext, '.
+                   'm2.id AS newid, m2.type AS newtype, m2.comment AS newcomment, m2.text AS newtext FROM '.
+                   '(SELECT * FROM members WHERE pint=' . $pli1 . ' AND kind="' . sqlesc($type) . '") AS m1 '.
+              'JOIN (SELECT * FROM members WHERE pint=' . $pli2 . ' AND kind="' . sqlesc($type) . '") AS m2 '.
+                   'ON m1.name=m2.name WHERE m1.hash=m2.hash');
 
   $items = array();
   foreach ($new as $item) {
-    $new = array('name' => $item['name'], 'text' => $item['text']);
-    array_push($items, array('name' => $item['name'], 'state' => 'added', 'old' => array(), 'new' => $new));
+    $new = map_array($mapping, $item);
+    array_push($items, array('name' => $item['name'], 'state' => 'added', 'old' => $new, 'new' => $new));
   }
   foreach ($old as $item) {
-    $old = array('name' => $item['name'], 'text' => $item['text']);
-    array_push($items, array('name' => $item['name'], 'state' => 'removed', 'old' => $old, 'new' => array()));
+    $old = map_array($mapping, $item);
+    array_push($items, array('name' => $item['name'], 'state' => 'removed', 'old' => $old, 'new' => $old));
   }
   foreach ($sam as $item) {
-    $old = array('name' => $item['name'], 'text' => $item['text']);
-    array_push($items, array('name' => $item['name'], 'state' => 'matching', 'old' => $old, 'new' => $new));
+    $new = map_array($mapping, $item);
+    array_push($items, array('name' => $item['name'], 'state' => 'matching', 'old' => $new, 'new' => $new));
   }
   foreach ($mod as $item) {
-    $old = array('name' => $item['name'], 'text' => $item['old']);
-    $new = array('name' => $item['name'], 'text' => $item['new']);
-    array_push($items, array('name' => $item['name'], 'state' => 'modified', 'old' => $old, 'new' => $new));
+    $old = map_array($mapping, map_array($oldmap, $item));
+    $new = map_array($mapping, map_array($newmap, $item));
+    array_push($items, array('name' => $item['name'], 'state' => 'modified', 'old' => $new, 'new' => $new));
   }
-  usort($items, 'member_compare');
+  usort($items, $sortfunc);
   return $items;
 }
 
@@ -69,11 +96,11 @@ if (!$smarty->is_cached('compareInterface.tpl', $cache)) {
   $smarty->assign('interface', $interface);
   $smarty->assign('platform1', $platform1);
   $smarty->assign('platform2', $platform2);
-  $smarty->assign('platforms', get_platform_names($iid));
+  $smarty->assign('platforms', get_platform_names($id));
 
-  $smarty->assign('constants', get_items($iid, $pl1, $pl2, 'const'));
-  $smarty->assign('attributes', get_items($iid, $pl1, $pl2, 'attribute'));
-  $smarty->assign('methods', get_items($iid, $pl1, $pl2, 'method'));
+  $smarty->assign('constants', get_items($pli1, $pli2, 'const', $constmap, 'member_text_compare'));
+  $smarty->assign('attributes', get_items($pli1, $pli2, 'attribute', $attrmap, 'member_name_compare'));
+  $smarty->assign('methods', get_items($pli1, $pli2, 'method', $methmap, 'member_name_compare'));
 }
 
 $smarty->display('compareInterface.tpl', $cache);

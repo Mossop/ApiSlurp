@@ -1,0 +1,1 @@
+<span class="keyword">{$attribute.readonly} attribute</span> <span class="type">{$attribute.type}</span> <span class="name">{$attribute.name}</span>
