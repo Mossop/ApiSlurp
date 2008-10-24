@@ -166,7 +166,7 @@ catch (Exception $e) {
   error('Corrupt database', 'The database could not be opened: ' . $e->getMessage());
 }
 
-$smarty->caching = false;
+$smarty->caching = true;
 
 function sqlesc($str) {
   return sqlite_escape_string($str);

@@ -23,11 +23,11 @@ function member_name_compare($a, $b) {
   return ($a['name'] < $b['name']) ? -1 : 1;
 }
 
-function member_text_compare($a, $b) {
-  if ($a['new']['text'] == $b['new']['text']) {
+function member_value_compare($a, $b) {
+  if ($a['new']['value'] == $b['new']['value']) {
     return 0;
   }
-  return ($a['new']['text'] < $b['new']['text']) ? -1 : 1;
+  return ($a['new']['value'] < $b['new']['value']) ? -1 : 1;
 }
 
 function map_array($mapping, $array) {
@@ -111,7 +111,7 @@ if (!$smarty->is_cached('compareInterface.tpl', $cache)) {
   $smarty->assign('platform2', $platform2);
   $smarty->assign('platforms', get_platform_names($id));
 
-  $smarty->assign('constants', get_items($pli1, $pli2, 'const', $constmap, 'member_text_compare'));
+  $smarty->assign('constants', get_items($pli1, $pli2, 'const', $constmap, 'member_value_compare'));
   $smarty->assign('attributes', get_items($pli1, $pli2, 'attribute', $attrmap, 'member_name_compare'));
   $smarty->assign('methods', get_items($pli1, $pli2, 'method', $methmap, 'member_name_compare'));
 }
