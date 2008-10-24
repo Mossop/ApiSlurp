@@ -59,8 +59,9 @@ class Slurp(object):
     c = self.dbc.cursor()
     c.execute('CREATE TABLE platforms (id INTEGER PRIMARY KEY AUTOINCREMENT, platform TEXT)')
     c.execute('CREATE TABLE interfaces (id INTEGER PRIMARY KEY AUTOINCREMENT, interface TEXT)')
-    c.execute('CREATE TABLE platform_interfaces (platform INTEGER, interface INTEGER, iid TEXT, hash TEXT)')
-    c.execute('CREATE TABLE members (platform INTEGER, interface INTEGER, type TEXT, name TEXT, hash TEXT, text TEXT)')
+    c.execute('CREATE TABLE platform_interfaces (platform INTEGER, interface INTEGER, iid TEXT, comment TEXT, hash TEXT)')
+    c.execute('CREATE TABLE members (platform INTEGER, interface INTEGER, kind TEXT, type TEXT, name TEXT, comment TEXT, hash TEXT, text TEXT)')
+    c.execute('CREATE TABLE parameters (platform INTEGER, interface INTEGER, member TEXT, pos INTEGER, type TEXT, name TEXT)')
     c.execute('INSERT INTO platforms (platform) VALUES (?)', (platform,))
     self.platform = c.lastrowid
     self.dbc.commit()
@@ -91,8 +92,8 @@ class Slurp(object):
       id = c.lastrowid
     else:
       id = id[0]
-    c.execute('INSERT INTO platform_interfaces (platform,interface,iid) VALUES (?,?,?)',
-              (self.platform, id, interface.attributes.uuid))
+    c.execute('INSERT INTO platform_interfaces (platform,interface,iid,comment) VALUES (?,?,?,?)',
+              (self.platform, id, interface.attributes.uuid, "\n".join(interface.doccomments)))
     self.dbc.commit()
     c.close()
     return id
@@ -107,14 +108,28 @@ class Slurp(object):
       if interface.location._file == filename and interface.kind == 'interface':
         print "Slurping %s" % interface.name
         id = self.__addInterface(interface)
-        interfacehash = md5.new()
+        interfacehash = md5.new(interface.name + "," + interface.attributes.uuid)
         c = self.dbc.cursor()
         for member in interface.namemap:
           text = str(member).strip()
-          interfacehash.update(text)
-          memberhash = md5.new(text)
-          c.execute('INSERT INTO members (platform, interface, type, name, hash, text) VALUES (?,?,?,?,?,?)',
-                    (self.platform, id, member.kind, member.name, memberhash.hexdigest(), str(member).strip()))
+          if member.kind == "method":
+            hash = "%s,%s,%s,%s" % (member.kind, member.name, member.type, ",".join([p.type for p in member.params]))
+            text = ""
+            pos = 0
+            for param in member.params:
+              c.execute('INSERT INTO parameters (platform, interface, member, pos, type, name) VALUES (?,?,?,?,?,?)',
+                        (self.platform, id, member.name, pos, param.type, param.name))
+              pos += 1
+          elif member.kind == "attribute":
+            hash = "%s,%s,%s" % (member.kind, member.name, member.type)
+            text = member.readonly and 'readonly' or ''
+          elif member.kind == "const":
+            hash = "%s,%s,%s,%s" % (member.kind, member.name, member.type, member.getValue())
+            text = member.getValue()
+          memberhash = md5.new(hash)
+          interfacehash.update(hash)
+          c.execute('INSERT INTO members (platform, interface, kind, type, name, comment, hash, text) VALUES (?,?,?,?,?,?,?,?)',
+                    (self.platform, id, member.kind, member.type, member.name, "\n".join(member.doccomments), memberhash.hexdigest(), text))
         c.execute('UPDATE platform_interfaces SET hash=? WHERE platform=? AND interface=?',
                   (interfacehash.hexdigest(), self.platform, id))
         self.dbc.commit()

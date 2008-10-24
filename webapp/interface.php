@@ -20,12 +20,12 @@ if (!$smarty->is_cached('interface.tpl', $cache)) {
   $smarty->assign('platform', $platform);
   
   $smarty->assign('platforms', $platforms);
-  $smarty->assign('constants', $db->arrayQuery('SELECT name,text FROM members WHERE '.
-                                               'platform=' . $pl . ' AND interface=' . $id . ' AND type="const" ORDER BY name'));
-  $smarty->assign('attributes', $db->arrayQuery('SELECT name,text FROM members WHERE '.
-                                                'platform=' . $pl . ' AND interface=' . $id . ' AND type="attribute" ORDER BY name'));
-  $smarty->assign('methods', $db->arrayQuery('SELECT name,text FROM members WHERE '.
-                                             'platform=' . $pl . ' AND interface=' . $id . ' AND type="method" ORDER BY name'));
+  $smarty->assign('constants', $db->arrayQuery('SELECT type,name,value FROM members WHERE '.
+                                               'platform=' . $pl . ' AND interface=' . $id . ' AND kind="const" ORDER BY value'));
+  $smarty->assign('attributes', $db->arrayQuery('SELECT readonly,type,name FROM members WHERE '.
+                                                'platform=' . $pl . ' AND interface=' . $id . ' AND kind="attribute" ORDER BY name'));
+  $smarty->assign('methods', $db->arrayQuery('SELECT type,name FROM members WHERE '.
+                                             'platform=' . $pl . ' AND interface=' . $id . ' AND kind="method" ORDER BY name'));
 }
 $smarty->display('interface.tpl', $cache);
 ?>

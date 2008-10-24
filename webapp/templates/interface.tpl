@@ -53,19 +53,19 @@
 <h2>Constants</h2>
 <ul class="code">
 {foreach from=$constants item="item"}
-<li><a name="{$item.name}">{$item.text}</a></li>
+<li><a name="{$item.name}">const {$item.type} {$item.name} = {$item.value}</a></li>
 {/foreach}
 </ul>
 <h2>Attributes</h2>
 <ul class="code">
 {foreach from=$attributes item="item"}
-<li><a name="{$item.name}">{$item.text}</a></li>
+<li><a name="{$item.name}">{$item.readonly} attribute {$item.type} {$item.name}</a></li>
 {/foreach}
 </ul>
 <h2>Methods</h2>
 <ul class="code">
 {foreach from=$methods item="item"}
-<li><a name="{$item.name}">{$item.text}</a></li>
+<li><a name="{$item.name}">{$item.type} {$item.name} ()</a></li>
 {/foreach}
 </ul>
 </div>

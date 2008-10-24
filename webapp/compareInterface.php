@@ -27,20 +27,20 @@ function get_items($iid, $pl1, $pl2, $type) {
   global $db;
 
   $new = $db->arrayQuery('SELECT m1.name AS name, m1.text AS text FROM '.
-                         '(SELECT * FROM members WHERE platform=' . $pl2 . ' AND interface=' . $iid . ' AND type="' . sqlesc($type) . '") AS m1 '.
-               'LEFT JOIN (SELECT * FROM members WHERE platform=' . $pl1 . ' AND interface=' . $iid . ' AND type="' . sqlesc($type) . '") AS m2 '.
+                         '(SELECT * FROM members WHERE platform=' . $pl2 . ' AND interface=' . $iid . ' AND kind="' . sqlesc($type) . '") AS m1 '.
+               'LEFT JOIN (SELECT * FROM members WHERE platform=' . $pl1 . ' AND interface=' . $iid . ' AND kind="' . sqlesc($type) . '") AS m2 '.
                          'ON m1.name=m2.name WHERE m2.name IS NULL');
   $old = $db->arrayQuery('SELECT m1.name AS name, m1.text AS text FROM '.
-                         '(SELECT * FROM members WHERE platform=' . $pl1 . ' AND interface=' . $iid . ' AND type="' . sqlesc($type) . '") AS m1 '.
-               'LEFT JOIN (SELECT * FROM members WHERE platform=' . $pl2 . ' AND interface=' . $iid . ' AND type="' . sqlesc($type) . '") AS m2 '.
+                         '(SELECT * FROM members WHERE platform=' . $pl1 . ' AND interface=' . $iid . ' AND kind="' . sqlesc($type) . '") AS m1 '.
+               'LEFT JOIN (SELECT * FROM members WHERE platform=' . $pl2 . ' AND interface=' . $iid . ' AND kind="' . sqlesc($type) . '") AS m2 '.
                          'ON m1.name=m2.name WHERE m2.name IS NULL');
   $mod = $db->arrayQuery('SELECT m1.name AS name, m1.text AS old, m2.text AS new FROM '.
-                         '(SELECT * FROM members WHERE platform=' . $pl1 . ' AND interface=' . $iid . ' AND type="' . sqlesc($type) . '") AS m1 '.
-                    'JOIN (SELECT * FROM members WHERE platform=' . $pl2 . ' AND interface=' . $iid . ' AND type="' . sqlesc($type) . '") AS m2 '.
+                         '(SELECT * FROM members WHERE platform=' . $pl1 . ' AND interface=' . $iid . ' AND kind="' . sqlesc($type) . '") AS m1 '.
+                    'JOIN (SELECT * FROM members WHERE platform=' . $pl2 . ' AND interface=' . $iid . ' AND kind="' . sqlesc($type) . '") AS m2 '.
                          'ON m1.name=m2.name WHERE m1.hash<>m2.hash');
   $sam = $db->arrayQuery('SELECT m1.name AS name, m1.text AS text FROM '.
-                         '(SELECT * FROM members WHERE platform=' . $pl1 . ' AND interface=' . $iid . ' AND type="' . sqlesc($type) . '") AS m1 '.
-                    'JOIN (SELECT * FROM members WHERE platform=' . $pl2 . ' AND interface=' . $iid . ' AND type="' . sqlesc($type) . '") AS m2 '.
+                         '(SELECT * FROM members WHERE platform=' . $pl1 . ' AND interface=' . $iid . ' AND kind="' . sqlesc($type) . '") AS m1 '.
+                    'JOIN (SELECT * FROM members WHERE platform=' . $pl2 . ' AND interface=' . $iid . ' AND kind="' . sqlesc($type) . '") AS m2 '.
                          'ON m1.name=m2.name WHERE m1.hash=m2.hash');
 
   $items = array();
