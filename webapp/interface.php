@@ -20,11 +20,11 @@ if (!$smarty->is_cached('interface.tpl', $cache)) {
   $smarty->assign('platform', $platform);
   
   $smarty->assign('platforms', $platforms);
-  $smarty->assign('constants', $db->arrayQuery('SELECT type,name,value FROM members WHERE '.
+  $smarty->assign('constants', $db->arrayQuery('SELECT comment, type, name, text AS value FROM members WHERE '.
                                                'platform=' . $pl . ' AND interface=' . $id . ' AND kind="const" ORDER BY value'));
-  $smarty->assign('attributes', $db->arrayQuery('SELECT readonly,type,name FROM members WHERE '.
+  $smarty->assign('attributes', $db->arrayQuery('SELECT comment, text AS readonly, type, name FROM members WHERE '.
                                                 'platform=' . $pl . ' AND interface=' . $id . ' AND kind="attribute" ORDER BY name'));
-  $smarty->assign('methods', $db->arrayQuery('SELECT type,name FROM members WHERE '.
+  $smarty->assign('methods', $db->arrayQuery('SELECT comment, type, name FROM members WHERE '.
                                              'platform=' . $pl . ' AND interface=' . $id . ' AND kind="method" ORDER BY name'));
 }
 $smarty->display('interface.tpl', $cache);
