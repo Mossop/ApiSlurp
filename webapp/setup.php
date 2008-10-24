@@ -177,7 +177,8 @@ function sql_array($query) {
 
   $result = sqlite_array_query($dbres, $query);
   if ($result === FALSE) {
-    error('Invalid SQL', 'This page attempted to run some invalid SQL: ' . $query . '<br />' . sqlite_error_string(sqlite_last_error($dbres)));
+    error('Database Error', 'Something this page did caused a database error. Please email <a href="mailto:dtownsend@mozilla.com">Dave</a> with the page url.');
+    //error('Invalid SQL', 'This page attempted to run some invalid SQL: ' . $query . '<br />' . sqlite_error_string(sqlite_last_error($dbres)));
   }
 
   return $result;
@@ -188,7 +189,8 @@ function sql_single($query, $firstOnly = false) {
 
   $result = sqlite_single_query($dbres, $query, $firstOnly);
   if ($result === FALSE) {
-    error('Invalid SQL', 'This page attempted to run some invalid SQL: ' . $query . '<br />' . sqlite_error_string(sqlite_last_error($dbres)));
+    error('Database Error', 'Something this page did caused a database error. Please email <a href="mailto:dtownsend@mozilla.com">Dave</a> with the page url.');
+    //error('Invalid SQL', 'This page attempted to run some invalid SQL: ' . $query . '<br />' . sqlite_error_string(sqlite_last_error($dbres)));
   }
 
   return $result;
