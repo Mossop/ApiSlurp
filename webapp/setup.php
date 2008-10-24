@@ -40,6 +40,117 @@ function error($title, $text) {
   exit;
 }
 
+class VersionComparator {
+  /**
+   * Parse a version part. 
+   * @return array $r parsed version part.
+   */
+  function parseVersionPart($p) {
+    if ($p == '*') {
+      return array('numA'   => 2147483647,
+                   'strB'   => '',
+                   'numC'   => 0,
+                   'extraD' => '');
+    }
+
+    preg_match('/^([-\d]*)([^-\d]*)([-\d]*)(.*)$/', $p, $m);
+
+    $r = array('numA'   => intval($m[1]),
+               'strB'   => $m[2],
+               'numC'   => intval($m[3]),
+               'extraD' => $m[4]);
+
+    if ($r['strB'] == '+') {
+      ++$r['numA'];
+      $r['strB'] = 'pre';
+    }
+
+    return $r;
+  }
+
+  /**
+   * Compare parsed version parts.
+   * @param string $an
+   * @param string $bp
+   * @return int $r
+   */
+  function cmp($an, $bn) {
+    if ($an < $bn)
+      return -1;
+
+    if ($an > $bn)
+      return 1;
+
+    return 0;
+  }
+
+  /**
+   * Recursive string comparison.
+   * @param string $as
+   * @param string $bs
+   * @return int $r
+   */
+  function strcmp($as, $bs) {
+    if ($as == $bs)
+      return 0;
+
+    if ($as == '')
+      return 1;
+
+    if ($bs == '')
+      return -1;
+
+    return strcmp($as, $bs);
+  }
+
+  /**
+   * Compare parsed version numbers.
+   * @param string $ap
+   * @param string $bp
+   * @return int $r -1|0|1
+   */
+  function compareVersionParts($ap, $bp) {
+    $avp = $this->parseVersionPart($ap);
+    $bvp = $this->parseVersionPart($bp);
+
+    $r = $this->cmp($avp['numA'], $bvp['numA']);
+    if ($r)
+      return $r;
+
+    $r = $this->strcmp($avp['strB'], $bvp['strB']);
+    if ($r)
+      return $r;
+
+    $r = $this->cmp($avp['numC'], $bvp['numC']);
+    if ($r)
+      return $r;
+
+    return $this->strcmp($avp['extraD'], $bvp['extraD']);
+  }
+
+  /**
+   * Master comparison function.
+   * @param string $a complete version string.
+   * @param string $b complete version string.
+   * @return int $r -1|0|1
+   */
+  function compareVersions($a, $b) {
+    $al = explode('.', $a);
+    $bl = explode('.', $b);
+
+    while (count($al) || count($bl)) {
+      $ap = array_shift($al);
+      $bp = array_shift($bl);
+
+      $r = $this->compareVersionParts($ap, $bp);
+      if ($r != 0)
+        return $r;
+    }
+
+    return 0;
+  }
+}
+
 $smarty = new APISmarty();
 
 $smarty->assign('ROOT', $webroot);
@@ -84,7 +195,14 @@ function sql_single($query, $firstOnly = false) {
 }
 
 function get_newest_platform($names) {
-  return $names[count($names) - 1];
+  $max = $names[0];
+  $vc = new VersionComparator();
+  for ($i = 1; $i < count($names); $i++) {
+    if ($vc->compareVersions($max, $names[$i]) < 0) {
+      $max = $names[$i];
+    }
+  }
+  return $max;
 }
 
 function get_platform($name) {
