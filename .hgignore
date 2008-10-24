@@ -1,6 +1,7 @@
-^webapp/smarty/
-^webapp/cache/
-^webapp/compiled/
+^webapp/smarty
+^webapp/cache
+^webapp/compiled
 ^webapp/api.sqlite$
+^webapp/config.php$
 ^[.]
 /[.]
