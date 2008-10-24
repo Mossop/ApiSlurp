@@ -1,0 +1,6 @@
+^webapp/smarty/
+^webapp/cache/
+^webapp/compiled/
+^webapp/api.sqlite$
+^[.]
+/[.]
