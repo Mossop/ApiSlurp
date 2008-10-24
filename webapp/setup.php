@@ -7,12 +7,29 @@ if (!is_dir('compiled') || !is_dir('cache') || !is_file('smarty/Smarty.class.php
 require_once('smarty/Smarty.class.php');
 require_once('config.php');
 
-$smarty = new Smarty();
+class APISmarty extends Smarty {
+  private $starttime;
 
-$smarty->template_dir         = 'templates/';
-$smarty->compile_dir          = 'compiled/';
-$smarty->cache_dir            = 'cache/';
-$smarty->cache_modified_check = true;
+  function APISmarty() {
+    $this->Smarty();
+
+    $this->template_dir         = 'templates/';
+    $this->compile_dir          = 'compiled/';
+    $this->cache_dir            = 'cache/';
+    $this->cache_modified_check = true;
+
+    $this->starttime = microtime(true);
+  }
+
+  function display($template, $cacheid = null, $compileid = null) {
+    $time = round(100 * (microtime(true) - $this->starttime)) / 100;
+    $this->assign('parsetime', $time);
+
+    parent::display($template, $cacheid, $compileid);
+  }
+}
+
+$smarty = new APISmarty();
 
 $smarty->assign('ROOT', $webroot);
 
