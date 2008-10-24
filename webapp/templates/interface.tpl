@@ -21,59 +21,36 @@
 </div>
 
 <div class="block">
-<h2>Constants</h2>
 <ul>
-{foreach from=$constants item="item"}
-  <li><a href="#{$item.name}">{$item.name}</a></li>
-{/foreach}
-</ul>
-</div>
-
-<div class="block">
-<h2>Attributes</h2>
-<ul>
-{foreach from=$attributes item="item"}
-  <li><a href="#{$item.name}">{$item.name}</a></li>
-{/foreach}
-</ul>
-</div>
-
-<div class="block">
-<h2>Methods</h2>
-<ul>
-{foreach from=$methods item="item"}
-  <li><a href="#{$item.name}">{$item.name}</a></li>
-{/foreach}
+  <li><a href="#constants">Constants ({$constants|@count})</a></li>
+  <li><a href="#attributes">Attributes ({$attributes|@count})</a></li>
+  <li><a href="#methods">Methods ({$methods|@count})</a></li>
 </ul>
 </div>
 </div>
 
 <div class="body">
-<h1>{$interface} Interface (from {$platform})</h1>
-<h2>Constants</h2>
-<ul class="code">
-{foreach from=$constants item="item"}
-  <li><pre>  {$item.comment}
-  <a name="{$item.name}">const {$item.type} {$item.name} = {$item.value}</a></pre></li>
-{/foreach}
-</ul>
-<h2>Attributes</h2>
-<ul class="code">
-{foreach from=$attributes item="item"}
-  <li><pre>  {$item.comment}
-  <a name="{$item.name}">{$item.readonly} attribute {$item.type} {$item.name}</a></pre></li>
-{/foreach}
-</ul>
-<h2>Methods</h2>
-<ul class="code">
-{foreach from=$methods item="item"}
-  <li><pre>  {$item.comment}
-  <a name="{$item.name}">{$item.type} {$item.name} (
-    {foreach from=$item.params item="param"}
-      {$param.type} {$param.name},
-    {/foreach}
-    )</a></pre></li>
-{/foreach}
-</ul>
+  <h1>{$interface} Interface (from {$platform})</h1>
+  <h2><a name="constants">Constants</a></h2>
+  {foreach from=$constants item="item"}
+    <div class="code">
+      <pre class="comment">  {$item.comment}</pre>
+      <span class="keyword">const</span> <span class="type">{$item.type}</span> <span class="name">{$item.name}</span> = <span class="value">{$item.value}</span>
+    </div>
+  {/foreach}
+  <h2><a name="attributes">Attributes</a></h2>
+  {foreach from=$attributes item="item"}
+    <div class="code">
+      <pre class="comment">  {$item.comment}</pre>
+      <span class="keyword">{$item.readonly} attribute</span> <span class="type">{$item.type}</span> <span class="name">{$item.name}</span>
+    </div>
+  {/foreach}
+  <h2><a name="methods">Methods</a></h2>
+  {foreach from=$methods item="item"}
+    <div class="code">
+      <pre class="comment">  {$item.comment}</pre>
+      <span class="type">{$item.type}</span> <span class="name">{$item.name}</span>({$item.paramcount}{foreach from=$item.params item="param" name="paramlist"}<span class="type">{$param.type}</span> <span class="name">{$param.name}</span>{if not $smarty.foreach.paramlist.last}, {/if}{/foreach})
+    </div>
+  {/foreach}
 </div>
 {include file="footer.tpl"}

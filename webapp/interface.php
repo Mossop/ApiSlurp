@@ -12,8 +12,8 @@ if (isset($_GET['platform'])) {
 else {
   $platform = get_newest_platform($platforms);
 }
-$plid = $db->singleQuery('SELECT plat_iface.id FROM plat_iface JOIN platforms ON plat_iface.platform=platforms.id '.
-                         'WHERE platform.platform="' . sqlesc($platform) . '" AND interface=' . $id, true);
+$plid = $db->singleQuery('SELECT plat_ifaces.id FROM plat_ifaces JOIN platforms ON plat_ifaces.platform=platforms.id '.
+                         'WHERE platforms.platform="' . sqlesc($platform) . '" AND interface=' . $id, true);
 
 $cache = $plid;
 
@@ -28,9 +28,9 @@ if (!$smarty->is_cached('interface.tpl', $cache)) {
   $methods = $db->arrayQuery('SELECT id, comment, type, name FROM members WHERE '.
                              'pint=' . $plid . ' AND kind="method" ORDER BY name');
 
-  foreach ($methods as $method) {
-    $methods['params'] = $db->singleQuery('SELECT type, name FROM parameters WHERE member=' .
-                                          $method['id'] . ' ORDER BY pos');
+  foreach ($methods as &$method) {
+    $method['params'] = $db->arrayQuery('SELECT type, name FROM parameters WHERE member=' .
+                                        $method['id'] . ' ORDER BY pos');
   }
   $smarty->assign('methods', $methods);
 }

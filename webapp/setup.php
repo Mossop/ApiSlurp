@@ -74,8 +74,8 @@ function get_platform_names($interface = null) {
   }
   else {
     return $db->singleQuery('SELECT platforms.platform FROM '.
-                            'plat_ifaces JOIN platforms ON plat_ifaces.platform=id '.
-                            'WHERE interface=' . $interface . ' ORDER BY id');
+                            'plat_ifaces JOIN platforms ON plat_ifaces.platform=platforms.id '.
+                            'WHERE interface=' . $interface . ' ORDER BY platforms.id');
   }
 }
 
@@ -93,7 +93,7 @@ function get_interface_names($platform = null) {
   }
   else {
     return $db->singleQuery('SELECT interfaces.interface FROM '.
-                            'plat_ifaces JOIN interfaces ON plat_ifaces.interface=id '.
+                            'plat_ifaces JOIN interfaces ON plat_ifaces.interface=interfaces.id '.
                             'WHERE platform=' . $platform . ' ORDER BY interfaces.interface');
   }
 }
