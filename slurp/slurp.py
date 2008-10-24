@@ -38,7 +38,7 @@
 #
 # ***** END LICENSE BLOCK *****
 
-import xpidl, sys, os, sqlite3, md5
+import xpidl, sys, os, sqlite3, md5, re
 
 class Slurp(object):
   platform = None
@@ -57,11 +57,15 @@ class Slurp(object):
   def __createDatabase(self, db, platform):
     self.dbc = sqlite3.connect(db)
     c = self.dbc.cursor()
-    c.execute('CREATE TABLE platforms (id INTEGER PRIMARY KEY AUTOINCREMENT, platform TEXT)')
-    c.execute('CREATE TABLE interfaces (id INTEGER PRIMARY KEY AUTOINCREMENT, interface TEXT)')
+    c.execute('CREATE TABLE platforms (id INTEGER PRIMARY KEY AUTOINCREMENT, platform TEXT UNIQUE)')
+    c.execute('CREATE TABLE interfaces (id INTEGER PRIMARY KEY AUTOINCREMENT, interface TEXT UNIQUE)')
     c.execute('CREATE TABLE plat_ifaces (id INTEGER PRIMARY KEY AUTOINCREMENT, platform INTEGER, interface INTEGER, iid TEXT, comment TEXT, hash TEXT)')
+    c.execute('CREATE INDEX pi_plat ON plat_ifaces (platform)');
+    c.execute('CREATE UNIQUE INDEX pi_id ON plat_ifaces (platform, interface)');
     c.execute('CREATE TABLE members (id INTEGER PRIMARY KEY AUTOINCREMENT, pint INTEGER, name TEXT, kind TEXT, type TEXT, comment TEXT, hash TEXT, text TEXT)')
+    c.execute('CREATE UNIQUE INDEX mem_id ON members (pint, name)');
     c.execute('CREATE TABLE parameters (member INTEGER, pos INTEGER, type TEXT, name TEXT)')
+    c.execute('CREATE UNIQUE INDEX param_idx ON parameters (member, pos)');
     c.execute('INSERT INTO platforms (platform) VALUES (?)', (platform,))
     self.platform = c.lastrowid
     self.dbc.commit()
@@ -80,12 +84,14 @@ class Slurp(object):
       self.platform = pl[0]
       c.execute('DELETE FROM plat_ifaces WHERE platform=?', (self.platform,))
       # TODO delete from interfaces as necessary
+      # TODO delete from members as necessary
+      # TODO delete from parameters as necessary
     self.dbc.commit()
     c.close()
 
   def __mungeComment(self, comments):
     lines = "\n".join(comments).splitlines()
-    return "\n".join([s.lstrip(" \t*/") for s in lines])
+    return "\n".join([re.sub("^\s*/?\*+/?", "", s) for s in lines])
 
   def __addInterface(self, interface):
     c = self.dbc.cursor()
