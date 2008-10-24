@@ -18,27 +18,27 @@ if (!$smarty->is_cached('comparePlatform.tpl', $cache)) {
   $smarty->assign("platform2", $platform2);
   
   $smarty->assign('added_interfaces',
-                  $db->singleQuery('SELECT interfaces.interface FROM '.
-                                   '(SELECT * FROM plat_ifaces WHERE platform=' . $pl2 .') AS pi1 '.
-                                   'LEFT JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $pl1 . ') AS pi2 '.
-                                   'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id '.
-                                   'WHERE pi2.platform IS NULL'));
+                  sql_single('SELECT interfaces.interface FROM '.
+                             '(SELECT * FROM plat_ifaces WHERE platform=' . $pl2 .') AS pi1 '.
+                             'LEFT JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $pl1 . ') AS pi2 '.
+                             'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id '.
+                             'WHERE pi2.platform IS NULL'));
   $smarty->assign('removed_interfaces',
-                  $db->singleQuery('SELECT interfaces.interface FROM '.
-                                   '(SELECT * FROM plat_ifaces WHERE platform=' . $pl1 .') AS pi1 '.
-                                   'LEFT JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $pl2 . ') AS pi2 '.
-                                   'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id '.
-                                   'WHERE pi2.platform IS NULL'));
+                  sql_single('SELECT interfaces.interface FROM '.
+                             '(SELECT * FROM plat_ifaces WHERE platform=' . $pl1 .') AS pi1 '.
+                             'LEFT JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $pl2 . ') AS pi2 '.
+                             'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id '.
+                             'WHERE pi2.platform IS NULL'));
   $smarty->assign('matching_interfaces',
-                  $db->singleQuery('SELECT interfaces.interface AS interface FROM '.
-                                   '(SELECT * FROM plat_ifaces WHERE platform=' . $pl1 .') AS pi1 '.
-                                   'JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $pl2 . ') AS pi2 '.
-                                   'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id WHERE pi1.hash=pi2.hash'));
+                  sql_single('SELECT interfaces.interface AS interface FROM '.
+                             '(SELECT * FROM plat_ifaces WHERE platform=' . $pl1 .') AS pi1 '.
+                             'JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $pl2 . ') AS pi2 '.
+                             'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id WHERE pi1.hash=pi2.hash'));
   $smarty->assign('modified_interfaces',
-                  $db->singleQuery('SELECT interfaces.interface AS interface FROM '.
-                                   '(SELECT * FROM plat_ifaces WHERE platform=' . $pl1 .') AS pi1 '.
-                                   'JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $pl2 . ') AS pi2 '.
-                                   'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id WHERE pi1.hash<>pi2.hash'));
+                  sql_single('SELECT interfaces.interface AS interface FROM '.
+                             '(SELECT * FROM plat_ifaces WHERE platform=' . $pl1 .') AS pi1 '.
+                             'JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $pl2 . ') AS pi2 '.
+                             'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id WHERE pi1.hash<>pi2.hash'));
 }
 
 $smarty->display('comparePlatform.tpl', $cache);
