@@ -83,6 +83,10 @@ class Slurp(object):
     self.dbc.commit()
     c.close()
 
+  def __mungeComment(self, comments):
+    lines = "\n".join(comments).splitlines()
+    return "\n".join([s.lstrip(" \t*/") for s in lines])
+
   def __addInterface(self, interface):
     c = self.dbc.cursor()
     c.execute('SELECT id from interfaces WHERE interface=?', (interface.name,))
@@ -93,7 +97,7 @@ class Slurp(object):
     else:
       id = id[0]
     c.execute('INSERT INTO plat_ifaces (platform,interface,iid,comment) VALUES (?,?,?,?)',
-              (self.platform, id, interface.attributes.uuid, "\n".join(interface.doccomments)))
+              (self.platform, id, interface.attributes.uuid, self.__mungeComment(interface.doccomments)))
     id = c.lastrowid
     self.dbc.commit()
     c.close()
@@ -125,7 +129,7 @@ class Slurp(object):
           memberhash = md5.new(hash)
           interfacehash.update(hash)
           c.execute('INSERT INTO members (pint, kind, type, name, comment, hash, text) VALUES (?,?,?,?,?,?,?)',
-                    (iid, member.kind, member.type, member.name, "\n".join(member.doccomments), memberhash.hexdigest(), text))
+                    (iid, member.kind, member.type, member.name, self.__mungeComment(member.doccomments), memberhash.hexdigest(), text))
           if member.kind == "method":
             mid = c.lastrowid
             pos = 0
@@ -133,8 +137,8 @@ class Slurp(object):
               c.execute('INSERT INTO parameters (member, pos, type, name) VALUES (?,?,?,?)',
                         (mid, pos, param.type, param.name))
               pos += 1
-        c.execute('UPDATE plat_ifaces SET hash=? WHERE platform=? AND interface=?',
-                  (interfacehash.hexdigest(), self.platform, iid))
+        c.execute('UPDATE plat_ifaces SET hash=? WHERE id=?',
+                  (interfacehash.hexdigest(), iid))
         self.dbc.commit()
         c.close()
 
