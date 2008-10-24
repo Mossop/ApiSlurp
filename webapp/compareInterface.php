@@ -34,7 +34,7 @@ function map_array($mapping, $array) {
   $result = array();
 
   foreach ($mapping as $key => $newkey) {
-    $result[$newkey] = $array[$key];
+    $result[$key] = $array[$newkey];
   }
   return $result;
 }
@@ -48,8 +48,6 @@ $newmap = array('id' => 'newid', 'name' => 'name', 'type' => 'newtype', 'comment
 
 function get_items($pli1, $pli2, $type, $mapping, $sortfunc) {
   global $oldmap, $newmap;
-
-  $result = array();
 
   $new = sql_array('SELECT m1.id AS id, m1.name AS name, m1.type AS type, m1.comment AS comment, m1.text AS text FROM '.
                    '(SELECT * FROM members WHERE pint=' . $pli2 . ' AND kind="' . sqlesc($type) . '") AS m1 '.
@@ -72,21 +70,36 @@ function get_items($pli1, $pli2, $type, $mapping, $sortfunc) {
 
   $items = array();
   foreach ($new as $item) {
-    $new = map_array($mapping, $item);
-    array_push($items, array('name' => $item['name'], 'state' => 'added', 'old' => $new, 'new' => $new));
+    $list = map_array($mapping, $item);
+    if ($type == 'method') {
+      $list['params'] = sql_array('SELECT type, name FROM parameters WHERE member=' . $list['id'] . ' ORDER BY pos');
+    }
+    array_push($items, array('name' => $item['name'], 'state' => 'added', 'old' => $list, 'new' => $list));
   }
   foreach ($old as $item) {
-    $old = map_array($mapping, $item);
-    array_push($items, array('name' => $item['name'], 'state' => 'removed', 'old' => $old, 'new' => $old));
+    $list = map_array($mapping, $item);
+    if ($type == 'method') {
+      $list['params'] = sql_array('SELECT type, name FROM parameters WHERE member=' . $list['id'] . ' ORDER BY pos');
+    }
+    array_push($items, array('name' => $item['name'], 'state' => 'removed', 'old' => $list, 'new' => $list));
   }
   foreach ($sam as $item) {
-    $new = map_array($mapping, $item);
-    array_push($items, array('name' => $item['name'], 'state' => 'matching', 'old' => $new, 'new' => $new));
+    $oldlist = map_array($mapping, map_array($oldmap, $item));
+    $newlist = map_array($mapping, map_array($newmap, $item));
+    if ($type == 'method') {
+      $oldlist['params'] = sql_array('SELECT type, name FROM parameters WHERE member=' . $oldlist['id'] . ' ORDER BY pos');
+      $newlist['params'] = sql_array('SELECT type, name FROM parameters WHERE member=' . $newlist['id'] . ' ORDER BY pos');
+    }
+    array_push($items, array('name' => $item['name'], 'state' => 'matching', 'old' => $oldlist, 'new' => $newlist));
   }
   foreach ($mod as $item) {
-    $old = map_array($mapping, map_array($oldmap, $item));
-    $new = map_array($mapping, map_array($newmap, $item));
-    array_push($items, array('name' => $item['name'], 'state' => 'modified', 'old' => $new, 'new' => $new));
+    $oldlist = map_array($mapping, map_array($oldmap, $item));
+    $newlist = map_array($mapping, map_array($newmap, $item));
+    if ($type == 'method') {
+      $oldlist['params'] = sql_array('SELECT type, name FROM parameters WHERE member=' . $oldlist['id'] . ' ORDER BY pos');
+      $newlist['params'] = sql_array('SELECT type, name FROM parameters WHERE member=' . $newlist['id'] . ' ORDER BY pos');
+    }
+    array_push($items, array('name' => $item['name'], 'state' => 'modified', 'old' => $oldlist, 'new' => $newlist));
   }
   usort($items, $sortfunc);
   return $items;

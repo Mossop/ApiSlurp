@@ -4,7 +4,7 @@
 <h2>Appears in</h2>
 <ul>
 {foreach from=$platforms item="item"}
-  <li><a href="{$ROOT}/platform/{$item}">{$item}</a></li>
+  <li><a href="{$ROOT}/platform/{$item}/interface/{$interface}">{$item}</a></li>
 {/foreach}
 </ul>
 </div>
@@ -30,7 +30,7 @@
 </div>
 
 <div class="body">
-  <h1>{$interface} Interface (from {$platform})</h1>
+  <h1>{$interface} Interface (from platform <a href="{$ROOT}/platform/{$platform}">{$platform}</a>)</h1>
   <h2><a name="constants">Constants</a></h2>
   {foreach from=$constants item="item"}
     <div class="code">

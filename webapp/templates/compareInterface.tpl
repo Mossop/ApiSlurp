@@ -4,7 +4,7 @@
 <h2>Appears in</h2>
 <ul>
 {foreach from=$platforms item="item"}
-  <li><a href="{$ROOT}/platform/{$item}">{$item}</a></li>
+  <li><a href="{$ROOT}/platform/{$item}/interface/{$interface}">{$item}</a></li>
 {/foreach}
 </ul>
 </div>
@@ -56,7 +56,7 @@
   {/foreach}
 
   <h2><a name="methods">Methods</a></h2>
-  {foreach from=$attributes item="item"}
+  {foreach from=$methods item="item"}
     <div class="code {$item.state}">
       {if $item.state eq "removed"}
         <pre class="comment">{$item.old.comment}</pre>
