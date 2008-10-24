@@ -1,4 +1,4 @@
-{include file="header.tpl" title="Comparing $interface between platform $platform1 and platform $platform2"}
+{include file="header.tpl" title="Comparing `$interface.name` between platform $platform1 and platform $platform2"}
 <!--<div id="overview">
 <div class="block">
 <h2>Appears in</h2>
@@ -17,11 +17,20 @@
 </ul>
 </div>
 </div>-->
+<script type="text/javascript">
+function toggleVisible() {ldelim}
+  var checkbox = document.getElementById("hidesame");
+  document.getElementById("diff").className = checkbox.checked ? "diff hidesame" : "diff";
+{rdelim}
+</script>
 
 <div class="body">
-  <table class="diff">
+  <table id="diff" class="diff">
     <tr>
-      <td colspan="2"><h2>{$interface.name} Interface</h2></td>
+      <td colspan="2">
+        <h2>{$interface.name} Interface</h2>
+        <div class="controls"><input type="checkbox" id="hidesame" name="hidesame" onchange="toggleVisible()"/><label for="hidesame">Hide unchanged items</label></div>
+      </td>
     </tr>
     <tr>
       <td class="before"><h2><a href="{$ROOT}/platform/{$platform1}/interface/{$interface.name}">{$platform1}</a></h2></td>

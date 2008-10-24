@@ -1,4 +1,4 @@
-{include file="header.tpl" title="$interface.name Interface (from $platform)"}
+{include file="header.tpl" title="`$interface.name` Interface (from $platform)"}
 <div id="overview">
 <div class="block">
 <h2>Appears in</h2>
