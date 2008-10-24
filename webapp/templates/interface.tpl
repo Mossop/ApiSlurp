@@ -1,10 +1,10 @@
-{include file="header.tpl" title="$interface Interface (from $platform)"}
+{include file="header.tpl" title="$interface.name Interface (from $platform)"}
 <div id="overview">
 <div class="block">
 <h2>Appears in</h2>
 <ul>
 {foreach from=$platforms item="item"}
-  <li><a href="{$ROOT}/platform/{$item}/interface/{$interface}">{$item}</a></li>
+  <li><a href="{$ROOT}/platform/{$item}/interface/{$interface.name}">{$item}</a></li>
 {/foreach}
 </ul>
 </div>
@@ -14,7 +14,7 @@
 <ul>
 {foreach from=$platforms item="item"}
   {if $item ne $platform}
-    <li><a href="{$ROOT}/compare/interface/{$interface}/{$item}/{$platform}">{$item}</a></li>
+    <li><a href="{$ROOT}/compare/interface/{$interface.name}/{$item}/{$platform}">{$item}</a></li>
   {/if}
 {/foreach}
 </ul>
@@ -30,7 +30,11 @@
 </div>
 
 <div class="body">
-  <h1>{$interface} Interface (from platform <a href="{$ROOT}/platform/{$platform}">{$platform}</a>)</h1>
+  <h1>{$interface.name} Interface (from platform <a href="{$ROOT}/platform/{$platform}">{$platform}</a>)</h1>
+  <div class="code">
+    <pre class="comment">{$interface.comment}</pre>
+    {include file="includes/interface.tpl" interface=$interface}
+  </div>
   <h2><a name="constants">Constants</a></h2>
   {foreach from=$constants item="item"}
     <div class="code">

@@ -4,7 +4,7 @@
 <h2>Appears in</h2>
 <ul>
 {foreach from=$platforms item="item"}
-  <li><a href="{$ROOT}/platform/{$item}/interface/{$interface}">{$item}</a></li>
+  <li><a href="{$ROOT}/platform/{$item}/interface/{$interface.name}">{$item}</a></li>
 {/foreach}
 </ul>
 </div>
@@ -21,11 +21,27 @@
 <div class="body">
   <table class="diff">
     <tr>
-      <td colspan="2"><h2>{$interface} Interface</h2></td>
+      <td colspan="2"><h2>{$interface.name} Interface</h2></td>
     </tr>
     <tr>
-      <td class="before"><h2><a href="{$ROOT}/platform/{$platform1}/interface/{$interface}">{$platform1}</a></h2></td>
-      <td class="after"><h2><a href="{$ROOT}/platform/{$platform2}/interface/{$interface}">{$platform2}</a></h2></td>
+      <td class="before"><h2><a href="{$ROOT}/platform/{$platform1}/interface/{$interface.name}">{$platform1}</a></h2></td>
+      <td class="after"><h2><a href="{$ROOT}/platform/{$platform2}/interface/{$interface.name}">{$platform2}</a></h2></td>
+    </tr>
+    <tr class="commentrow">
+      <td class="before">
+        <pre class="comment">{$interface.old.comment}</pre>
+      </td>
+      <td class="after">
+        <pre class="comment">{$interface.new.comment}</pre>
+      </td>
+    </tr>
+    <tr class="signaturerow">
+      <td class="before">
+        {include file="includes/interface.tpl" interface=$interface.old}
+      </td>
+      <td class="after">
+        {include file="includes/interface.tpl" interface=$interface.new}
+      </td>
     </tr>
     <tr>
       <td colspan="2"><h2><a name="constants">Constants</a></h2></td>

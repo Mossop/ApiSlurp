@@ -1,7 +1,6 @@
 <?php
 require_once('setup.php');
 
-$smarty->assign('interface', $_GET['interface']);
 $id = get_interface($_GET['interface']);
 
 $platforms = get_platform_names($id);
@@ -12,20 +11,22 @@ if (isset($_GET['platform'])) {
 else {
   $platform = get_newest_platform($platforms);
 }
-$plid = get_plat_iface_id($id, $platform);
+$pli = get_plat_iface($id, $platform);
+$pli['name'] = $_GET['interface'];
+$smarty->assign('interface', $pli);
 
-$cache = $plid;
+$cache = $pli['id'];
 
 if (!$smarty->is_cached('interface.tpl', $cache)) {
   $smarty->assign('platform', $platform);
   
   $smarty->assign('platforms', $platforms);
   $smarty->assign('constants', sql_array('SELECT id, comment, type, name, text AS value FROM members WHERE '.
-                                         'pint=' . $plid . ' AND kind="const" ORDER BY value'));
+                                         'pint=' . $pli['id'] . ' AND kind="const" ORDER BY value'));
   $smarty->assign('attributes', sql_array('SELECT id, comment, text AS readonly, type, name FROM members WHERE '.
-                                          'pint=' . $plid . ' AND kind="attribute" ORDER BY name'));
+                                          'pint=' . $pli['id'] . ' AND kind="attribute" ORDER BY name'));
   $methods = sql_array('SELECT id, comment, type, name FROM members WHERE '.
-                       'pint=' . $plid . ' AND kind="method" ORDER BY name');
+                       'pint=' . $pli['id'] . ' AND kind="method" ORDER BY name');
 
   foreach ($methods as &$method) {
     $method['params'] = sql_array('SELECT type, name FROM parameters WHERE member=' .

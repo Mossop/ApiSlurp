@@ -240,4 +240,10 @@ function get_plat_iface_id($iid, $platform) {
                     'WHERE platforms.platform="' . sqlesc($platform) . '" AND interface=' . $iid, true);
 }
 
+function get_plat_iface($iid, $platform) {
+  $rows = sql_array('SELECT plat_ifaces.id AS id, plat_ifaces.iid AS iid, plat_ifaces.comment AS comment, plat_ifaces.hash AS hash FROM plat_ifaces JOIN platforms ON plat_ifaces.platform=platforms.id '.
+                    'WHERE platforms.platform="' . sqlesc($platform) . '" AND interface=' . $iid);
+  return $rows[0];
+}
+
 ?>
