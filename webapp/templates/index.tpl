@@ -11,10 +11,12 @@
   <ul>
     {foreach from=$interfaces item="item"}
       <li>
-        <a href="{$ROOT}/interface/{$item->name}">{$item}</a> (
-        {foreach from=$item->versions item="version"}
-          <a href="{$ROOT}/platform/{$version->platform->name}/interface/{$item->name}">{$version->platform}</a>
-        {/foreach})
+        <a href="{$ROOT}/interface/{$item->name}">{$item}</a>
+        {if $item->oldest == $item->newest}
+          <span class="variants">({$item->newest->platform})</span>
+        {else}
+          <span class="variants">({$item->oldest->platform} - {$item->newest->platform})</span>
+        {/if}
       </li>
     {/foreach}
   </ul>

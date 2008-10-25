@@ -330,8 +330,16 @@ class XPCOMInterface {
   }
 
   public function __get($name) {
-    if ($name == 'versions') {
-      return $this->getVersions();
+    switch ($name) {
+      case 'versions':
+        return $this->getVersions();
+        break;
+      case 'oldest':
+        return $this->getOldestVersion();
+        break;
+      case 'newest':
+        return $this->getNewestVersion();
+        break;
     }
     return null;
   }
@@ -364,9 +372,9 @@ class XPCOMInterface {
 
   public function getNewestVersion() {
     $vc = new VersionComparator();
-    $version = $this->getVersions();
+    $versions = $this->getVersions();
 
-    $version = $version[0];
+    $version = $versions[0];
     for ($i = 1; $i < count($versions); $i++) {
       if ($vc->compareVersions($version->platform->version, $versions[$i]->platform->version) < 0) {
         $version = $versions[$i];
@@ -377,9 +385,9 @@ class XPCOMInterface {
 
   public function getOldestVersion() {
     $vc = new VersionComparator();
-    $version = $this->getVersions();
+    $versions = $this->getVersions();
 
-    $version = $version[0];
+    $version = $versions[0];
     for ($i = 1; $i < count($versions); $i++) {
       if ($vc->compareVersions($version->platform->version, $versions[$i]->platform->version) > 0) {
         $version = $versions[$i];

@@ -62,6 +62,11 @@
   margin-top: 0;
 }
 
+.variants {
+  vertical-align: super;
+  font-size: 70%;
+}
+
 .code {
   font-family: monospace;
   margin: 1em 0 1em 40px;
