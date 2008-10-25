@@ -109,16 +109,16 @@ function get_items($pli1, $pli2, $type, $mapping, $sortfunc) {
   return $items;
 }
 
-if (!$smarty->is_cached('compareInterface.tpl', $cache)) {
-  $smarty->assign('interface', array('name' => $interface, 'old' => $pli1, 'new' => $pli2));
-  $smarty->assign('platform1', $platform1);
-  $smarty->assign('platform2', $platform2);
-  $smarty->assign('platforms', get_platform_names($id));
+$smarty->prepare('compareInterface.tpl', $cache);
 
-  $smarty->assign('constants', get_items($pli1['id'], $pli2['id'], 'const', $constmap, 'member_value_compare'));
-  $smarty->assign('attributes', get_items($pli1['id'], $pli2['id'], 'attribute', $attrmap, 'member_name_compare'));
-  $smarty->assign('methods', get_items($pli1['id'], $pli2['id'], 'method', $methmap, 'member_name_compare'));
-}
+$smarty->assign('interface', array('name' => $interface, 'old' => $pli1, 'new' => $pli2));
+$smarty->assign('platform1', $platform1);
+$smarty->assign('platform2', $platform2);
+$smarty->assign('platforms', get_platform_names($id));
 
-$smarty->display('compareInterface.tpl', $cache);
+$smarty->assign('constants', get_items($pli1['id'], $pli2['id'], 'const', $constmap, 'member_value_compare'));
+$smarty->assign('attributes', get_items($pli1['id'], $pli2['id'], 'attribute', $attrmap, 'member_name_compare'));
+$smarty->assign('methods', get_items($pli1['id'], $pli2['id'], 'method', $methmap, 'member_name_compare'));
+
+$smarty->display();
 ?>

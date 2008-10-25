@@ -113,6 +113,9 @@ class VersionComparator {
 
 class APISmarty extends Smarty {
   private $starttime;
+  private $template;
+  private $cacheid;
+  private $compileid;
 
   public function __construct() {
     parent::__construct();
@@ -125,11 +128,22 @@ class APISmarty extends Smarty {
     $this->starttime = microtime(true);
   }
 
-  public function display($template, $cacheid = null, $compileid = null) {
+  public function prepare($template, $cacheid = null, $compileid = null) {
+    if ($this->is_cached($template, $cacheid, $compileid)) {
+      parent::display($template, $cacheid, $compileid);
+      exit;
+    }
+
+    $this->template = $template;
+    $this->cacheid = $cacheid;
+    $this->compileid = $compileid;
+  }
+
+  public function display() {
     $time = round(100 * (microtime(true) - $this->starttime)) / 100;
     $this->assign('parsetime', $time);
 
-    parent::display($template, $cacheid, $compileid);
+    parent::display($this->template, $this->cacheid, $this->compileid);
   }
 }
 

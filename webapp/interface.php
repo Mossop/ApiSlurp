@@ -17,22 +17,23 @@ $smarty->assign('interface', $pli);
 
 $cache = $pli['id'];
 
-if (!$smarty->is_cached('interface.tpl', $cache)) {
-  $smarty->assign('platform', $platform);
-  
-  $smarty->assign('platforms', $platforms);
-  $smarty->assign('constants', sql_array('SELECT id, comment, type, name, text AS value FROM members WHERE '.
-                                         'pint=' . $pli['id'] . ' AND kind="const" ORDER BY value'));
-  $smarty->assign('attributes', sql_array('SELECT id, comment, text AS readonly, type, name FROM members WHERE '.
-                                          'pint=' . $pli['id'] . ' AND kind="attribute" ORDER BY name'));
-  $methods = sql_array('SELECT id, comment, type, name FROM members WHERE '.
-                       'pint=' . $pli['id'] . ' AND kind="method" ORDER BY name');
+$smarty->prepare('interface.tpl', $cache);
 
-  foreach ($methods as &$method) {
-    $method['params'] = sql_array('SELECT type, name FROM parameters WHERE member=' .
-                                  $method['id'] . ' ORDER BY pos');
-  }
-  $smarty->assign('methods', $methods);
+$smarty->assign('platform', $platform);
+
+$smarty->assign('platforms', $platforms);
+$smarty->assign('constants', sql_array('SELECT id, comment, type, name, text AS value FROM members WHERE '.
+                                       'pint=' . $pli['id'] . ' AND kind="const" ORDER BY value'));
+$smarty->assign('attributes', sql_array('SELECT id, comment, text AS readonly, type, name FROM members WHERE '.
+                                        'pint=' . $pli['id'] . ' AND kind="attribute" ORDER BY name'));
+$methods = sql_array('SELECT id, comment, type, name FROM members WHERE '.
+                     'pint=' . $pli['id'] . ' AND kind="method" ORDER BY name');
+
+foreach ($methods as &$method) {
+  $method['params'] = sql_array('SELECT type, name FROM parameters WHERE member=' .
+                                $method['id'] . ' ORDER BY pos');
 }
-$smarty->display('interface.tpl', $cache);
+$smarty->assign('methods', $methods);
+
+$smarty->display();
 ?>
