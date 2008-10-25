@@ -1,10 +1,15 @@
 <?php
 require_once('setup.php');
 
-$platform = get_platform($_GET['platform']);
-$smarty->assign('platform', $platform);
-$smarty->assign('interfaces', get_interface_names($platform['id']));
-$smarty->assign('platforms', get_platform_names());
+$platform = Platform::getByName($_GET['platform']);
 
-$smarty->display('platform.tpl', $platform['id']);
+if ($platform == null) {
+  error('Unknown Platform', 'The platform ' . $_GET['platform'] . ' does not exist in the database.');
+}
+
+$smarty->assign('platform', $platform);
+$smarty->assign('interfaces', $platform->getInterfaces());
+$smarty->assign('platforms', Platform::getAllPlatforms());
+
+$smarty->display('platform.tpl', $platform->id);
 ?>

@@ -114,7 +114,7 @@ class VersionComparator {
 class APISmarty extends Smarty {
   private $starttime;
 
-  function __construct() {
+  public function __construct() {
     parent::__construct();
 
     $this->template_dir         = 'templates/';
@@ -125,7 +125,7 @@ class APISmarty extends Smarty {
     $this->starttime = microtime(true);
   }
 
-  function display($template, $cacheid = null, $compileid = null) {
+  public function display($template, $cacheid = null, $compileid = null) {
     $time = round(100 * (microtime(true) - $this->starttime)) / 100;
     $this->assign('parsetime', $time);
 
@@ -134,14 +134,14 @@ class APISmarty extends Smarty {
 }
 
 class Database {
-  function escape($str) {
+  public function escape($str) {
     return addslashes($str);
   }
 
-  function arrayQuery($query) {
+  public function arrayQuery($query) {
   }
 
-  function singleQuery($query) {
+  public function singleQuery($query) {
     $rows = $this->arrayQuery($query);
     if ($rows === false) {
       return $rows;
@@ -149,7 +149,7 @@ class Database {
     return $rows[0][0];
   }
 
-  function columnQuery($query) {
+  public function columnQuery($query) {
     $column = array();
     $rows = $this->arrayQuery($query);
     if ($rows === false) {
@@ -161,7 +161,7 @@ class Database {
     return $column;
   }
 
-  function rowQuery($query) {
+  public function rowQuery($query) {
     $rows = $this->arrayQuery($query);
     if ($rows === false) {
       return $rows;
@@ -173,24 +173,140 @@ class Database {
 class SQLiteDB extends Database {
   private $dbres;
 
-  function __construct($filename) {
+  public function __construct($filename) {
     $this->dbres = sqlite_popen($filename);
   }
 
-  function escape($str) {
+  public function escape($str) {
     return sqlite_escape_string($str);
   }
 
-  function arrayQuery($query) {
+  public function arrayQuery($query) {
     return sqlite_array_query($this->dbres, $query);
   }
 
-  function singleQuery($query) {
+  public function singleQuery($query) {
     return sqlite_single_query($this->dbres, $query, true);
   }
 
-  function columnQuery($query) {
+  public function columnQuery($query) {
     return sqlite_single_query($this->dbres, $query, false);
   }
 }
+
+class Platform {
+  public $id;
+  public $name;
+  public $version;
+  public $sourceurl;
+
+  public function __construct($id, $name, $version, $sourceurl) {
+    $this->id = $id;
+    $this->name = $name;
+    $this->version = $version;
+    $this->sourceurl = $sourceurl;
+  }
+
+  public function __toString() {
+    return $this->name;
+  }
+
+  public function getInterfaces() {
+    global $db;
+
+    $interfaces = array();
+    $rows = $db->arrayQuery('SELECT plat_ifaces.*,interfaces.interface AS name FROM plat_ifaces JOIN '.
+                            'interfaces ON interfaces.id=plat_ifaces.interface WHERE platform='.
+                            $this->id . ' ORDER BY interfaces.interface');
+    foreach ($rows as $row) {
+      array_push($interfaces, new XPCOMInterface($row['id'], $this, $row['name'], $row['path'],
+                                                 $row['comment'], $row['iid'], $row['hash']));
+    }
+    return $interfaces;
+  }
+
+  public static function getByName($name) {
+    global $db;
+
+    $row = $db->rowQuery('SELECT * FROM platforms WHERE platform="' . $db->escape($name) . '"');
+    if ($row === false) {
+      return null;
+    }
+    return new Platform($row['id'], $row['platform'], $row['platform'], $row['url']);
+  }
+
+  public static function getAllPlatforms() {
+    global $db;
+
+    $platforms = array();
+    $rows = $db->arrayQuery('SELECT * FROM platforms');
+    foreach ($rows as $row) {
+      array_push($platforms, new Platform($row['id'], $row['platform'], $row['platform'], $row['url']));
+    }
+    return $platforms;
+  }
+}
+
+class XPCOMInterface {
+  public $id;
+  public $platform;
+  public $name;
+  public $path;
+  public $comment;
+  public $iid;
+  public $hash;
+
+  public function __construct($id, $platform, $name, $path, $comment, $iid, $hash) {
+    $this->id = $id;
+    $this->platform = $platform;
+    $this->name = $name;
+    $this->path = $path;
+    $this->comment = $comment;
+    $this->iid = $iid;
+    $this->hash = $hash;
+  }
+
+  public function __toString() {
+    return $this->name;
+  }
+
+  public function getMembers() {
+  }
+
+  public function getConstants() {
+  }
+
+  public function getAttributes() {
+  }
+
+  public function getMethods() {
+  }
+}
+
+class Member {
+  public $id;
+  public $interface;
+  public $type;
+  public $name;
+  public $hash;
+}
+
+class Attribute extends Member {
+}
+
+class Constant extends Member {
+  public $value;
+}
+
+class Method extends Member {
+  public function getParameters() {
+  }
+}
+
+class Parameter {
+  public $method;
+  public $type;
+  public $name;
+}
+
 ?>
