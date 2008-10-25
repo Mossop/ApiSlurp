@@ -1,10 +1,10 @@
-{include file="header.tpl" title="$interface Interface (from $platform)"}
+{include file="header.tpl" title="`$interface.name` Interface (from $platform)"}
 <div id="overview">
 <div class="block">
 <h2>Appears in</h2>
 <ul>
 {foreach from=$platforms item="item"}
-  <li><a href="{$ROOT}/platform/{$item}">{$item}</a></li>
+  <li><a href="{$ROOT}/platform/{$item}/interface/{$interface.name}">{$item}</a></li>
 {/foreach}
 </ul>
 </div>
@@ -14,7 +14,7 @@
 <ul>
 {foreach from=$platforms item="item"}
   {if $item ne $platform}
-    <li><a href="{$ROOT}/compare/interface/{$interface}/{$item}/{$platform}">{$item}</a></li>
+    <li><a href="{$ROOT}/compare/interface/{$interface.name}/{$item}/{$platform}">{$item}</a></li>
   {/if}
 {/foreach}
 </ul>
@@ -30,26 +30,30 @@
 </div>
 
 <div class="body">
-  <h1>{$interface} Interface (from {$platform})</h1>
+  <h1>{$interface.name} Interface (from platform <a href="{$ROOT}/platform/{$platform}">{$platform}</a>)</h1>
+  <div class="code">
+    <pre class="comment">{$interface.comment}</pre>
+    {include file="includes/interface.tpl" interface=$interface}
+  </div>
   <h2><a name="constants">Constants</a></h2>
   {foreach from=$constants item="item"}
     <div class="code">
       <pre class="comment">{$item.comment}</pre>
-      <span class="keyword">const</span> <span class="type">{$item.type}</span> <span class="name">{$item.name}</span> = <span class="value">{$item.value}</span>
+      {include file="includes/constant.tpl" constant=$item}
     </div>
   {/foreach}
   <h2><a name="attributes">Attributes</a></h2>
   {foreach from=$attributes item="item"}
     <div class="code">
       <pre class="comment">{$item.comment}</pre>
-      <span class="keyword">{$item.readonly} attribute</span> <span class="type">{$item.type}</span> <span class="name">{$item.name}</span>
+      {include file="includes/attribute.tpl" attribute=$item}
     </div>
   {/foreach}
   <h2><a name="methods">Methods</a></h2>
   {foreach from=$methods item="item"}
     <div class="code">
       <pre class="comment">{$item.comment}</pre>
-      <span class="type">{$item.type}</span> <span class="name">{$item.name}</span>({$item.paramcount}{foreach from=$item.params item="param" name="paramlist"}<span class="type">{$param.type}</span> <span class="name">{$param.name}</span>{if not $smarty.foreach.paramlist.last}, {/if}{/foreach})
+      {include file="includes/method.tpl" method=$item}
     </div>
   {/foreach}
 </div>

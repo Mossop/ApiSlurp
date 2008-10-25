@@ -1,0 +1,1 @@
+<div class="interface signature {$class}"><span class="keyword">uuid</span>(<span class="value">{$interface.iid}</span>)</div>

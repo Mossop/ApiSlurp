@@ -67,9 +67,34 @@
   margin: 1em 0 1em 40px;
 }
 
+.controls {
+  text-align: center;
+}
+
+.diff h2 {
+  text-align: center;
+}
+
+.commentrow td {
+  padding-top: 1em;
+}
+
+.signaturerow td {
+  padding-bottom: 1em;
+}
+
+.diff .signature {
+  margin: 2px;
+}
+
+.hidesame .matching {
+  display: none;
+}
+
 .comment {
   color: grey;
   padding-left: 20px;
+  margin-bottom: 0.5em;
 }
 
 .keyword {
@@ -88,11 +113,11 @@
   color: purple;
 }
 
-.added {
+.added .after {
   background-color: lightgreen;
 }
 
-.removed {
+.removed .before {
   background-color: rgb(255, 204, 153);
 }
 

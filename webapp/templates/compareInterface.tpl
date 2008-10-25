@@ -1,90 +1,146 @@
-{include file="header.tpl" title="Comparing $interface between platform $platform1 and platform $platform2"}
-<div id="overview">
+{include file="header.tpl" title="Comparing `$interface.name` between platform $platform1 and platform $platform2"}
+<!--<div id="overview">
 <div class="block">
 <h2>Appears in</h2>
 <ul>
 {foreach from=$platforms item="item"}
-<li><a href="{$ROOT}/platform/{$item}">{$item}</a></li>
+  <li><a href="{$ROOT}/platform/{$item}/interface/{$interface.name}">{$item}</a></li>
 {/foreach}
 </ul>
 </div>
 
 <div class="block">
-<h2>Constants</h2>
 <ul>
-{foreach from=$constants item="item"}
-<li><a href="#{$item.name}">{$item.name}</a></li>
-{/foreach}
+  <li><a href="#constants">Constants ({$constants|@count})</a></li>
+  <li><a href="#attributes">Attributes ({$attributes|@count})</a></li>
+  <li><a href="#methods">Methods ({$methods|@count})</a></li>
 </ul>
 </div>
-
-<div class="block">
-<h2>Attributes</h2>
-<ul>
-{foreach from=$attributes item="item"}
-<li><a href="#{$item.name}">{$item.name}</a></li>
-{/foreach}
-</ul>
-</div>
-
-<div class="block">
-<h2>Methods</h2>
-<ul>
-{foreach from=$methods item="item"}
-<li><a href="#{$item.name}">{$item.name}</a></li>
-{/foreach}
-</ul>
-</div>
-</div>
+</div>-->
+<script type="text/javascript">
+function toggleVisible() {ldelim}
+  var checkbox = document.getElementById("hidesame");
+  document.getElementById("diff").className = checkbox.checked ? "diff hidesame" : "diff";
+{rdelim}
+</script>
 
 <div class="body">
-<h1>Comparing {$interface} between platform
-    <a href="{$ROOT}/platform/{$platform1}">{$platform1}</a> and platform
-    <a href="{$ROOT}/platform/{$platform2}">{$platform2}</a></h1>
-<h2>Constants</h2>
-<ul class="code">
-{foreach from=$constants item="item"}
-{if $item.state eq "added"}
-<li class="added"><a name="{$item.name}">{$item.new.text}</a></li>
-{elseif $item.state eq "removed"}
-<li class="removed"><a name="{$item.name}">{$item.old.text}</a></li>
-{elseif $item.state eq "modified"}
-<li class="modified"><a name="{$item.name}">{$item.old.text}</a><br />
-                     <a name="{$item.name}">{$item.new.text}</a></li>
-{else}
-<li class="matching"><a name="{$item.name}">{$item.old.text}</a></li>
-{/if}
-{/foreach}
-</ul>
-<h2>Attributes</h2>
-<ul class="code">
-{foreach from=$attributes item="item"}
-{if $item.state eq "added"}
-<li class="added"><a name="{$item.name}">{$item.new.text}</a></li>
-{elseif $item.state eq "removed"}
-<li class="removed"><a name="{$item.name}">{$item.old.text}</a></li>
-{elseif $item.state eq "modified"}
-<li class="modified"><a name="{$item.name}">{$item.old.text}</a><br />
-                     {$item.new.text}</a></li>
-{else}
-<li class="matching"><a name="{$item.name}">{$item.old.text}</a></li>
-{/if}
-{/foreach}
-</ul>
-<h2>Methods</h2>
-<ul class="code">
-{foreach from=$methods item="item"}
-{if $item.state eq "added"}
-<li class="added"><a name="{$item.name}">{$item.new.text}</a></li>
-{elseif $item.state eq "removed"}
-<li class="removed"><a name="{$item.name}">{$item.old.text}</a></li>
-{elseif $item.state eq "modified"}
-<li class="modified"><a name="{$item.name}">{$item.old.text}</a><br />
-                     <a name="{$item.name}">{$item.new.text}</a></li>
-{else}
-<li class="matching"><a name="{$item.name}">{$item.old.text}</a></li>
-{/if}
-{/foreach}
-</ul>
+  <table id="diff" class="diff">
+    <tr>
+      <td colspan="2">
+        <h2>{$interface.name} Interface</h2>
+        <div class="controls"><input type="checkbox" id="hidesame" name="hidesame" onchange="toggleVisible()"/><label for="hidesame">Hide unchanged items</label></div>
+      </td>
+    </tr>
+    <tr>
+      <td class="before"><h2><a href="{$ROOT}/platform/{$platform1}/interface/{$interface.name}">{$platform1}</a></h2></td>
+      <td class="after"><h2><a href="{$ROOT}/platform/{$platform2}/interface/{$interface.name}">{$platform2}</a></h2></td>
+    </tr>
+    <tr class="commentrow">
+      <td class="before">
+        <pre class="comment">{$interface.old.comment}</pre>
+      </td>
+      <td class="after">
+        <pre class="comment">{$interface.new.comment}</pre>
+      </td>
+    </tr>
+    <tr class="signaturerow">
+      <td class="before">
+        {include file="includes/interface.tpl" interface=$interface.old}
+      </td>
+      <td class="after">
+        {include file="includes/interface.tpl" interface=$interface.new}
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2"><h2><a name="constants">Constants</a></h2></td>
+    </tr>
+    {foreach from=$constants item="item"}
+      <tr class="commentrow {$item.state}">
+        <td class="before">
+          {if $item.state ne "added"}
+            <pre class="comment">{$item.old.comment}</pre>
+          {/if}
+        </td>
+        <td class="after">
+          {if $item.state ne "removed"}
+            <pre class="comment">{$item.new.comment}</pre>
+          {/if}
+        </td>
+      </tr>
+      <tr class="signaturerow {$item.state}">
+        <td class="before">
+          {if $item.state ne "added"}
+            {include file="includes/constant.tpl" constant=$item.old}
+          {/if}
+        </td>
+        <td class="after">
+          {if $item.state ne "removed"}
+            {include file="includes/constant.tpl" constant=$item.new}
+          {/if}
+        </td>
+      </tr>
+    {/foreach}
+
+    <tr>
+      <td colspan="2"><h2><a name="attributes">Attributes</a></h2></td>
+    </tr>
+    {foreach from=$attributes item="item"}
+      <tr class="commentrow {$item.state}">
+        <td class="before">
+          {if $item.state ne "added"}
+            <pre class="comment">{$item.old.comment}</pre>
+          {/if}
+        </td>
+        <td class="after">
+          {if $item.state ne "removed"}
+            <pre class="comment">{$item.new.comment}</pre>
+          {/if}
+        </td>
+      </tr>
+      <tr class="signaturerow {$item.state}">
+        <td class="before">
+          {if $item.state ne "added"}
+            {include file="includes/attribute.tpl" attribute=$item.old}
+          {/if}
+        </td>
+        <td class="after">
+          {if $item.state ne "removed"}
+            {include file="includes/attribute.tpl" attribute=$item.new}
+          {/if}
+        </td>
+      </tr>
+    {/foreach}
+
+    <tr>
+      <td colspan="2"><h2><a name="methods">Methods</a></h2></td>
+    </tr>
+    {foreach from=$methods item="item"}
+      <tr class="commentrow {$item.state}">
+        <td class="before">
+          {if $item.state ne "added"}
+            <pre class="comment">{$item.old.comment}</pre>
+          {/if}
+        </td>
+        <td class="after">
+          {if $item.state ne "removed"}
+            <pre class="comment">{$item.new.comment}</pre>
+          {/if}
+        </td>
+      </tr>
+      <tr class="signaturerow {$item.state}">
+        <td class="before">
+          {if $item.state ne "added"}
+            {include file="includes/method.tpl" method=$item.old}
+          {/if}
+        </td>
+        <td class="after">
+          {if $item.state ne "removed"}
+            {include file="includes/method.tpl" method=$item.new}
+          {/if}
+        </td>
+      </tr>
+    {/foreach}
+  </table>
 </div>
 {include file="footer.tpl"}
