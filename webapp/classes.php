@@ -680,4 +680,55 @@ class Parameter {
   }
 }
 
+class PlatformDiff {
+  public $left;
+  public $right;
+
+  public $added = array();
+  public $removed = array();
+  public $modified = array();
+  public $unchanged = array();
+
+  public function __construct($left, $right) {
+    global $db;
+
+    $this->left = $left;
+    $this->right = $right;
+
+    $rows = $db->arrayQuery('SELECT interfaces.id, interfaces.interface FROM '.
+                            '(SELECT * FROM plat_ifaces WHERE platform=' . $right->id .') AS pi1 '.
+                            'LEFT JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $left->id . ') AS pi2 '.
+                            'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id '.
+                            'WHERE pi2.platform IS NULL ORDER BY interfaces.interface');
+    foreach ($rows as $row) {
+      array_push($this->added, XPCOMInterface::getOrCreate($row['interfaces.id'], $row['interfaces.interface']));
+    }
+
+    $rows = $db->arrayQuery('SELECT interfaces.id, interfaces.interface FROM '.
+                            '(SELECT * FROM plat_ifaces WHERE platform=' . $left->id .') AS pi1 '.
+                            'LEFT JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $right->id . ') AS pi2 '.
+                            'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id '.
+                            'WHERE pi2.platform IS NULL ORDER BY interfaces.interface');
+    foreach ($rows as $row) {
+      array_push($this->removed, XPCOMInterface::getOrCreate($row['interfaces.id'], $row['interfaces.interface']));
+    }
+
+    $rows = $db->arrayQuery('SELECT interfaces.id, interfaces.interface FROM '.
+                            '(SELECT * FROM plat_ifaces WHERE platform=' . $left->id .') AS pi1 '.
+                            'JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $right->id . ') AS pi2 '.
+                            'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id WHERE pi1.hash=pi2.hash ORDER BY interfaces.interface');
+    foreach ($rows as $row) {
+      array_push($this->unchanged, XPCOMInterface::getOrCreate($row['interfaces.id'], $row['interfaces.interface']));
+    }
+
+    $rows = $db->arrayQuery('SELECT interfaces.id, interfaces.interface FROM '.
+                            '(SELECT * FROM plat_ifaces WHERE platform=' . $left->id .') AS pi1 '.
+                            'JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $right->id . ') AS pi2 '.
+                            'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id WHERE pi1.hash<>pi2.hash ORDER BY interfaces.interface');
+    foreach ($rows as $row) {
+      array_push($this->modified, XPCOMInterface::getOrCreate($row['interfaces.id'], $row['interfaces.interface']));
+    }
+  }
+}
+
 ?>

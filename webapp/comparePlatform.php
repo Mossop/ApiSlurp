@@ -1,45 +1,27 @@
 <?php
 require_once('setup.php');
 
-$platform1 = $_GET['platform1'];
-$platform2 = $_GET['platform2'];
-$newest = get_newest_platform(array($platform1, $platform2));
-if ($newest == $platform1) {
-  $platform1 = $platform2;
-  $platform2 = $newest;
+if (!isset($_GET['platform1']) || !isset($_GET['platform2'])) {
+  error('Invalid Request', 'This URL is malformed');
 }
 
-$pl1 = get_platform($platform1);
-$pl2 = get_platform($platform2);
-$cache = $pl1['id'].'.'.$pl2['id'];
+$platform1 = Platform::getByName($_GET['platform1']);
+if ($platform1 == null) {
+  error('Unknown Platform', 'The platform ' . $_GET['platform'] . ' does not exist in the database.');
+}
 
-$smarty->prepare('comparePlatform.tpl', $cache);
+$platform2 = Platform::getByName($_GET['platform2']);
+if ($platform2 == null) {
+  error('Unknown Platform', 'The platform ' . $_GET['platform2'] . ' does not exist in the database.');
+}
 
-$smarty->assign("platform1", $pl1);
-$smarty->assign("platform2", $pl2);
+if ($versioncomparator->compareVersions($platform1->version, $platform2->version) > 0) {
+  $temp = $platform2;
+  $platform1 = $platform2;
+  $platform2 = $temp;
+}
 
-$smarty->assign('added_interfaces',
-                sql_column('SELECT interfaces.interface FROM '.
-                           '(SELECT * FROM plat_ifaces WHERE platform=' . $pl2['id'] .') AS pi1 '.
-                           'LEFT JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $pl1['id'] . ') AS pi2 '.
-                           'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id '.
-                           'WHERE pi2.platform IS NULL ORDER BY interfaces.interface'));
-$smarty->assign('removed_interfaces',
-                sql_column('SELECT interfaces.interface FROM '.
-                           '(SELECT * FROM plat_ifaces WHERE platform=' . $pl1['id'] .') AS pi1 '.
-                           'LEFT JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $pl2['id'] . ') AS pi2 '.
-                           'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id '.
-                           'WHERE pi2.platform IS NULL ORDER BY interfaces.interface'));
-$smarty->assign('matching_interfaces',
-                sql_column('SELECT interfaces.interface AS interface FROM '.
-                           '(SELECT * FROM plat_ifaces WHERE platform=' . $pl1['id'] .') AS pi1 '.
-                           'JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $pl2['id'] . ') AS pi2 '.
-                           'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id WHERE pi1.hash=pi2.hash ORDER BY interfaces.interface'));
-$smarty->assign('modified_interfaces',
-                sql_column('SELECT interfaces.interface AS interface FROM '.
-                           '(SELECT * FROM plat_ifaces WHERE platform=' . $pl1['id'] .') AS pi1 '.
-                           'JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $pl2['id'] . ') AS pi2 '.
-                           'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id WHERE pi1.hash<>pi2.hash ORDER BY interfaces.interface'));
-
+$smarty->prepare('comparePlatform.tpl', $platform1->id.'.'.$platform2->id);
+$smarty->assign("diff", new PlatformDiff($platform1, $platform2));
 $smarty->display();
 ?>
