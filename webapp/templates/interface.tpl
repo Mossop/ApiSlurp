@@ -1,6 +1,26 @@
 {include file="header.tpl" title="$interface Interface (from $platform)"}
 <div id="overview">
 <div class="block">
+  <h2>Appears in:</h2>
+  <ul>
+    {foreach from=$interface->versions item="item"}
+      <li><a href="{$ROOT}/platform/{$item->platform->name}/interface/{$interface->name}">{$item->platform}</a></li>
+    {/foreach}
+  </ul>
+</div>
+
+<div class="block">
+  <h2>Compare with:</h2>
+  <ul>
+    {foreach from=$interface->versions item="item"}
+      {if $item ne $interface}
+        <li><a href="{$ROOT}/compare/interface/{$interface->name}/{$item->platform->name}/{$interface->platform->name}">{$item->platform}</a></li>
+      {/if}
+    {/foreach}
+  </ul>
+</div>
+
+<div class="block">
   <ul>
     <li><a href="#constants">Constants ({$interface->constants|@count})</a></li>
     <li><a href="#attributes">Attributes ({$interface->attributes|@count})</a></li>
