@@ -1,6 +1,6 @@
 diff --git a/dom/public/idl/core/nsIDOMDOMError.idl b/dom/public/idl/core/nsIDOMDOMError.idl
---- a/nsIDOMDOMError.idl
-+++ b/nsIDOMDOMError.idl
+--- a/dom/public/idl/core/nsIDOMDOMError.idl
++++ b/dom/public/idl/core/nsIDOMDOMError.idl
 @@ -33,16 +33,18 @@
   * and other provisions required by the GPL or the LGPL. If you do not delete
   * the provisions above, a recipient may use your version of this file under
@@ -21,8 +21,8 @@ diff --git a/dom/public/idl/core/nsIDOMDOMError.idl b/dom/public/idl/core/nsIDOM
   * http://www.w3.org/TR/2002/WD-DOM-Level-3-Core-20020409/core.html
   */
 diff --git a/dom/public/idl/core/nsIDOMDOMErrorHandler.idl b/dom/public/idl/core/nsIDOMDOMErrorHandler.idl
---- a/nsIDOMDOMErrorHandler.idl
-+++ b/nsIDOMDOMErrorHandler.idl
+--- a/dom/public/idl/core/nsIDOMDOMErrorHandler.idl
++++ b/dom/public/idl/core/nsIDOMDOMErrorHandler.idl
 @@ -33,16 +33,18 @@
   * and other provisions required by the GPL or the LGPL. If you do not delete
   * the provisions above, a recipient may use your version of this file under
@@ -43,8 +43,8 @@ diff --git a/dom/public/idl/core/nsIDOMDOMErrorHandler.idl b/dom/public/idl/core
   */
  
 diff --git a/embedding/browser/webBrowser/nsIPrintPreviewNavigation.idl b/embedding/browser/webBrowser/nsIPrintPreviewNavigation.idl
---- a/nsIPrintPreviewNavigation.idl
-+++ b/nsIPrintPreviewNavigation.idl
+--- a/embedding/browser/webBrowser/nsIPrintPreviewNavigation.idl
++++ b/embedding/browser/webBrowser/nsIPrintPreviewNavigation.idl
 @@ -65,21 +65,21 @@ interface nsIPrintPreviewNavigation  : n
    boolean	previousPage();
  
@@ -70,8 +70,8 @@ diff --git a/embedding/browser/webBrowser/nsIPrintPreviewNavigation.idl b/embedd
  
  };
 diff --git a/browser/components/bookmarks/public/Attic/nsIBookmarkTransactionManager.idl
---- a/nsIBookmarkTransactionManager.idl
-+++ b/nsIBookmarkTransactionManager.idl
+--- a/browser/components/bookmarks/public/nsIBookmarkTransactionManager.idl
++++ b/browser/components/bookmarks/public/nsIBookmarkTransactionManager.idl
 @@ -64,17 +64,17 @@ interface nsIBookmarkTransactionManager 
     * @param aItem         the rdf node the transaction is being performed on
     * @param aIndex        the index of the item in its RDF Container

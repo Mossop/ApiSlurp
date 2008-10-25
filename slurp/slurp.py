@@ -46,39 +46,46 @@ class Slurp(object):
   parser = None
   dbc = None
   
-  def __init__(self, platform, cachedir, db, idldirs):
-    self.idldirs = idldirs
+  def __init__(self, platform, url, cachedir, db, idldir):
+    self.idldirs = self.__buildPath(idldir)
     self.parser = xpidl.IDLParser(cachedir)
     if os.path.isfile(db):
-      self.__addPlatform(db, platform)
+      self.__addPlatform(db, platform, url)
     else:
-      self.__createDatabase(db, platform)
+      self.__createDatabase(db, platform, url)
 
-  def __createDatabase(self, db, platform):
+  def __buildPath(self, dir):
+    path = []
+    for root, dirs, files in os.walk(dir):
+      if len(files) > 0:
+        path.append(root)
+    return path
+
+  def __createDatabase(self, db, platform, url):
     self.dbc = sqlite3.connect(db)
     c = self.dbc.cursor()
-    c.execute('CREATE TABLE platforms (id INTEGER PRIMARY KEY AUTOINCREMENT, platform TEXT UNIQUE)')
+    c.execute('CREATE TABLE platforms (id INTEGER PRIMARY KEY AUTOINCREMENT, platform TEXT UNIQUE, url TEXT)')
     c.execute('CREATE TABLE interfaces (id INTEGER PRIMARY KEY AUTOINCREMENT, interface TEXT UNIQUE)')
-    c.execute('CREATE TABLE plat_ifaces (id INTEGER PRIMARY KEY AUTOINCREMENT, platform INTEGER, interface INTEGER, iid TEXT, comment TEXT, hash TEXT)')
+    c.execute('CREATE TABLE plat_ifaces (id INTEGER PRIMARY KEY AUTOINCREMENT, platform INTEGER, interface INTEGER, iid TEXT, comment TEXT, path TEXT, hash TEXT)')
     c.execute('CREATE INDEX pi_plat ON plat_ifaces (platform)');
     c.execute('CREATE UNIQUE INDEX pi_id ON plat_ifaces (platform, interface)');
     c.execute('CREATE TABLE members (id INTEGER PRIMARY KEY AUTOINCREMENT, pint INTEGER, name TEXT, kind TEXT, type TEXT, comment TEXT, hash TEXT, text TEXT)')
     c.execute('CREATE UNIQUE INDEX mem_id ON members (pint, name)');
     c.execute('CREATE TABLE parameters (member INTEGER, pos INTEGER, type TEXT, name TEXT)')
     c.execute('CREATE UNIQUE INDEX param_idx ON parameters (member, pos)');
-    c.execute('INSERT INTO platforms (platform) VALUES (?)', (platform,))
+    c.execute('INSERT INTO platforms (platform, url) VALUES (?,?)', (platform,url))
     self.platform = c.lastrowid
     self.dbc.commit()
     c.close()
 
 
-  def __addPlatform(self, db, platform):
+  def __addPlatform(self, db, platform, url):
     self.dbc = sqlite3.connect(db)
     c = self.dbc.cursor()
     c.execute('SELECT id FROM platforms WHERE platform=?', (platform,))
     pl = c.fetchone()
     if pl is None:
-      c.execute('INSERT INTO platforms (platform) VALUES (?)', (platform,))
+      c.execute('INSERT INTO platforms (platform, url) VALUES (?,?)', (platform,url))
       self.platform = c.lastrowid
     else:
       self.platform = pl[0]
@@ -93,7 +100,7 @@ class Slurp(object):
     lines = "\n".join(comments).splitlines()
     return "\n".join([re.sub("^\s*/?\*+/?", "", s) for s in lines])
 
-  def __addInterface(self, interface):
+  def __addInterface(self, interface, path):
     c = self.dbc.cursor()
     c.execute('SELECT id from interfaces WHERE interface=?', (interface.name,))
     id = c.fetchone()
@@ -102,14 +109,14 @@ class Slurp(object):
       id = c.lastrowid
     else:
       id = id[0]
-    c.execute('INSERT INTO plat_ifaces (platform,interface,iid,comment) VALUES (?,?,?,?)',
-              (self.platform, id, interface.attributes.uuid, self.__mungeComment(interface.doccomments)))
+    c.execute('INSERT INTO plat_ifaces (platform,interface,iid,comment,path) VALUES (?,?,?,?,?)',
+              (self.platform, id, interface.attributes.uuid, self.__mungeComment(interface.doccomments), path))
     id = c.lastrowid
     self.dbc.commit()
     c.close()
     return id
 
-  def slurpFile(self, filename):
+  def slurpFile(self, filename, path):
     if not os.path.isfile(filename):
       raise IOError, "Unknown file " + filename
     text = open(filename, 'r').read()
@@ -118,7 +125,7 @@ class Slurp(object):
     for interface in idl.getNames():
       if interface.location._file == filename and interface.kind == 'interface':
         print "Slurping %s" % interface.name
-        iid = self.__addInterface(interface)
+        iid = self.__addInterface(interface, path)
         interfacehash = md5.new(interface.name + "," + interface.attributes.uuid)
         c = self.dbc.cursor()
         for member in interface.namemap:
@@ -149,22 +156,24 @@ class Slurp(object):
         c.close()
 
   def slurpFiles(self, dir):
+    dir = os.path.abspath(dir)
     for root, dirs, files in os.walk(dir):
       for name in files:
-        self.slurpFile(os.path.join(root, name))
+        fullpath = os.path.join(root, name)
+        self.slurpFile(fullpath, fullpath[len(dir) + 1:])
 
 def displayUsage():
-  print "Usage: slurp.py <platform> <cache dir> <database> <idl path>"
+  print "Usage: slurp.py <platform> <source url> <cache dir> <database> <idl path>"
 
 if __name__ == '__main__':
   if len(sys.argv) < 5:
     displayUsage()
     sys.exit()
-  if not os.path.isdir(sys.argv[2]):
+  if not os.path.isdir(sys.argv[3]):
     displayUsage()
     sys.exit()
-  if not os.path.isdir(sys.argv[4]):
+  if not os.path.isdir(sys.argv[5]):
     displayUsage()
     sys.exit()
-  s = Slurp(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4:])
-  s.slurpFiles(sys.argv[4])
+  s = Slurp(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
+  s.slurpFiles(sys.argv[5])
