@@ -680,6 +680,7 @@ class Parameter {
   }
 }
 
+
 class PlatformDiff {
   public $left;
   public $right;
@@ -727,6 +728,77 @@ class PlatformDiff {
                             'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id WHERE pi1.hash<>pi2.hash ORDER BY interfaces.interface');
     foreach ($rows as $row) {
       array_push($this->modified, XPCOMInterface::getOrCreate($row['interfaces.id'], $row['interfaces.interface']));
+    }
+  }
+}
+
+class InterfaceDiff {
+  public $left;
+  public $right;
+
+  public $constants = array();
+  public $attributes = array();
+  public $methods = array();
+
+  public function __construct($left, $right) {
+    global $db;
+
+    $this->left = $left;
+    $this->right = $right;
+
+    $this->constants = $this->getMemberPairs($left->constants, $right->constants, 'constant_compare');
+    $this->attributes = $this->getMemberPairs($left->attributes, $right->attributes, 'member_compare');
+    $this->methods = $this->getMemberPairs($left->methods, $right->methods, 'member_compare');
+  }
+
+  private function getMemberPairs($left, $right, $compare) {
+    $pairs = array();
+    $l = reset($left);
+    $r = reset($right);
+
+    while ($l !== false || $r !== false) {
+      if ($l !== false && $r !== false) {
+        $dif = $compare($l, $r);
+      }
+      if ($dif < 0 || $r === false) {
+        array_push($pairs, new MemberPair($l, null));
+        $l = next($left);
+      }
+      else if ($dif > 0 || $l === false) {
+        array_push($pairs, new MemberPair(null, $r));
+        $r = next($right);
+      }
+      else {
+        array_push($pairs, new MemberPair($l, $r));
+        $l = next($left);
+        $r = next($right);
+      }
+    }
+
+    return $pairs;
+  }
+}
+
+class MemberPair {
+  public $left;
+  public $right;
+  public $state;
+
+  public function __construct($left, $right) {
+    $this->left = $left;
+    $this->right = $right;
+
+    if ($left == null) {
+      $this->state = 'added';
+    }
+    else if ($right == null) {
+      $this->state = 'removed';
+    }
+    else if ($left->hash != $right->hash) {
+      $this->state = 'modified';
+    }
+    else {
+      $this->state = 'unchanged';
     }
   }
 }
