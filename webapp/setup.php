@@ -177,8 +177,8 @@ function sql_array($query) {
 
   $result = sqlite_array_query($dbres, $query);
   if ($result === FALSE) {
-    error('Database Error', 'Something this page did caused a database error. Please email <a href="mailto:dtownsend@mozilla.com">Dave</a> with the page url.');
-    //error('Invalid SQL', 'This page attempted to run some invalid SQL: ' . $query . '<br />' . sqlite_error_string(sqlite_last_error($dbres)));
+    //error('Database Error', 'Something this page did caused a database error. Please email <a href="mailto:dtownsend@mozilla.com">Dave</a> with the page url.');
+    error('Invalid SQL', 'This page attempted to run some invalid SQL: ' . $query . '<br />' . sqlite_error_string(sqlite_last_error($dbres)));
   }
 
   return $result;
@@ -189,8 +189,8 @@ function sql_single($query, $firstOnly = false) {
 
   $result = sqlite_single_query($dbres, $query, $firstOnly);
   if ($result === FALSE) {
-    error('Database Error', 'Something this page did caused a database error. Please email <a href="mailto:dtownsend@mozilla.com">Dave</a> with the page url.');
-    //error('Invalid SQL', 'This page attempted to run some invalid SQL: ' . $query . '<br />' . sqlite_error_string(sqlite_last_error($dbres)));
+    //error('Database Error', 'Something this page did caused a database error. Please email <a href="mailto:dtownsend@mozilla.com">Dave</a> with the page url.');
+    error('Invalid SQL', 'This page attempted to run some invalid SQL: ' . $query . '<br />' . sqlite_error_string(sqlite_last_error($dbres)));
   }
 
   return $result;
@@ -208,7 +208,8 @@ function get_newest_platform($names) {
 }
 
 function get_platform($name) {
-  return sql_single('SELECT id FROM platforms WHERE platform="' . sqlesc($name) . '"', true);
+  $rows = sql_array('SELECT id, platform AS name, url FROM platforms WHERE platform="' . sqlesc($name) . '"');
+  return $rows[0];
 }
 
 function get_platform_names($interface = null) {
@@ -237,13 +238,8 @@ function get_interface_names($platform = null) {
   }
 }
 
-function get_plat_iface_id($iid, $platform) {
-  return sql_single('SELECT plat_ifaces.id FROM plat_ifaces JOIN platforms ON plat_ifaces.platform=platforms.id '.
-                    'WHERE platforms.platform="' . sqlesc($platform) . '" AND interface=' . $iid, true);
-}
-
 function get_plat_iface($iid, $platform) {
-  $rows = sql_array('SELECT plat_ifaces.id AS id, plat_ifaces.iid AS iid, plat_ifaces.comment AS comment, plat_ifaces.hash AS hash FROM plat_ifaces JOIN platforms ON plat_ifaces.platform=platforms.id '.
+  $rows = sql_array('SELECT plat_ifaces.id AS id, plat_ifaces.iid AS iid, plat_ifaces.comment AS comment, plat_ifaces.path AS path, plat_ifaces.hash AS hash FROM plat_ifaces JOIN platforms ON plat_ifaces.platform=platforms.id '.
                     'WHERE platforms.platform="' . sqlesc($platform) . '" AND interface=' . $iid);
   return $rows[0];
 }

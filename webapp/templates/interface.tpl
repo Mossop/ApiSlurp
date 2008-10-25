@@ -1,4 +1,4 @@
-{include file="header.tpl" title="`$interface.name` Interface (from $platform)"}
+{include file="header.tpl" title="`$interface.name` Interface (from `$platform.name`)"}
 <div id="overview">
 <div class="block">
 <h2>Appears in</h2>
@@ -13,8 +13,8 @@
 <h2>Compare to</h2>
 <ul>
 {foreach from=$platforms item="item"}
-  {if $item ne $platform}
-    <li><a href="{$ROOT}/compare/interface/{$interface.name}/{$item}/{$platform}">{$item}</a></li>
+  {if $item ne $platform.name}
+    <li><a href="{$ROOT}/compare/interface/{$interface.name}/{$item}/{$platform.name}">{$item}</a></li>
   {/if}
 {/foreach}
 </ul>
@@ -30,7 +30,7 @@
 </div>
 
 <div class="body">
-  <h1>{$interface.name} Interface (from platform <a href="{$ROOT}/platform/{$platform}">{$platform}</a>)</h1>
+  <h1>{$interface.name} Interface (from platform <a href="{$ROOT}/platform/{$platform.name}">{$platform.name}</a>) - <a href="{$platform.url}{$interface.path}">Source</a></h1>
   <div class="code">
     <pre class="comment">{$interface.comment}</pre>
     {include file="includes/interface.tpl" interface=$interface}

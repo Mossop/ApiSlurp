@@ -71,6 +71,18 @@
   text-align: center;
 }
 
+.diff {
+  width: 100%;
+}
+
+.before {
+  width: 50%;
+}
+
+.after {
+  width: 50%;
+}
+
 .diff h2 {
   text-align: center;
 }

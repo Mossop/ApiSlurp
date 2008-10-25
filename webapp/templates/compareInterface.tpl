@@ -1,4 +1,4 @@
-{include file="header.tpl" title="Comparing `$interface.name` between platform $platform1 and platform $platform2"}
+{include file="header.tpl" title="Comparing `$interface.name` between platform `$platform1.name` and platform `$platform2.name`"}
 <!--<div id="overview">
 <div class="block">
 <h2>Appears in</h2>
@@ -33,8 +33,10 @@ function toggleVisible() {ldelim}
       </td>
     </tr>
     <tr>
-      <td class="before"><h2><a href="{$ROOT}/platform/{$platform1}/interface/{$interface.name}">{$platform1}</a></h2></td>
-      <td class="after"><h2><a href="{$ROOT}/platform/{$platform2}/interface/{$interface.name}">{$platform2}</a></h2></td>
+      <td class="before"><h2><a href="{$ROOT}/platform/{$platform1.name}/interface/{$interface.name}">{$platform1.name}</a> - 
+                             <a href="{$platform1.url}{$interface.old.path}">Source</a></h2></td>
+      <td class="after"><h2><a href="{$ROOT}/platform/{$platform2.name}/interface/{$interface.name}">{$platform2.name}</a> - 
+                             <a href="{$platform2.url}{$interface.new.path}">Source</a></h2></td>
     </tr>
     <tr class="commentrow">
       <td class="before">

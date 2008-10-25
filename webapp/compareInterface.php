@@ -10,11 +10,13 @@ if ($newest == $platform1) {
   $platform1 = $platform2;
   $platform2 = $newest;
 }
+$platform1 = get_platform($platform1);
+$platform2 = get_platform($platform2);
 
 $id = get_interface($interface);
-$pli1 = get_plat_iface($id, $platform1);
+$pli1 = get_plat_iface($id, $platform1['name']);
 $pli1['name'] = $interface;
-$pli2 = get_plat_iface($id, $platform2);
+$pli2 = get_plat_iface($id, $platform2['name']);
 $pli2['name'] = $interface;
 $cache = $pli1['id'].'.'.$pli2['id'];
 

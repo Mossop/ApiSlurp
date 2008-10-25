@@ -6,12 +6,12 @@ $id = get_interface($_GET['interface']);
 $platforms = get_platform_names($id);
 
 if (isset($_GET['platform'])) {
-  $platform = $_GET['platform'];
+  $platform = get_platform($_GET['platform']);
 }
 else {
-  $platform = get_newest_platform($platforms);
+  $platform = get_platform(get_newest_platform($platforms));
 }
-$pli = get_plat_iface($id, $platform);
+$pli = get_plat_iface($id, $platform['name']);
 $pli['name'] = $_GET['interface'];
 $smarty->assign('interface', $pli);
 
