@@ -15,7 +15,8 @@ function error($title, $text) {
 
   $smarty->assign('error', $title);
   $smarty->assign('message', $text);
-  $smarty->display('error.tpl');
+  $smarty->prepare('error.tpl');
+  $smarty->display();
   exit;
 }
 

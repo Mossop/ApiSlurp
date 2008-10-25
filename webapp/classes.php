@@ -176,8 +176,8 @@ abstract class Database {
 
   public function rowQuery($query) {
     $rows = $this->arrayQuery($query);
-    if ($rows === false) {
-      return $rows;
+    if ($rows === false || count($rows) == 0) {
+      return false;
     }
     return $rows[0];
   }
@@ -411,7 +411,7 @@ class XPCOMInterface {
     $rows = $db->arrayQuery('SELECT interfaces.*, plat_ifaces.*, platforms.* '.
                             'FROM plat_ifaces JOIN interfaces ON plat_ifaces.interface=interfaces.id '.
                             'JOIN platforms ON plat_ifaces.platform=platforms.id WHERE interfaces.interface="' . $db->escape($name) . '"');
-    if ($rows === false) {
+    if ($rows === false || count($rows) == 0) {
       return null;
     }
     if (Cache::has('XPCOMInterface', $rows[0]['interfaces.id'])) {
@@ -564,12 +564,18 @@ class InterfaceVersion {
     if ($platform instanceof Platform) {
       $row = $db->rowQuery('SELECT plat_ifaces.* FROM plat_ifaces JOIN interfaces ON plat_ifaces.interface=interfaces.id '.
                            'WHERE plat_ifaces.platform=' . $platform->id . ' AND interfaces.interface="' . $db->escape($name) . '"');
+      if ($row === false) {
+        return null;
+      }
     }
     else {
       $row = $db->rowQuery('SELECT plat_ifaces.*, platforms.id AS plit, platforms.platform AS plname, platforms.url as plurl '.
                            'FROM plat_ifaces JOIN interfaces ON plat_ifaces.interface=interfaces.id '.
                            'JOIN platforms ON plat_ifaces.platform=platforms.id WHERE '.
                            'platforms.platform="' . $db->escape($platform) . '" AND interfaces.interface="' . $db->escape($name) . '"');
+      if ($row === false) {
+        return null;
+      }
       $platform = Platform::getOrCreate($row['plid'], $row['plname'], $row['plname'], $row['plurl']);
     }
     return self::getOrCreate($row['plat_ifaces.id'], $platform, $name, $row['plat_ifaces.path'], $row['plat_ifaces.comment'], $row['plat_ifaces.iid'], $row['plat_ifaces.hash']);
