@@ -1,6 +1,10 @@
 <?php
 require_once('setup.php');
 
+if (!isset($_GET['platform'])) {
+  error('Invalid Request', 'This URL is malformed');
+}
+
 $platform = Platform::getByName($_GET['platform']);
 
 if ($platform == null) {

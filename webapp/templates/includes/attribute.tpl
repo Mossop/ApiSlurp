@@ -1,1 +1,1 @@
-<div class="attribute signature {$class}"><span class="keyword">{$attribute.readonly} attribute</span> <span class="type">{$attribute.type}</span> <span class="name">{$attribute.name}</span></div>
+<div class="attribute signature {$class}"><span class="keyword">{$attribute->readonly} attribute</span> <span class="type">{$attribute->type}</span> <span class="name">{$attribute->name}</span></div>
