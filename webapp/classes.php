@@ -238,7 +238,7 @@ class Cache {
     return null;
   }
 
-  public static function set($type, $value) {
+  public static function set($type, $key, $value) {
     if (!isset(self::$cache[$type])) {
       self::$cache[$type] = array();
     }
@@ -327,6 +327,13 @@ class XPCOMInterface {
 
   public function __toString() {
     return $this->name;
+  }
+
+  public function __get($name) {
+    if ($name == 'versions') {
+      return $this->getVersions();
+    }
+    return null;
   }
 
   public function getVersions() {
@@ -425,10 +432,34 @@ class XPCOMInterface {
   public static function getAllInterfaces() {
     global $db;
 
+    $versions = array();
+    $rows = $db->arrayQuery('SELECT interfaces.*, plat_ifaces.*, platforms.* '.
+                            'FROM plat_ifaces JOIN interfaces ON plat_ifaces.interface=interfaces.id '.
+                            'JOIN platforms ON plat_ifaces.platform=platforms.id ORDER BY interfaces.interface');
+
+    $interface = self::getOrCreate($rows[0]['interfaces.id'], $rows[0]['interfaces.interface']);
+
     $interfaces = array();
-    $rows = $db->arrayQuery('SELECT id,interface FROM interfaces');
     foreach ($rows as $row) {
-      array_push($interfaces, new XPCOMInterface($row['id'], $row['interface']));
+      $interface = Cache::get('XPCOMInterface', $row['interfaces.id']);
+      if ($interface == null) {
+        $interface = self::getOrCreate($row['interfaces.id'], $row['interfaces.interface']);
+        array_push($interfaces, $interface);
+      }
+      if (!isset($interface->versions)) {
+        $interface->versions = array();
+      }
+      $platform = Platform::getOrCreate($row['platforms.id'],
+                                        $row['platforms.platform'],
+                                        $row['platforms.platform'],
+                                        $row['platforms.url']);
+      array_push($interface->versions, InterfaceVersion::getOrCreate($row['plat_ifaces.id'],
+                                                                     $platform,
+                                                                     $interface->name,
+                                                                     $row['plat_ifaces.path'],
+                                                                     $row['plat_ifaces.comment'],
+                                                                     $row['plat_ifaces.iid'],
+                                                                     $row['plat_ifaces.hash']));
     }
     return $interfaces;
   }

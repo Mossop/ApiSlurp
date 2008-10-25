@@ -10,7 +10,12 @@
   <h2>All Interfaces</h2>
   <ul>
     {foreach from=$interfaces item="item"}
-      <li><a href="{$ROOT}/interface/{$item->name}">{$item}</a></li>
+      <li>
+        <a href="{$ROOT}/interface/{$item->name}">{$item}</a> (
+        {foreach from=$item->versions item="version"}
+          <a href="{$ROOT}/platform/{$version->platform->name}/interface/{$item->name}">{$version->platform}</a>
+        {/foreach})
+      </li>
     {/foreach}
   </ul>
 </div>
