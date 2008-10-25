@@ -21,7 +21,6 @@ else {
 
 $smarty->assign('interface', $interface);
 $smarty->assign('platform', $interface->platform);
-
 $smarty->prepare('interface.tpl', $interface->id);
 $smarty->display();
 ?>
