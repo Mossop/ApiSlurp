@@ -281,48 +281,43 @@ class Platform {
                             'interfaces ON interfaces.id=plat_ifaces.interface WHERE platform='.
                             $this->id . ' ORDER BY interfaces.interface');
     foreach ($rows as $row) {
-      $interface = XPCOMInterface::getOrCreate($row['interfaces.id'], $row['interfaces.interface']);
-      array_push($interfaces, InterfaceVersion::getOrCreate($row['plat_ifaces.id'],
+      $interface = XPCOMInterface::getOrCreate($row);
+      array_push($interfaces, InterfaceVersion::getOrCreate($row,
                                                             $interface,
                                                             $this,
-                                                            $interface->name,
-                                                            $row['plat_ifaces.path'],
-                                                            $row['plat_ifaces.comment'],
-                                                            $row['plat_ifaces.iid'],
-                                                            $row['plat_ifaces.hash']));
+                                                            $interface->name));
     }
     return $interfaces;
   }
 
-  public static function getOrCreate($id, $name, $version, $sourceurl) {
-    $result = Cache::get('Platform', $id);
+  public static function getOrCreate($row, $prefix = 'platforms.') {
+    $result = Cache::get('Platform', $row[$prefix . 'id']);
     if ($result != null) {
       return $result;
     }
-    return new Platform($id, $name, $version, $sourceurl);
+    return new Platform($row[$prefix . 'id'],
+                        $row[$prefix . 'platform'],
+                        $row[$prefix . 'platform'],
+                        $row[$prefix . 'url']);
   }
 
   public static function getByName($name) {
     global $db;
 
-    $row = $db->rowQuery('SELECT * FROM platforms WHERE platform="' . $db->escape($name) . '"');
+    $row = $db->rowQuery('SELECT platforms.* FROM platforms WHERE platform="' . $db->escape($name) . '"');
     if ($row === false) {
       return null;
     }
-    $platform = Cache::get('Platform', $row['id']);
-    if ($platform != null) {
-      return $platform;
-    }
-    return Platform::getOrCreate($row['id'], $row['platform'], $row['platform'], $row['url']);
+    return Platform::getOrCreate($row, '');
   }
 
   public static function getAllPlatforms() {
     global $db;
 
     $platforms = array();
-    $rows = $db->arrayQuery('SELECT * FROM platforms');
+    $rows = $db->arrayQuery('SELECT platforms.* FROM platforms');
     foreach ($rows as $row) {
-      array_push($platforms, Platform::getOrCreate($row['id'], $row['platform'], $row['platform'], $row['url']));
+      array_push($platforms, Platform::getOrCreate($row, ''));
     }
     return $platforms;
   }
@@ -371,18 +366,11 @@ class XPCOMInterface {
                             'plat_ifaces JOIN platforms ON plat_ifaces.platform=platforms.id '.
                             'WHERE plat_ifaces.interface=' . $this->id);
     foreach ($rows as $row) {
-      $platform = Platform::getOrCreate($row['platforms.id'],
-                                        $row['platforms.platform'],
-                                        $row['platforms.platform'],
-                                        $row['platforms.url']);
-      array_push($this->versions, InterfaceVersion::getOrCreate($row['plat_ifaces.id'],
+      $platform = Platform::getOrCreate($row);
+      array_push($this->versions, InterfaceVersion::getOrCreate($row,
                                                                 $this,
                                                                 $platform,
-                                                                $this->name,
-                                                                $row['plat_ifaces.path'],
-                                                                $row['plat_ifaces.comment'],
-                                                                $row['plat_ifaces.iid'],
-                                                                $row['plat_ifaces.hash']));
+                                                                $this->name));
     }
     usort($this->versions, 'interfaceversion_compare');
     return $this->versions;
@@ -398,12 +386,12 @@ class XPCOMInterface {
     return $versions[0];
   }
 
-  public static function getOrCreate($id, $name) {
-    $result = Cache::get('XPCOMInterface', $id);
+  public static function getOrCreate($row, $prefix = 'interfaces.') {
+    $result = Cache::get('XPCOMInterface', $row[$prefix . 'id']);
     if ($result != null) {
       return $result;
     }
-    return new XPCOMInterface($id, $name);
+    return new XPCOMInterface($row[$prefix . 'id'], $row[$prefix . 'interface']);
   }
 
   public static function getByName($name) {
@@ -420,22 +408,15 @@ class XPCOMInterface {
       return Cache::get('XPCOMInterface', $rows[0]['interfaces.id']);
     }
 
-    $interface = self::getOrCreate($rows[0]['interfaces.id'], $rows[0]['interfaces.interface']);
+    $interface = self::getOrCreate($rows[0]);
 
     $interface->versions = array();
     foreach ($rows as $row) {
-      $platform = Platform::getOrCreate($row['platforms.id'],
-                                        $row['platforms.platform'],
-                                        $row['platforms.platform'],
-                                        $row['platforms.url']);
-      array_push($interface->versions, InterfaceVersion::getOrCreate($row['plat_ifaces.id'],
+      $platform = Platform::getOrCreate($row);
+      array_push($interface->versions, InterfaceVersion::getOrCreate($row,
                                                                      $interface,
                                                                      $platform,
-                                                                     $interface->name,
-                                                                     $row['plat_ifaces.path'],
-                                                                     $row['plat_ifaces.comment'],
-                                                                     $row['plat_ifaces.iid'],
-                                                                     $row['plat_ifaces.hash']));
+                                                                     $interface->name));
     }
     usort($interface->versions, 'interfaceversion_compare');
     return $interface;
@@ -449,30 +430,23 @@ class XPCOMInterface {
                             'FROM plat_ifaces JOIN interfaces ON plat_ifaces.interface=interfaces.id '.
                             'JOIN platforms ON plat_ifaces.platform=platforms.id ORDER BY interfaces.interface');
 
-    $interface = self::getOrCreate($rows[0]['interfaces.id'], $rows[0]['interfaces.interface']);
+    $interface = self::getOrCreate($rows[0]);
 
     $interfaces = array();
     foreach ($rows as $row) {
       $interface = Cache::get('XPCOMInterface', $row['interfaces.id']);
       if ($interface == null) {
-        $interface = self::getOrCreate($row['interfaces.id'], $row['interfaces.interface']);
+        $interface = self::getOrCreate($row);
         array_push($interfaces, $interface);
       }
       if (!isset($interface->versions)) {
         $interface->versions = array();
       }
-      $platform = Platform::getOrCreate($row['platforms.id'],
-                                        $row['platforms.platform'],
-                                        $row['platforms.platform'],
-                                        $row['platforms.url']);
-      array_push($interface->versions, InterfaceVersion::getOrCreate($row['plat_ifaces.id'],
+      $platform = Platform::getOrCreate($row);
+      array_push($interface->versions, InterfaceVersion::getOrCreate($row,
                                                                      $interface,
                                                                      $platform,
-                                                                     $interface->name,
-                                                                     $row['plat_ifaces.path'],
-                                                                     $row['plat_ifaces.comment'],
-                                                                     $row['plat_ifaces.iid'],
-                                                                     $row['plat_ifaces.hash']));
+                                                                     $interface->name));
       usort($interface->versions, 'interfaceversion_compare');
     }
     return $interfaces;
@@ -561,12 +535,19 @@ class InterfaceVersion {
     return $this->members[$name];
   }
 
-  public static function getOrCreate($id, $versions, $platform, $name, $path, $comment, $iid, $hash) {
-    $result = Cache::get('InterfaceVersion', $id);
+  public static function getOrCreate($row, $versions, $platform, $name, $prefix = 'plat_ifaces.') {
+    $result = Cache::get('InterfaceVersion', $row[$prefix . 'id']);
     if ($result != null) {
       return $result;
     }
-    return new InterfaceVersion($id, $versions, $platform, $name, $path, $comment, $iid, $hash);
+    return new InterfaceVersion($row[$prefix . 'id'],
+                                $versions,
+                                $platform,
+                                $name,
+                                $row[$prefix . 'path'],
+                                $row[$prefix . 'comment'],
+                                $row[$prefix . 'iid'],
+                                $row[$prefix . 'hash']);
   }
 
   public static function getByNameAndPlatform($name, $platform) {
@@ -587,20 +568,13 @@ class InterfaceVersion {
       if ($row === false) {
         return null;
       }
-      $platform = Platform::getOrCreate($row['platforms.id'],
-                                        $row['platforms.platform'],
-                                        $row['platforms.platform'],
-                                        $row['platforms.url']);
+      $platform = Platform::getOrCreate($row);
     }
-    $interface = XPCOMInterface::getOrCreate($row['interfaces.id'], $row['interfaces.interface']);
-    return self::getOrCreate($row['plat_ifaces.id'],
+    $interface = XPCOMInterface::getOrCreate($row);
+    return self::getOrCreate($row,
                              $interface,
                              $platform,
-                             $interface->name,
-                             $row['plat_ifaces.path'],
-                             $row['plat_ifaces.comment'],
-                             $row['plat_ifaces.iid'],
-                             $row['plat_ifaces.hash']);
+                             $interface->name);
   }
 }
 
@@ -702,7 +676,7 @@ class PlatformDiff {
                             'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id '.
                             'WHERE pi2.platform IS NULL ORDER BY interfaces.interface');
     foreach ($rows as $row) {
-      array_push($this->added, XPCOMInterface::getOrCreate($row['interfaces.id'], $row['interfaces.interface']));
+      array_push($this->added, XPCOMInterface::getOrCreate($row));
     }
 
     $rows = $db->arrayQuery('SELECT interfaces.id, interfaces.interface FROM '.
@@ -711,7 +685,7 @@ class PlatformDiff {
                             'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id '.
                             'WHERE pi2.platform IS NULL ORDER BY interfaces.interface');
     foreach ($rows as $row) {
-      array_push($this->removed, XPCOMInterface::getOrCreate($row['interfaces.id'], $row['interfaces.interface']));
+      array_push($this->removed, XPCOMInterface::getOrCreate($row));
     }
 
     $rows = $db->arrayQuery('SELECT interfaces.id, interfaces.interface FROM '.
@@ -719,7 +693,7 @@ class PlatformDiff {
                             'JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $right->id . ') AS pi2 '.
                             'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id WHERE pi1.hash=pi2.hash ORDER BY interfaces.interface');
     foreach ($rows as $row) {
-      array_push($this->unchanged, XPCOMInterface::getOrCreate($row['interfaces.id'], $row['interfaces.interface']));
+      array_push($this->unchanged, XPCOMInterface::getOrCreate($row));
     }
 
     $rows = $db->arrayQuery('SELECT interfaces.id, interfaces.interface FROM '.
@@ -727,7 +701,7 @@ class PlatformDiff {
                             'JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $right->id . ') AS pi2 '.
                             'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id WHERE pi1.hash<>pi2.hash ORDER BY interfaces.interface');
     foreach ($rows as $row) {
-      array_push($this->modified, XPCOMInterface::getOrCreate($row['interfaces.id'], $row['interfaces.interface']));
+      array_push($this->modified, XPCOMInterface::getOrCreate($row));
     }
   }
 }
