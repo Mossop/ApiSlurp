@@ -30,7 +30,7 @@
 </div>
 
 <div class="body">
-  <h1>{$interface} Interface (from platform <a href="{$ROOT}/platform/{$platform->name}">{$platform}</a>) - <a href="{$platform->sourceurl}{$interface->path}">Source</a></h1>
+  <h1>{$interface} Interface (from platform <a href="{$ROOT}/platform/{$platform->name}">{$platform}</a>) - <a href="{$platform->sourceurl}{$interface->path}#{$interface->line}">Source</a></h1>
   <div class="code">
     <pre class="comment">{$interface->comment}</pre>
     {include file="includes/interface.tpl" interface=$interface}

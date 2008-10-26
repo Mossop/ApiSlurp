@@ -459,18 +459,20 @@ class InterfaceVersion {
   public $platform;
   public $name;
   public $path;
+  public $line;
   public $comment;
   public $iid;
   public $hash;
 
   private $members;
 
-  private function __construct($id, $versions, $platform, $name, $path, $comment, $iid, $hash) {
+  private function __construct($id, $versions, $platform, $name, $path, $line, $comment, $iid, $hash) {
     $this->id = $id;
     $this->versions = $versions;
     $this->platform = $platform;
     $this->name = $name;
     $this->path = $path;
+    $this->line = $line;
     $this->comment = $comment;
     $this->iid = $iid;
     $this->hash = $hash;
@@ -502,7 +504,9 @@ class InterfaceVersion {
         switch ($row['kind']) {
           case 'const':
             array_push($this->members['constants'], new Constant($row['id'],
-                                                                 $this, $row['comment'],
+                                                                 $this,
+                                                                 $row['line'],
+                                                                 $row['comment'],
                                                                  $row['type'],
                                                                  $row['name'],
                                                                  $row['hash'],
@@ -511,6 +515,7 @@ class InterfaceVersion {
           case 'attribute':
             array_push($this->members['attributes'], new Attribute($row['id'],
                                                                    $this,
+                                                                   $row['line'],
                                                                    $row['comment'],
                                                                    $row['type'],
                                                                    $row['name'],
@@ -520,6 +525,7 @@ class InterfaceVersion {
           case 'method':
             array_push($this->members['methods'], new Method($row['id'],
                                                              $this,
+                                                             $row['line'],
                                                              $row['comment'],
                                                              $row['type'],
                                                              $row['name'],
@@ -545,6 +551,7 @@ class InterfaceVersion {
                                 $platform,
                                 $name,
                                 $row[$prefix . 'path'],
+                                $row[$prefix . 'line'],
                                 $row[$prefix . 'comment'],
                                 $row[$prefix . 'iid'],
                                 $row[$prefix . 'hash']);
@@ -581,14 +588,16 @@ class InterfaceVersion {
 class Member {
   public $id;
   public $interface;
+  public $line;
   public $comment;
   public $type;
   public $name;
   public $hash;
 
-  public function __construct($id, $interface, $comment, $type, $name, $hash) {
+  public function __construct($id, $interface, $line, $comment, $type, $name, $hash) {
     $this->id = $id;
     $this->interface = $interface;
+    $this->line = $line;
     $this->comment = $comment;
     $this->type = $type;
     $this->name = $name;
@@ -603,8 +612,8 @@ class Member {
 class Attribute extends Member {
   public $readonly;
 
-  public function __construct($id, $interface, $comment, $type, $name, $hash, $value) {
-    parent::__construct($id, $interface, $comment, $type, $name, $hash);
+  public function __construct($id, $interface, $line, $comment, $type, $name, $hash, $value) {
+    parent::__construct($id, $interface, $line, $comment, $type, $name, $hash);
     $this->readonly = $value;
   }
 }
@@ -612,8 +621,8 @@ class Attribute extends Member {
 class Constant extends Member {
   public $value;
 
-  public function __construct($id, $interface, $comment, $type, $name, $hash, $value) {
-    parent::__construct($id, $interface, $comment, $type, $name, $hash);
+  public function __construct($id, $interface, $line, $comment, $type, $name, $hash, $value) {
+    parent::__construct($id, $interface, $line, $comment, $type, $name, $hash);
     $this->value = $value;
   }
 }
