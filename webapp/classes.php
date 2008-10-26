@@ -209,18 +209,25 @@ class SQLiteDB extends Database {
 
 $versioncomparator = new VersionComparator();
 
-function member_compare($a, $b) {
+function member_name_compare($a, $b) {
   if ($a->name == $b->name) {
     return 0;
   }
   return ($a->name < $b->name) ? -1 : 1;
 }
 
-function constant_compare($a, $b) {
+function member_value_compare($a, $b) {
   if ($a->value == $b->value) {
     return 0;
   }
   return ($a->value < $b->value) ? -1 : 1;
+}
+
+function member_line_compare($a, $b) {
+  if ($a->line == $b->line) {
+    return 0;
+  }
+  return ($a->line < $b->line) ? -1 : 1;
 }
 
 function interfaceversion_compare($a, $b) {
@@ -517,9 +524,9 @@ class InterfaceVersion {
           array_push($this->members['methods'], $member);
         }
       }
-      usort($this->members['constants'], 'constant_compare');
-      usort($this->members['attributes'], 'member_compare');
-      usort($this->members['methods'], 'member_compare');
+      usort($this->members['constants'], 'member_line_compare');
+      usort($this->members['attributes'], 'member_name_compare');
+      usort($this->members['methods'], 'member_name_compare');
     }
 
     return $this->members[$name];
@@ -752,9 +759,9 @@ class InterfaceDiff {
     $this->left = $left;
     $this->right = $right;
 
-    $this->constants = $this->getMemberPairs($left->constants, $right->constants, 'constant_compare');
-    $this->attributes = $this->getMemberPairs($left->attributes, $right->attributes, 'member_compare');
-    $this->methods = $this->getMemberPairs($left->methods, $right->methods, 'member_compare');
+    $this->constants = $this->getMemberPairs($left->constants, $right->constants, 'member_line_compare');
+    $this->attributes = $this->getMemberPairs($left->attributes, $right->attributes, 'member_name_compare');
+    $this->methods = $this->getMemberPairs($left->methods, $right->methods, 'member_name_compare');
   }
 
   private function getMemberPairs($left, $right, $compare) {
