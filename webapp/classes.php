@@ -491,6 +491,9 @@ class InterfaceVersion {
     if ($name == 'versions') {
       return $this->versions->getVersions();
     }
+    if ($name == 'sourceurl') {
+      return $this->platform->sourceurl . $this->path . '#' . $this->line;
+    }
     return null;
   }
 
@@ -499,37 +502,17 @@ class InterfaceVersion {
 
     if (!isset($this->members)) {
       $this->members = array('constants' => array(), 'attributes' => array(), 'methods' => array());
-      $rows = $db->arrayQuery('SELECT id, kind, comment, type, name, text, hash FROM members WHERE pint=' . $this->id);
+      $rows = $db->arrayQuery('SELECT * FROM members WHERE pint=' . $this->id);
       foreach ($rows as $row) {
         switch ($row['kind']) {
           case 'const':
-            array_push($this->members['constants'], new Constant($row['id'],
-                                                                 $this,
-                                                                 $row['line'],
-                                                                 $row['comment'],
-                                                                 $row['type'],
-                                                                 $row['name'],
-                                                                 $row['hash'],
-                                                                 $row['text']));
+            array_push($this->members['constants'], new Constant($row, $this, ''));
             break;
           case 'attribute':
-            array_push($this->members['attributes'], new Attribute($row['id'],
-                                                                   $this,
-                                                                   $row['line'],
-                                                                   $row['comment'],
-                                                                   $row['type'],
-                                                                   $row['name'],
-                                                                   $row['hash'],
-                                                                   $row['text']));
+            array_push($this->members['attributes'], new Attribute($row, $this, ''));
             break;
           case 'method':
-            array_push($this->members['methods'], new Method($row['id'],
-                                                             $this,
-                                                             $row['line'],
-                                                             $row['comment'],
-                                                             $row['type'],
-                                                             $row['name'],
-                                                             $row['hash']));
+            array_push($this->members['methods'], new Method($row, $this, ''));
             break;
         }
       }
@@ -594,17 +577,20 @@ class Member {
   public $name;
   public $hash;
 
-  public function __construct($id, $interface, $line, $comment, $type, $name, $hash) {
-    $this->id = $id;
+  public function __construct($row, $interface, $prefix = 'members.') {
+    $this->id = $row[$prefix . 'id'];
     $this->interface = $interface;
-    $this->line = $line;
-    $this->comment = $comment;
-    $this->type = $type;
-    $this->name = $name;
-    $this->hash = $hash;
+    $this->line = $row[$prefix . 'line'];
+    $this->comment = $row[$prefix . 'comment'];
+    $this->type = $row[$prefix . 'type'];
+    $this->name = $row[$prefix . 'name'];
+    $this->hash = $row[$prefix . 'hash'];
   }
 
   public function __get($name) {
+    if ($name == 'sourceurl') {
+      return $this->interface->platform->sourceurl . $this->interface->path . '#' . $this->line;
+    }
     return null;
   }
 }
@@ -612,18 +598,18 @@ class Member {
 class Attribute extends Member {
   public $readonly;
 
-  public function __construct($id, $interface, $line, $comment, $type, $name, $hash, $value) {
-    parent::__construct($id, $interface, $line, $comment, $type, $name, $hash);
-    $this->readonly = $value;
+  public function __construct($row, $interface, $prefix = 'members.') {
+    parent::__construct($row, $interface, $prefix);
+    $this->readonly = $row[$prefix . 'text'];
   }
 }
 
 class Constant extends Member {
   public $value;
 
-  public function __construct($id, $interface, $line, $comment, $type, $name, $hash, $value) {
-    parent::__construct($id, $interface, $line, $comment, $type, $name, $hash);
-    $this->value = $value;
+  public function __construct($row, $interface, $prefix = 'members.') {
+    parent::__construct($row, $interface, $prefix);
+    $this->value = $row[$prefix . 'text'];
   }
 }
 

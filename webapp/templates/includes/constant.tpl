@@ -1,1 +1,1 @@
-<div class="constant signature {$class}"><span class="keyword">const</span> <span class="type">{$constant->type}</span> <span class="name">{$constant->name}</span> = <span class="value">{$constant->value}</span></div>
+<div class="constant signature {$class}"><span class="keyword">const</span> <span class="type">{$constant->type}</span> <span class="name"><a href="{$constant->sourceurl}">{$constant->name}</a></span> = <span class="value">{$constant->value}</span></div>
