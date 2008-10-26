@@ -66,10 +66,10 @@ class Slurp(object):
     c = self.dbc.cursor()
     c.execute('CREATE TABLE platforms (id INTEGER PRIMARY KEY AUTOINCREMENT, platform TEXT UNIQUE, url TEXT)')
     c.execute('CREATE TABLE interfaces (id INTEGER PRIMARY KEY AUTOINCREMENT, interface TEXT UNIQUE)')
-    c.execute('CREATE TABLE plat_ifaces (id INTEGER PRIMARY KEY AUTOINCREMENT, platform INTEGER, interface INTEGER, iid TEXT, comment TEXT, path TEXT, hash TEXT)')
+    c.execute('CREATE TABLE plat_ifaces (id INTEGER PRIMARY KEY AUTOINCREMENT, platform INTEGER, interface INTEGER, iid TEXT, comment TEXT, path TEXT, line INTEGER, hash TEXT)')
     c.execute('CREATE INDEX pi_plat ON plat_ifaces (platform)');
     c.execute('CREATE UNIQUE INDEX pi_id ON plat_ifaces (platform, interface)');
-    c.execute('CREATE TABLE members (id INTEGER PRIMARY KEY AUTOINCREMENT, pint INTEGER, name TEXT, kind TEXT, type TEXT, comment TEXT, hash TEXT, text TEXT)')
+    c.execute('CREATE TABLE members (id INTEGER PRIMARY KEY AUTOINCREMENT, pint INTEGER, name TEXT, kind TEXT, type TEXT, comment TEXT, line INTEGER, hash TEXT, text TEXT)')
     c.execute('CREATE UNIQUE INDEX mem_id ON members (pint, name)');
     c.execute('CREATE TABLE parameters (member INTEGER, pos INTEGER, type TEXT, name TEXT)')
     c.execute('CREATE UNIQUE INDEX param_idx ON parameters (member, pos)');
@@ -109,8 +109,8 @@ class Slurp(object):
       id = c.lastrowid
     else:
       id = id[0]
-    c.execute('INSERT INTO plat_ifaces (platform,interface,iid,comment,path) VALUES (?,?,?,?,?)',
-              (self.platform, id, interface.attributes.uuid, self.__mungeComment(interface.doccomments), path))
+    c.execute('INSERT INTO plat_ifaces (platform,interface,iid,comment,path,line) VALUES (?,?,?,?,?,?)',
+              (self.platform, id, interface.attributes.uuid, self.__mungeComment(interface.doccomments), path, interface.location._lineno))
     id = c.lastrowid
     self.dbc.commit()
     c.close()
@@ -141,8 +141,8 @@ class Slurp(object):
             text = member.getValue()
           memberhash = md5.new(hash)
           interfacehash.update(hash)
-          c.execute('INSERT INTO members (pint, kind, type, name, comment, hash, text) VALUES (?,?,?,?,?,?,?)',
-                    (iid, member.kind, member.type, member.name, self.__mungeComment(member.doccomments), memberhash.hexdigest(), text))
+          c.execute('INSERT INTO members (pint, kind, type, name, comment, hash, text, line) VALUES (?,?,?,?,?,?,?,?)',
+                    (iid, member.kind, member.type, member.name, self.__mungeComment(member.doccomments), memberhash.hexdigest(), text, member.location._lineno))
           if member.kind == "method":
             mid = c.lastrowid
             pos = 0
@@ -166,7 +166,7 @@ def displayUsage():
   print "Usage: slurp.py <platform> <source url> <cache dir> <database> <idl path>"
 
 if __name__ == '__main__':
-  if len(sys.argv) < 5:
+  if len(sys.argv) < 6:
     displayUsage()
     sys.exit()
   if not os.path.isdir(sys.argv[3]):
@@ -176,4 +176,8 @@ if __name__ == '__main__':
     displayUsage()
     sys.exit()
   s = Slurp(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
-  s.slurpFiles(sys.argv[5])
+  if len(sys.argv) > 6:
+    fullpath = sys.argv[6]
+    s.slurpFile(fullpath, fullpath[len(sys.argv[5]) + 1:])
+  else:
+    s.slurpFiles(sys.argv[5])
