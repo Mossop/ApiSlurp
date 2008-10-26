@@ -5,6 +5,7 @@
 ^webapp/config.php$
 ^slurp/idl
 ^slurp/cache
+^slurp/sources
 ^slurp/api.sqlite$
 ^[.]
 /[.]
