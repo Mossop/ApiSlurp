@@ -16,7 +16,7 @@ if ($platform2 == null) {
 }
 
 if ($versioncomparator->compareVersions($platform1->version, $platform2->version) > 0) {
-  $temp = $platform2;
+  $temp = $platform1;
   $platform1 = $platform2;
   $platform2 = $temp;
 }
