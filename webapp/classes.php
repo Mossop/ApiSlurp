@@ -502,18 +502,19 @@ class InterfaceVersion {
 
     if (!isset($this->members)) {
       $this->members = array('constants' => array(), 'attributes' => array(), 'methods' => array());
-      $rows = $db->arrayQuery('SELECT * FROM members WHERE pint=' . $this->id);
+      $rows = $db->arrayQuery('SELECT members.*,interfaces.id FROM '.
+                              'members LEFT JOIN interfaces ON members.type=interfaces.interface '.
+                              'WHERE pint=' . $this->id);
       foreach ($rows as $row) {
-        switch ($row['kind']) {
-          case 'const':
-            array_push($this->members['constants'], new Constant($row, $this, ''));
-            break;
-          case 'attribute':
-            array_push($this->members['attributes'], new Attribute($row, $this, ''));
-            break;
-          case 'method':
-            array_push($this->members['methods'], new Method($row, $this, ''));
-            break;
+        $member = Method::getOrCreate($row, $this);
+        if ($member instanceof Constant) {
+          array_push($this->members['constants'], $member);
+        }
+        else if ($member instanceof Attribute) {
+          array_push($this->members['attributes'], $member);
+        }
+        else if ($member instanceof Method) {
+          array_push($this->members['methods'], $member);
         }
       }
       usort($this->members['constants'], 'constant_compare');
@@ -574,6 +575,7 @@ class Member {
   public $line;
   public $comment;
   public $type;
+  public $typeisif;
   public $name;
   public $hash;
 
@@ -585,6 +587,14 @@ class Member {
     $this->type = $row[$prefix . 'type'];
     $this->name = $row[$prefix . 'name'];
     $this->hash = $row[$prefix . 'hash'];
+    if (isset($row['interfaces.id']) && $row['interfaces.id'] != false) {
+      $this->typeisif = true;
+    }
+    else {
+      $this->typeisif = false;
+    }
+
+    Cache::set('Member', $this->id, $this);
   }
 
   public function __get($name) {
@@ -592,6 +602,24 @@ class Member {
       return $this->interface->platform->sourceurl . $this->interface->path . '#' . $this->line;
     }
     return null;
+  }
+
+  public static function getOrCreate($row, $interface, $prefix = 'members.') {
+    $result = Cache::get('Member', $row[$prefix . 'id']);
+    if ($result != null) {
+      return $result;
+    }
+    switch ($row[$prefix . 'kind']) {
+      case 'const':
+        return new Constant($row, $this, $prefix);
+        break;
+      case 'attribute':
+        return new Attribute($row, $this, $prefix);
+        break;
+      case 'method':
+        return new Method($row, $this, $prefix);
+        break;
+    }
   }
 }
 
@@ -628,9 +656,11 @@ class Method extends Member {
 
     if (!isset($this->params)) {
       $this->params = array();
-      $rows = $db->arrayQuery('SELECT type, name FROM parameters WHERE member=' . $this->id . ' ORDER BY pos');
+      $rows = $db->arrayQuery('SELECT parameters.*,interfaces.id FROM '.
+                              'parameters LEFT JOIN interfaces ON parameters.type=interfaces.interface '.
+                              'WHERE member=' . $this->id . ' ORDER BY parameters.pos');
       foreach ($rows as $row) {
-        array_push($this->params, new Parameter($this, $row['type'], $row['name']));
+        array_push($this->params, new Parameter($row, $this));
       }
     }
     return $this->params;
@@ -640,12 +670,19 @@ class Method extends Member {
 class Parameter {
   public $method;
   public $type;
+  public $typeisif;
   public $name;
 
-  public function __construct($method, $type, $name) {
+  public function __construct($row, $method, $prefix = 'parameters.') {
     $this->method = $method;
-    $this->type = $type;
-    $this->name = $name;
+    $this->type = $row[$prefix . 'type'];
+    $this->name = $row[$prefix . 'name'];
+    if (isset($row['interfaces.id']) && $row['interfaces.id'] != false) {
+      $this->typeisif = true;
+    }
+    else {
+      $this->typeisif = false;
+    }
   }
 }
 

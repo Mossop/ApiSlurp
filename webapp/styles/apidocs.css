@@ -122,7 +122,8 @@
   color: green;
 }
 
-.name a {
+.name a,
+.type a {
   color: inherit;
 }
 
