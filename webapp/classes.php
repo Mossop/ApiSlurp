@@ -611,13 +611,13 @@ class Member {
     }
     switch ($row[$prefix . 'kind']) {
       case 'const':
-        return new Constant($row, $this, $prefix);
+        return new Constant($row, $interface, $prefix);
         break;
       case 'attribute':
-        return new Attribute($row, $this, $prefix);
+        return new Attribute($row, $interface, $prefix);
         break;
       case 'method':
-        return new Method($row, $this, $prefix);
+        return new Method($row, $interface, $prefix);
         break;
     }
   }
