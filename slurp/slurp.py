@@ -40,6 +40,18 @@
 
 import xpidl, sys, os, sqlite3, md5, re
 
+NOSCRIPT = 1
+NOTXPCOM = 2
+READONLY = 4
+SCRIPTABLE = 8
+FUNCTION = 16
+
+CONST = 1
+ARRAY = 2
+RETVAL = 4
+SHARED = 8
+OPTIONAL = 16
+
 class Slurp(object):
   platform = None
   idldirs = None
@@ -66,12 +78,12 @@ class Slurp(object):
     c = self.dbc.cursor()
     c.execute('CREATE TABLE platforms (id INTEGER PRIMARY KEY AUTOINCREMENT, platform TEXT UNIQUE, url TEXT)')
     c.execute('CREATE TABLE interfaces (id INTEGER PRIMARY KEY AUTOINCREMENT, interface TEXT UNIQUE)')
-    c.execute('CREATE TABLE plat_ifaces (id INTEGER PRIMARY KEY AUTOINCREMENT, platform INTEGER, interface INTEGER, iid TEXT, comment TEXT, path TEXT, line INTEGER, hash TEXT)')
+    c.execute('CREATE TABLE plat_ifaces (id INTEGER PRIMARY KEY AUTOINCREMENT, platform INTEGER, interface INTEGER, base TEXT, flags INTEGER, iid TEXT, comment TEXT, path TEXT, line INTEGER, hash TEXT)')
     c.execute('CREATE INDEX pi_plat ON plat_ifaces (platform)');
     c.execute('CREATE UNIQUE INDEX pi_id ON plat_ifaces (platform, interface)');
-    c.execute('CREATE TABLE members (id INTEGER PRIMARY KEY AUTOINCREMENT, pint INTEGER, name TEXT, kind TEXT, type TEXT, comment TEXT, line INTEGER, hash TEXT, text TEXT)')
+    c.execute('CREATE TABLE members (id INTEGER PRIMARY KEY AUTOINCREMENT, pint INTEGER, name TEXT, kind TEXT, type TEXT, flags INTEGER, comment TEXT, line INTEGER, hash TEXT, text TEXT)')
     c.execute('CREATE UNIQUE INDEX mem_id ON members (pint, name)');
-    c.execute('CREATE TABLE parameters (member INTEGER, pos INTEGER, type TEXT, name TEXT)')
+    c.execute('CREATE TABLE parameters (member INTEGER, pos INTEGER, type TEXT, name TEXT, flags INTEGER, sizeis TEXT, iidis TEXT)')
     c.execute('CREATE UNIQUE INDEX param_idx ON parameters (member, pos)');
     c.execute('INSERT INTO platforms (platform, url) VALUES (?,?)', (platform,url))
     self.platform = c.lastrowid
@@ -109,8 +121,13 @@ class Slurp(object):
       id = c.lastrowid
     else:
       id = id[0]
-    c.execute('INSERT INTO plat_ifaces (platform,interface,iid,comment,path,line) VALUES (?,?,?,?,?,?)',
-              (self.platform, id, interface.attributes.uuid, self.__mungeComment(interface.doccomments), path, interface.location._lineno))
+    flags = 0
+    flags += SCRIPTABLE if interface.attributes.scriptable else 0
+    flags += NOSCRIPT if interface.attributes.noscript else 0
+    flags += FUNCTION if interface.attributes.function else 0
+    c.execute('INSERT INTO plat_ifaces (platform,interface,base,iid,flags,comment,path,line) VALUES (?,?,?,?,?,?,?,?)',
+              (self.platform, id, interface.base, interface.attributes.uuid,
+               flags, self.__mungeComment(interface.doccomments), path, interface.location._lineno))
     id = c.lastrowid
     self.dbc.commit()
     c.close()
@@ -130,26 +147,40 @@ class Slurp(object):
         c = self.dbc.cursor()
         for member in interface.namemap:
           text = str(member).strip()
+          flags = 0
           if member.kind == "method":
-            hash = "%s,%s,%s,%s" % (member.kind, member.name, member.type, ",".join([p.type for p in member.params]))
-            text = ""
+            text = member.binaryname
+            flags += NOSCRIPT if member.noscript else 0
+            flags += NOTXPCOM if member.notxpcom else 0
+            hash = "%s,%s,%s,%s,%s" % (member.kind, member.name, member.type, member.binaryname, flags)
           elif member.kind == "attribute":
-            hash = "%s,%s,%s" % (member.kind, member.name, member.type)
-            text = member.readonly and 'readonly' or ''
+            flags += NOSCRIPT if member.noscript else 0
+            flags += NOTXPCOM if member.notxpcom else 0
+            flags += READONLY if member.readonly else 0
+            text = member.binaryname
+            hash = "%s,%s,%s,%s,%s" % (member.kind, member.name, member.type, member.binaryname, flags)
           elif member.kind == "const":
-            hash = "%s,%s,%s,%s" % (member.kind, member.name, member.type, member.getValue())
             text = member.getValue()
+            hash = "%s,%s,%s,%s" % (member.kind, member.name, member.type, member.getValue())
           memberhash = md5.new(hash)
           interfacehash.update(hash)
-          c.execute('INSERT INTO members (pint, kind, type, name, comment, hash, text, line) VALUES (?,?,?,?,?,?,?,?)',
-                    (iid, member.kind, member.type, member.name, self.__mungeComment(member.doccomments), memberhash.hexdigest(), text, member.location._lineno))
+          c.execute('INSERT INTO members (pint, kind, type, name, flags, comment, text, line) VALUES (?,?,?,?,?,?,?,?)',
+                    (iid, member.kind, member.type, member.name, flags, self.__mungeComment(member.doccomments), text, member.location._lineno))
+          mid = c.lastrowid
           if member.kind == "method":
-            mid = c.lastrowid
             pos = 0
             for param in member.params:
-              c.execute('INSERT INTO parameters (member, pos, type, name) VALUES (?,?,?,?)',
-                        (mid, pos, param.type, param.name))
+              flags = 0
+              flags += CONST if param.const else 0
+              flags += ARRAY if param.array else 0
+              flags += RETVAL if param.retval else 0
+              flags += SHARED if param.shared else 0
+              flags += OPTIONAL if param.optional else 0
+              memberhash.update(",%s %s %s %s" % (flags, param.size_is, param.iid_is, param.type))
+              c.execute('INSERT INTO parameters (member, pos, type, name, flags, sizeis, iidis) VALUES (?,?,?,?,?,?,?)',
+                        (mid, pos, param.type, param.name, flags, param.size_is, param.iid_is))
               pos += 1
+          c.execute('UPDATE members SET hash=? WHERE id=?', (memberhash.hexdigest(), mid))
         c.execute('UPDATE plat_ifaces SET hash=? WHERE id=?',
                   (interfacehash.hexdigest(), iid))
         self.dbc.commit()
