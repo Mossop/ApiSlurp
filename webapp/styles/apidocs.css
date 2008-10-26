@@ -104,6 +104,15 @@
   margin: 2px;
 }
 
+.signature {
+  margin-left: 8em;
+  text-indent: -8em;
+}
+
+.param {
+  white-space: nowrap;
+}
+
 .hidesame .unchanged {
   display: none;
 }
@@ -112,6 +121,10 @@
   color: grey;
   padding-left: 20px;
   margin-bottom: 0.5em;
+}
+
+.sourcelink {
+  vertical-align: middle;
 }
 
 .keyword {

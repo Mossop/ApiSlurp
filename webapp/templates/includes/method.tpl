@@ -1,1 +1,6 @@
-<div class="method signature {$class}"><span class="type">{if $method->typeisif}<a href="{$ROOT}/platform/{$method->interface->platform->name}/interface/{$method->type}">{/if}{$method->type}{if $method->typeisif}</a>{/if}</span> <span class="name"><a href="{$method->sourceurl}">{$method->name}</a></span>({foreach from=$method->params item="param" name="paramlist"}<span class="type">{if $param->typeisif}<a href="{$ROOT}/platform/{$param->method->interface->platform->name}/interface/{$param->type}">{/if}{$param->type}{if $param->typeisif}</a>{/if}</span> <span class="name">{$param->name}</span>{if not $smarty.foreach.paramlist.last}, {/if}{/foreach})</div>
+<div class="method signature {$class}">
+  <a class="sourcelink" href="{$method->sourceurl}" title="View source code"><img src="{$ROOT}/silk/script_link.png" /></a>
+  <span class="type">
+    {if $method->typeisif}<a href="{$ROOT}/platform/{$method->interface->platform->name}/interface/{$method->type}">{/if}{$method->type}{if $method->typeisif}</a>{/if}</span>
+  <span class="name">{$method->name}</span>(<span class="paramlist">{foreach from=$method->params item="param" name="paramlist"}<span class="param"><span class="type">{if $param->typeisif}<a href="{$ROOT}/platform/{$param->method->interface->platform->name}/interface/{$param->type}">{/if}{$param->type}{if $param->typeisif}</a>{/if}</span> <span class="name">{$param->name}</span></span>{if not $smarty.foreach.paramlist.last}, {/if}{/foreach}</span>)
+</div>

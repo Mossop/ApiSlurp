@@ -10,10 +10,10 @@
 </div>
 
 <div class="block">
-  <h2>Compare with:</h2>
+  <h2>Different in:</h2>
   <ul>
     {foreach from=$interface->versions item="item"}
-      {if $item ne $interface}
+      {if $item->hash ne $interface->hash}
         <li><a href="{$ROOT}/compare/interface/{$interface->name}/{$item->platform->name}/{$interface->platform->name}">{$item->platform}</a></li>
       {/if}
     {/foreach}
