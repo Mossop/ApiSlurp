@@ -83,7 +83,7 @@ class Slurp(object):
     c.execute('CREATE UNIQUE INDEX pi_id ON plat_ifaces (platform, interface)');
     c.execute('CREATE TABLE members (id INTEGER PRIMARY KEY AUTOINCREMENT, pint INTEGER, name TEXT, kind TEXT, type TEXT, flags INTEGER, comment TEXT, line INTEGER, hash TEXT, text TEXT)')
     c.execute('CREATE UNIQUE INDEX mem_id ON members (pint, name)');
-    c.execute('CREATE TABLE parameters (member INTEGER, pos INTEGER, type TEXT, name TEXT, flags INTEGER, sizeis TEXT, iidis TEXT)')
+    c.execute('CREATE TABLE parameters (member INTEGER, pos INTEGER, direction TEXT, type TEXT, name TEXT, flags INTEGER, sizeis TEXT, iidis TEXT)')
     c.execute('CREATE UNIQUE INDEX param_idx ON parameters (member, pos)');
     c.execute('INSERT INTO platforms (name, version, url, sourceurl) VALUES (?,?,?,?)',
               (platname, platversion, url, sourceurl))
@@ -179,8 +179,8 @@ class Slurp(object):
               flags += SHARED if param.shared else 0
               flags += OPTIONAL if param.optional else 0
               memberhash.update(",%s %s %s %s" % (flags, param.size_is, param.iid_is, param.type))
-              c.execute('INSERT INTO parameters (member, pos, type, name, flags, sizeis, iidis) VALUES (?,?,?,?,?,?,?)',
-                        (mid, pos, param.type, param.name, flags, param.size_is, param.iid_is))
+              c.execute('INSERT INTO parameters (member, pos, direction, type, name, flags, sizeis, iidis) VALUES (?,?,?,?,?,?,?,?)',
+                        (mid, pos, param.paramtype, param.type, param.name, flags, param.size_is, param.iid_is))
               pos += 1
           c.execute('UPDATE members SET hash=? WHERE id=?', (memberhash.hexdigest(), mid))
         c.execute('UPDATE plat_ifaces SET hash=? WHERE id=?',
