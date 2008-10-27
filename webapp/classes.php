@@ -477,6 +477,35 @@ class XPCOMInterface {
     return $interface;
   }
 
+  public static function searchForName($string) {
+    global $db;
+
+    $versions = array();
+    $rows = $db->arrayQuery('SELECT interfaces.*, plat_ifaces.*, platforms.* '.
+                            'FROM plat_ifaces JOIN interfaces ON plat_ifaces.interface=interfaces.id '.
+                            'JOIN platforms ON plat_ifaces.platform=platforms.id '.
+                            'WHERE interfaces.interface LIKE "%' . $db->escape($string) . '%"');
+
+    $interfaces = array();
+    foreach ($rows as $row) {
+      $interface = Cache::get('XPCOMInterface', $row['interfaces.id']);
+      if ($interface == null) {
+        $interface = self::getOrCreate($row);
+        array_push($interfaces, $interface);
+      }
+      if (!isset($interface->versions)) {
+        $interface->versions = array();
+      }
+      $platform = Platform::getOrCreate($row);
+      array_push($interface->versions, InterfaceVersion::getOrCreate($row,
+                                                                     $interface,
+                                                                     $platform,
+                                                                     $interface->name));
+      usort($interface->versions, 'interfaceversion_compare');
+    }
+    return $interfaces;
+  }
+
   public static function getAllInterfaces() {
     global $db;
 
@@ -484,8 +513,6 @@ class XPCOMInterface {
     $rows = $db->arrayQuery('SELECT interfaces.*, plat_ifaces.*, platforms.* '.
                             'FROM plat_ifaces JOIN interfaces ON plat_ifaces.interface=interfaces.id '.
                             'JOIN platforms ON plat_ifaces.platform=platforms.id ORDER BY interfaces.interface');
-
-    $interface = self::getOrCreate($rows[0]);
 
     $interfaces = array();
     foreach ($rows as $row) {

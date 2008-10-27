@@ -4,3 +4,4 @@ RewriteRule ^platform/([^/]+)/interface/([^/]+)$ interface.php?platform=$1&inter
 RewriteRule ^interface/([^/]+)$ interface.php?interface=$1 [L]
 RewriteRule ^compare/platform/([^/]+)/([^/]+)$ comparePlatform.php?platform1=$1&platform2=$2 [L]
 RewriteRule ^compare/interface/([^/]+)/([^/]+)/([^/]+)$ compareInterface.php?interface=$1&platform1=$2&platform2=$3 [L]
+RewriteRule ^search/interface/(.+)$ searchInterface.php?string=$1 [L]
