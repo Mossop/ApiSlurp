@@ -15,9 +15,7 @@ if ($interface2 === null) {
 }
 
 if ($versioncomparator->compareVersions($interface1->platform->version, $interface2->platform->version) > 0) {
-  $temp = $platform1;
-  $platform1 = $platform2;
-  $platform2 = $temp;
+  redirect('/compare/interface/' . $interface1->name . '/' . $interface2->platform->version . '/' . $interface1->platform->version);
 }
 
 $smarty->prepare('compareInterface.tpl', $interface1->id . '.' . $interface2->id);

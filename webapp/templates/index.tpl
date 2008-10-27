@@ -13,9 +13,9 @@
       <li>
         <a href="{$ROOT}/interface/{$item->name}">{$item}</a>
         {if $item->oldest == $item->newest}
-          <span class="variants">({$item->newest->platform})</span>
+          <span class="variants">({$item->newest->platform->version})</span>
         {else}
-          <span class="variants">({$item->oldest->platform} - {$item->newest->platform})</span>
+          <span class="variants">({$item->oldest->platform->version} - {$item->newest->platform->version})</span>
         {/if}
       </li>
     {/foreach}
