@@ -1,5 +1,17 @@
 <?php
 
+define('FLAG_NOSCRIPT',  1);
+define('FLAG_NOTXPCOM', 2);
+define('FLAG_READONLY', 4);
+define('FLAG_SCRIPTABLE', 8);
+define('FLAG_FUNCTION', 16);
+
+define('FLAG_CONST', 1);
+define('FLAG_ARRAY', 2);
+define('FLAG_RETVAL', 4);
+define('FLAG_SHARED', 8);
+define('FLAG_OPTIONAL', 16);
+
 class VersionComparator {
   /**
    * Parse a version part. 
@@ -262,22 +274,44 @@ class Cache {
 }
 
 class Platform {
-  public $id;
-  public $name;
-  public $version;
-  public $sourceurl;
+  private $row;
+  private $prefix;
 
-  private function __construct($id, $name, $version, $sourceurl) {
-    $this->id = $id;
-    $this->name = $name;
-    $this->version = $version;
-    $this->sourceurl = $sourceurl;
+  private function __construct($row, $prefix = 'platforms.') {
+    $this->row = $row;
+    $this->prefix = $prefix;
 
-    Cache::set('Platform', $id, $this);
+    Cache::set('Platform', $row[$prefix . 'id'], $this);
   }
 
   public function __toString() {
     return $this->name;
+  }
+
+  public function __isset($name) {
+    switch ($name) {
+      case 'name':
+      case 'version':
+      case 'sourceurl':
+        return true;
+        break;
+    }
+    return isset($this->row[$this->prefix . $name]);
+  }
+
+  public function __get($name) {
+    switch ($name) {
+      case 'name':
+        return $this->platform;
+        break;
+      case 'version':
+        return $this->platform;
+        break;
+      case 'sourceurl':
+        return $this->url;
+        break;
+    }
+    return $this->row[$this->prefix . $name];
   }
 
   public function getInterfaces() {
@@ -302,10 +336,7 @@ class Platform {
     if ($result != null) {
       return $result;
     }
-    return new Platform($row[$prefix . 'id'],
-                        $row[$prefix . 'platform'],
-                        $row[$prefix . 'platform'],
-                        $row[$prefix . 'url']);
+    return new Platform($row, $prefix);
   }
 
   public static function getByName($name) {
@@ -331,23 +362,40 @@ class Platform {
 }
 
 class XPCOMInterface {
-  public $id;
-  public $name;
+  private $row;
+  private $prefix;
   private $versions;
 
-  private function __construct($id, $name) {
-    $this->id = $id;
-    $this->name = $name;
+  private function __construct($row, $prefix = 'interfaces.') {
+    $this->row = $row;
+    $this->prefix = $prefix;
 
-    Cache::set('XPCOMInterface', $id, $this);
+    Cache::set('XPCOMInterface', $row[$prefix . 'id'], $this);
   }
 
   public function __toString() {
     return $this->name;
   }
 
+  public function __isset($name) {
+    switch ($name) {
+      case 'name':
+      case 'versions':
+        return true;
+      case 'oldest':
+      case 'newest':
+        $version = $this->getVersions();
+        return count($versions) > 0;
+        break;
+    }
+    return isset($this->row[$this->prefix . $name]);
+  }
+
   public function __get($name) {
     switch ($name) {
+      case 'name':
+        return $this->interface;
+        break;
       case 'versions':
         return $this->getVersions();
         break;
@@ -358,7 +406,7 @@ class XPCOMInterface {
         return $this->getNewestVersion();
         break;
     }
-    return null;
+    return $this->row[$this->prefix . $name];
   }
 
   public function getVersions() {
@@ -398,7 +446,7 @@ class XPCOMInterface {
     if ($result != null) {
       return $result;
     }
-    return new XPCOMInterface($row[$prefix . 'id'], $row[$prefix . 'interface']);
+    return new XPCOMInterface($row, $prefix);
   }
 
   public static function getByName($name) {
@@ -461,47 +509,68 @@ class XPCOMInterface {
 }
 
 class InterfaceVersion {
-  public $id;
+  private $row;
+  private $prefix;
   private $versions;
   public $platform;
   public $name;
-  public $path;
-  public $line;
-  public $comment;
-  public $iid;
-  public $hash;
 
   private $members;
 
-  private function __construct($id, $versions, $platform, $name, $path, $line, $comment, $iid, $hash) {
-    $this->id = $id;
+  private function __construct($row, $versions, $platform, $name, $prefix = 'plat_ifaces.') {
+    $this->row = $row;
+    $this->prefix = $prefix;
     $this->versions = $versions;
     $this->platform = $platform;
     $this->name = $name;
-    $this->path = $path;
-    $this->line = $line;
-    $this->comment = $comment;
-    $this->iid = $iid;
-    $this->hash = $hash;
 
-    Cache::set('InterfaceVersion', $id, $this);
+    Cache::set('InterfaceVersion', $row[$prefix . 'id'], $this);
   }
 
   public function __toString() {
     return $this->name;
   }
 
+  public function __isset($name) {
+    switch ($name) {
+      case 'constants':
+      case 'attributes':
+      case 'methods':
+      case 'versions':
+      case 'sourceurl':
+      case 'noscript':
+      case 'scriptable':
+      case 'function':
+        return true;
+        break;
+    }
+    return isset($this->row[$this->prefix . $name]);
+  }
+
   public function __get($name) {
-    if ($name == 'constants' || $name == 'attributes' || $name == 'methods') {
-      return $this->getMembers($name);
+    switch ($name) {
+      case 'constants':
+      case 'attributes':
+      case 'methods':
+        return $this->getMembers($name);
+        break;
+      case 'versions':
+        return $this->versions->getVersions();
+        break;
+      case 'sourceurl':
+        return $this->platform->sourceurl . $this->path . '#' . $this->line;
+        break;
+      case 'noscript':
+        return ($this->flags & FLAG_NOSCRIPT) != 0;
+        break;
+      case 'scriptable':
+        return ($this->flags & FLAG_SCRIPTABLE) != 0;
+        break;
+      case 'function':
+        return ($this->flags & FLAG_FUNCTION) != 0;
+        break;
     }
-    if ($name == 'versions') {
-      return $this->versions->getVersions();
-    }
-    if ($name == 'sourceurl') {
-      return $this->platform->sourceurl . $this->path . '#' . $this->line;
-    }
-    return null;
+    return $this->row[$this->prefix . $name];
   }
 
   private function getMembers($name) {
@@ -537,15 +606,7 @@ class InterfaceVersion {
     if ($result != null) {
       return $result;
     }
-    return new InterfaceVersion($row[$prefix . 'id'],
-                                $versions,
-                                $platform,
-                                $name,
-                                $row[$prefix . 'path'],
-                                $row[$prefix . 'line'],
-                                $row[$prefix . 'comment'],
-                                $row[$prefix . 'iid'],
-                                $row[$prefix . 'hash']);
+    return new InterfaceVersion($row, $versions, $platform, $name, $prefix);
   }
 
   public static function getByNameAndPlatform($name, $platform) {
@@ -577,38 +638,38 @@ class InterfaceVersion {
 }
 
 class Member {
-  public $id;
+  private $row;
+  private $prefix;
   public $interface;
-  public $line;
-  public $comment;
-  public $type;
-  public $typeisif;
-  public $name;
-  public $hash;
 
   public function __construct($row, $interface, $prefix = 'members.') {
-    $this->id = $row[$prefix . 'id'];
+    $this->row = $row;
+    $this->prefix = $prefix;
     $this->interface = $interface;
-    $this->line = $row[$prefix . 'line'];
-    $this->comment = $row[$prefix . 'comment'];
-    $this->type = $row[$prefix . 'type'];
-    $this->name = $row[$prefix . 'name'];
-    $this->hash = $row[$prefix . 'hash'];
-    if (isset($row['interfaces.id']) && $row['interfaces.id'] != false) {
-      $this->typeisif = true;
-    }
-    else {
-      $this->typeisif = false;
-    }
 
-    Cache::set('Member', $this->id, $this);
+    Cache::set('Member', $row[$prefix . 'id'], $this);
+  }
+
+  public function __isset($name) {
+    switch ($name) {
+      case 'sourceurl':
+      case 'typeisif':
+        return true;
+        break;
+    }
+    return isset($this->row[$this->prefix . $name]);
   }
 
   public function __get($name) {
-    if ($name == 'sourceurl') {
-      return $this->interface->platform->sourceurl . $this->interface->path . '#' . $this->line;
+    switch ($name) {
+      case 'sourceurl':
+        return $this->interface->platform->sourceurl . $this->interface->path . '#' . $this->line;
+        break;
+      case 'typeisif':
+        return (isset($this->row['interfaces.id']) && $this->row['interfaces.id'] != false);
+        break;
     }
-    return null;
+    return $this->row[$this->prefix . $name];
   }
 
   public static function getOrCreate($row, $interface, $prefix = 'members.') {
@@ -631,29 +692,113 @@ class Member {
 }
 
 class Attribute extends Member {
-  public $readonly;
+  public function __isset($name) {
+    switch ($name) {
+      case 'attributes':
+      case 'readonly':
+      case 'noscript':
+      case 'notxpcom':
+        return true;
+        break;
+      case 'binaryname':
+        return $this->text != '';
+        break;
+    }
+    return parent::__get($name);
+  }
 
-  public function __construct($row, $interface, $prefix = 'members.') {
-    parent::__construct($row, $interface, $prefix);
-    $this->readonly = $row[$prefix . 'text'];
+  public function __get($name) {
+    switch ($name) {
+      case 'attributes':
+        $type = '';
+        if ($this->noscript) {
+          $type .= 'noscript, ';
+        }
+        if ($this->notxpcom) {
+          $type .= 'notxpcom, ';
+        }
+        if (isset($this->binaryname)) {
+          $type .= 'binaryname(' . $this->binaryname . '), ';
+        }
+        if ($type != '') {
+          $type = substr($type, 0, -2);
+        }
+        return $type;
+        break;
+      case 'readonly':
+        return ($this->flags & FLAG_READONLY) != 0;
+        break;
+      case 'noscript':
+        return ($this->flags & FLAG_NOSCRIPT) != 0;
+        break;
+      case 'notxpcom':
+        return ($this->flags & FLAG_NOTXPCOM) != 0;
+        break;
+      case 'binaryname':
+        return $this->text;
+        break;
+    }
+    return parent::__get($name);
   }
 }
 
 class Constant extends Member {
-  public $value;
-
-  public function __construct($row, $interface, $prefix = 'members.') {
-    parent::__construct($row, $interface, $prefix);
-    $this->value = $row[$prefix . 'text'];
+  public function __get($name) {
+    if ($name == 'value') {
+      return $this->text;
+    }
+    return parent::__get($name);
   }
 }
 
 class Method extends Member {
   private $params;
 
+  public function __isset($name) {
+    switch ($name) {
+      case 'attributes':
+      case 'params':
+      case 'noscript':
+      case 'notxpcom':
+        return true;
+        break;
+      case 'binaryname':
+        return $this->text != '';
+        break;
+    }
+    return parent::__get($name);
+  }
+
   public function __get($name) {
-    if ($name == 'params') {
-      return $this->getParameters();
+    switch ($name) {
+      case 'attributes':
+        $type = '';
+        if ($this->noscript) {
+          $type .= 'noscript, ';
+        }
+        if ($this->notxpcom) {
+          $type .= 'notxpcom, ';
+        }
+        if (isset($this->binaryname)) {
+          $type .= 'binaryname(' . $this->binaryname . '), ';
+        }
+        if ($type != '') {
+          $type = substr($type, 0, -2);
+        }
+        return $type;
+        break;
+      case 'params':
+        return $this->getParameters();
+        break;
+      case 'noscript':
+        return ($this->flags & FLAG_NOSCRIPT) != 0;
+        break;
+      case 'notxpcom':
+        return ($this->flags & FLAG_NOTXPCOM) != 0;
+        break;
+      case 'binaryname':
+        return $this->text;
+        break;
     }
     return parent::__get($name);
   }
@@ -675,21 +820,93 @@ class Method extends Member {
 }
 
 class Parameter {
+  private $prefix;
+  private $row;
   public $method;
-  public $type;
-  public $typeisif;
-  public $name;
 
   public function __construct($row, $method, $prefix = 'parameters.') {
+    $this->row = $row;
+    $this->prefix = $prefix;
     $this->method = $method;
-    $this->type = $row[$prefix . 'type'];
-    $this->name = $row[$prefix . 'name'];
-    if (isset($row['interfaces.id']) && $row['interfaces.id'] != false) {
-      $this->typeisif = true;
+  }
+
+  public function __isset($name) {
+    switch ($name) {
+      case 'attributes':
+      case 'typeisif':
+      case 'const':
+      case 'array':
+      case 'retval':
+      case 'shared':
+      case 'optional':
+        return true;
+        break;
+      case 'iid_is':
+        return $this->iidis != '';
+        break;
+      case 'size_is':
+        return $this->sizeis != '';
+        break;
     }
-    else {
-      $this->typeisif = false;
+    return isset($this->row[$this->prefix . $name]);
+  }
+
+  public function __get($name) {
+    switch ($name) {
+      case 'attributes':
+        $type = '';
+        if ($this->const) {
+          $type .= 'const, ';
+        }
+        if ($this->array) {
+          $type .= 'array, ';
+        }
+        if ($this->retval) {
+          $type .= 'retval, ';
+        }
+        if ($this->shared) {
+          $type .= 'shared, ';
+        }
+        if ($this->optional) {
+          $type .= 'optional, ';
+        }
+        if (isset($this->iid_is)) {
+          $type .= 'iid_is(' . $this->iid_is . '), ';
+        }
+        if (isset($this->size_is)) {
+          $type .= 'size_is(' . $this->size_is . '), ';
+        }
+        if ($type != '') {
+          $type = substr($type, 0, -2);
+        }
+        return $type;
+        break;
+      case 'typeisif':
+        return (isset($this->row['interfaces.id']) && $this->row['interfaces.id'] != false);
+        break;
+      case 'const':
+        return ($this->flags & FLAG_CONST) != 0;
+        break;
+      case 'array':
+        return ($this->flags & FLAG_ARRAY) != 0;
+        break;
+      case 'retval':
+        return ($this->flags & FLAG_RETVAL) != 0;
+        break;
+      case 'shared':
+        return ($this->flags & FLAG_SHARED) != 0;
+        break;
+      case 'optional':
+        return ($this->flags & FLAG_OPTIONAL) != 0;
+        break;
+      case 'iid_is':
+        return $this->iidis;
+        break;
+      case 'size_is':
+        return $this->sizeis;
+        break;
     }
+    return $this->row[$this->prefix . $name];
   }
 }
 
