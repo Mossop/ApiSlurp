@@ -178,7 +178,7 @@ class Slurp(object):
               flags += RETVAL if param.retval else 0
               flags += SHARED if param.shared else 0
               flags += OPTIONAL if param.optional else 0
-              memberhash.update(",%s %s %s %s" % (flags, param.size_is, param.iid_is, param.type))
+              memberhash.update(",%s %s %s %s %s" % (flags, param.size_is, param.iid_is, param.paramtype, param.type))
               c.execute('INSERT INTO parameters (member, pos, direction, type, name, flags, sizeis, iidis) VALUES (?,?,?,?,?,?,?,?)',
                         (mid, pos, param.paramtype, param.type, param.name, flags, param.size_is, param.iid_is))
               pos += 1
