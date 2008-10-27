@@ -4,7 +4,7 @@
   <h2>All Platforms</h2>
   <ul>
     {foreach from=$platforms item="item"}
-      <li><a href="{$ROOT}/platform/{$item->name}">{$item}</a></li>
+      <li><a href="{$ROOT}/platform/{$item->version}">{$item}</a></li>
     {/foreach}
   </ul>
   <h2>All Interfaces</h2>

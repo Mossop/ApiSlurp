@@ -5,7 +5,7 @@
   <ul>
     {foreach from=$platforms item="item"}
       {if $item->id ne $platform->id}
-        <li><a href="{$ROOT}/platform/{$item->name}">{$item}</a></li>
+        <li><a href="{$ROOT}/platform/{$item->version}">{$item}</a></li>
       {/if}
     {/foreach}
   </ul>
@@ -16,7 +16,7 @@
   <ul>
     {foreach from=$platforms item="item"}
       {if $item->id ne $platform->id}
-        <li><a href="{$ROOT}/compare/platform/{$item->name}/{$platform->name}">{$item}</a></li>
+        <li><a href="{$ROOT}/compare/platform/{$item->version}/{$platform->version}">{$item}</a></li>
       {/if}
     {/foreach}
   </ul>
@@ -28,7 +28,7 @@
   <h2>Interfaces</h2>
   <ul>
     {foreach from=$interfaces item="item"}
-      <li><a href="{$ROOT}/platform/{$platform->name}/interface/{$item->name}">{$item}</a></li>
+      <li><a href="{$ROOT}/platform/{$platform->version}/interface/{$item->name}">{$item}</a></li>
     {/foreach}
   </ul>
 </div>

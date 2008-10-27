@@ -10,30 +10,30 @@
 
 <div class="body">
   <h1>Comparing platform
-      <a href="{$ROOT}/platform/{$platform1.name}">{$diff->left}</a> to platform
-      <a href="{$ROOT}/platform/{$platform2.name}">{$diff->right}</a></h1>
+      <a href="{$ROOT}/platform/{$platform1->version}">{$diff->left}</a> to platform
+      <a href="{$ROOT}/platform/{$platform2->version}">{$diff->right}</a></h1>
   <h2><a name="removed">Removed Interfaces</a></h2>
   <ul>
     {foreach from=$diff->removed item="item"}
-      <li><a href="{$ROOT}/platform/{$diff->left}/interface/{$item->name}">{$item}</a></li>
+      <li><a href="{$ROOT}/platform/{$diff->left->version}/interface/{$item->name}">{$item}</a></li>
     {/foreach}
   </ul>
   <h2><a name="added">Added Interfaces</a></h2>
   <ul>
     {foreach from=$diff->added item="item"}
-      <li><a href="{$ROOT}/platform/{$diff->right}/interface/{$item->name}">{$item}</a></li>
+      <li><a href="{$ROOT}/platform/{$diff->right->version}/interface/{$item->name}">{$item}</a></li>
     {/foreach}
   </ul>
   <h2><a name="modified">Modified Interfaces</a></h2>
   <ul>
     {foreach from=$diff->modified item="item"}
-      <li><a href="{$ROOT}/compare/interface/{$item->name}/{$diff->left}/{$diff->right}">{$item}</a></li>
+      <li><a href="{$ROOT}/compare/interface/{$item->name}/{$diff->left->version}/{$diff->right->version}">{$item}</a></li>
     {/foreach}
   </ul>
   <h2><a name="matching">Unchanged Interfaces</a></h2>
   <ul>
     {foreach from=$diff->unchanged item="item"}
-      <li><a href="{$ROOT}/platform/{$diff->left}/interface/{$item->name}">{$item}</a></li>
+      <li><a href="{$ROOT}/platform/{$diff->right->version}/interface/{$item->name}">{$item}</a></li>
     {/foreach}
   </ul>
 </div>

@@ -1,5 +1,17 @@
 <?php
 
+define('FLAG_NOSCRIPT',  1);
+define('FLAG_NOTXPCOM', 2);
+define('FLAG_READONLY', 4);
+define('FLAG_SCRIPTABLE', 8);
+define('FLAG_FUNCTION', 16);
+
+define('FLAG_CONST', 1);
+define('FLAG_ARRAY', 2);
+define('FLAG_RETVAL', 4);
+define('FLAG_SHARED', 8);
+define('FLAG_OPTIONAL', 16);
+
 class VersionComparator {
   /**
    * Parse a version part. 
@@ -262,22 +274,30 @@ class Cache {
 }
 
 class Platform {
-  public $id;
-  public $name;
-  public $version;
-  public $sourceurl;
+  private $row;
+  private $prefix;
 
-  private function __construct($id, $name, $version, $sourceurl) {
-    $this->id = $id;
-    $this->name = $name;
-    $this->version = $version;
-    $this->sourceurl = $sourceurl;
+  private function __construct($row, $prefix = 'platforms.') {
+    $this->row = $row;
+    $this->prefix = $prefix;
 
-    Cache::set('Platform', $id, $this);
+    Cache::set('Platform', $row[$prefix . 'id'], $this);
   }
 
   public function __toString() {
     return $this->name;
+  }
+
+  public function __isset($name) {
+    return isset($this->row[$this->prefix . $name]);
+  }
+
+  public function __get($name) {
+    return $this->row[$this->prefix . $name];
+  }
+
+  public function getSourceURL($path, $line) {
+    return str_replace(array('%p', '%l'), array($path, $line), $this->sourceurl);
   }
 
   public function getInterfaces() {
@@ -286,7 +306,7 @@ class Platform {
     $interfaces = array();
     $rows = $db->arrayQuery('SELECT plat_ifaces.*,interfaces.* FROM plat_ifaces JOIN '.
                             'interfaces ON interfaces.id=plat_ifaces.interface WHERE platform='.
-                            $this->id . ' ORDER BY interfaces.interface');
+                            $this->id . ' ORDER BY interfaces.name');
     foreach ($rows as $row) {
       $interface = XPCOMInterface::getOrCreate($row);
       array_push($interfaces, InterfaceVersion::getOrCreate($row,
@@ -302,16 +322,13 @@ class Platform {
     if ($result != null) {
       return $result;
     }
-    return new Platform($row[$prefix . 'id'],
-                        $row[$prefix . 'platform'],
-                        $row[$prefix . 'platform'],
-                        $row[$prefix . 'url']);
+    return new Platform($row, $prefix);
   }
 
-  public static function getByName($name) {
+  public static function getByVersion($name) {
     global $db;
 
-    $row = $db->rowQuery('SELECT platforms.* FROM platforms WHERE platform="' . $db->escape($name) . '"');
+    $row = $db->rowQuery('SELECT platforms.* FROM platforms WHERE version="' . $db->escape($name) . '"');
     if ($row === false) {
       return null;
     }
@@ -331,19 +348,32 @@ class Platform {
 }
 
 class XPCOMInterface {
-  public $id;
-  public $name;
+  private $row;
+  private $prefix;
   private $versions;
 
-  private function __construct($id, $name) {
-    $this->id = $id;
-    $this->name = $name;
+  private function __construct($row, $prefix = 'interfaces.') {
+    $this->row = $row;
+    $this->prefix = $prefix;
 
-    Cache::set('XPCOMInterface', $id, $this);
+    Cache::set('XPCOMInterface', $row[$prefix . 'id'], $this);
   }
 
   public function __toString() {
     return $this->name;
+  }
+
+  public function __isset($name) {
+    switch ($name) {
+      case 'versions':
+        return true;
+      case 'oldest':
+      case 'newest':
+        $version = $this->getVersions();
+        return count($versions) > 0;
+        break;
+    }
+    return isset($this->row[$this->prefix . $name]);
   }
 
   public function __get($name) {
@@ -358,7 +388,7 @@ class XPCOMInterface {
         return $this->getNewestVersion();
         break;
     }
-    return null;
+    return $this->row[$this->prefix . $name];
   }
 
   public function getVersions() {
@@ -398,7 +428,7 @@ class XPCOMInterface {
     if ($result != null) {
       return $result;
     }
-    return new XPCOMInterface($row[$prefix . 'id'], $row[$prefix . 'interface']);
+    return new XPCOMInterface($row, $prefix);
   }
 
   public static function getByName($name) {
@@ -407,7 +437,7 @@ class XPCOMInterface {
     $versions = array();
     $rows = $db->arrayQuery('SELECT interfaces.*, plat_ifaces.*, platforms.* '.
                             'FROM plat_ifaces JOIN interfaces ON plat_ifaces.interface=interfaces.id '.
-                            'JOIN platforms ON plat_ifaces.platform=platforms.id WHERE interfaces.interface="' . $db->escape($name) . '"');
+                            'JOIN platforms ON plat_ifaces.platform=platforms.id WHERE interfaces.name="' . $db->escape($name) . '"');
     if ($rows === false || count($rows) == 0) {
       return null;
     }
@@ -429,15 +459,42 @@ class XPCOMInterface {
     return $interface;
   }
 
+  public static function searchForName($string) {
+    global $db;
+
+    $versions = array();
+    $rows = $db->arrayQuery('SELECT interfaces.*, plat_ifaces.*, platforms.* '.
+                            'FROM plat_ifaces JOIN interfaces ON plat_ifaces.interface=interfaces.id '.
+                            'JOIN platforms ON plat_ifaces.platform=platforms.id '.
+                            'WHERE interfaces.name LIKE "%' . $db->escape($string) . '%"');
+
+    $interfaces = array();
+    foreach ($rows as $row) {
+      $interface = Cache::get('XPCOMInterface', $row['interfaces.id']);
+      if ($interface == null) {
+        $interface = self::getOrCreate($row);
+        array_push($interfaces, $interface);
+      }
+      if (!isset($interface->versions)) {
+        $interface->versions = array();
+      }
+      $platform = Platform::getOrCreate($row);
+      array_push($interface->versions, InterfaceVersion::getOrCreate($row,
+                                                                     $interface,
+                                                                     $platform,
+                                                                     $interface->name));
+      usort($interface->versions, 'interfaceversion_compare');
+    }
+    return $interfaces;
+  }
+
   public static function getAllInterfaces() {
     global $db;
 
     $versions = array();
     $rows = $db->arrayQuery('SELECT interfaces.*, plat_ifaces.*, platforms.* '.
                             'FROM plat_ifaces JOIN interfaces ON plat_ifaces.interface=interfaces.id '.
-                            'JOIN platforms ON plat_ifaces.platform=platforms.id ORDER BY interfaces.interface');
-
-    $interface = self::getOrCreate($rows[0]);
+                            'JOIN platforms ON plat_ifaces.platform=platforms.id ORDER BY interfaces.name');
 
     $interfaces = array();
     foreach ($rows as $row) {
@@ -461,47 +518,68 @@ class XPCOMInterface {
 }
 
 class InterfaceVersion {
-  public $id;
+  private $row;
+  private $prefix;
   private $versions;
   public $platform;
   public $name;
-  public $path;
-  public $line;
-  public $comment;
-  public $iid;
-  public $hash;
 
   private $members;
 
-  private function __construct($id, $versions, $platform, $name, $path, $line, $comment, $iid, $hash) {
-    $this->id = $id;
+  private function __construct($row, $versions, $platform, $name, $prefix = 'plat_ifaces.') {
+    $this->row = $row;
+    $this->prefix = $prefix;
     $this->versions = $versions;
     $this->platform = $platform;
     $this->name = $name;
-    $this->path = $path;
-    $this->line = $line;
-    $this->comment = $comment;
-    $this->iid = $iid;
-    $this->hash = $hash;
 
-    Cache::set('InterfaceVersion', $id, $this);
+    Cache::set('InterfaceVersion', $row[$prefix . 'id'], $this);
   }
 
   public function __toString() {
     return $this->name;
   }
 
+  public function __isset($name) {
+    switch ($name) {
+      case 'constants':
+      case 'attributes':
+      case 'methods':
+      case 'versions':
+      case 'sourceurl':
+      case 'noscript':
+      case 'scriptable':
+      case 'function':
+        return true;
+        break;
+    }
+    return isset($this->row[$this->prefix . $name]);
+  }
+
   public function __get($name) {
-    if ($name == 'constants' || $name == 'attributes' || $name == 'methods') {
-      return $this->getMembers($name);
+    switch ($name) {
+      case 'constants':
+      case 'attributes':
+      case 'methods':
+        return $this->getMembers($name);
+        break;
+      case 'versions':
+        return $this->versions->getVersions();
+        break;
+      case 'sourceurl':
+        return $this->platform->getSourceURL($this->path, $this->line);
+        break;
+      case 'noscript':
+        return ($this->flags & FLAG_NOSCRIPT) != 0;
+        break;
+      case 'scriptable':
+        return ($this->flags & FLAG_SCRIPTABLE) != 0;
+        break;
+      case 'function':
+        return ($this->flags & FLAG_FUNCTION) != 0;
+        break;
     }
-    if ($name == 'versions') {
-      return $this->versions->getVersions();
-    }
-    if ($name == 'sourceurl') {
-      return $this->platform->sourceurl . $this->path . '#' . $this->line;
-    }
-    return null;
+    return $this->row[$this->prefix . $name];
   }
 
   private function getMembers($name) {
@@ -510,7 +588,7 @@ class InterfaceVersion {
     if (!isset($this->members)) {
       $this->members = array('constants' => array(), 'attributes' => array(), 'methods' => array());
       $rows = $db->arrayQuery('SELECT members.*,interfaces.id FROM '.
-                              'members LEFT JOIN interfaces ON members.type=interfaces.interface '.
+                              'members LEFT JOIN interfaces ON members.type=interfaces.name '.
                               'WHERE pint=' . $this->id);
       foreach ($rows as $row) {
         $member = Method::getOrCreate($row, $this);
@@ -537,15 +615,7 @@ class InterfaceVersion {
     if ($result != null) {
       return $result;
     }
-    return new InterfaceVersion($row[$prefix . 'id'],
-                                $versions,
-                                $platform,
-                                $name,
-                                $row[$prefix . 'path'],
-                                $row[$prefix . 'line'],
-                                $row[$prefix . 'comment'],
-                                $row[$prefix . 'iid'],
-                                $row[$prefix . 'hash']);
+    return new InterfaceVersion($row, $versions, $platform, $name, $prefix);
   }
 
   public static function getByNameAndPlatform($name, $platform) {
@@ -553,7 +623,7 @@ class InterfaceVersion {
 
     if ($platform instanceof Platform) {
       $row = $db->rowQuery('SELECT plat_ifaces.*,interfaces.* FROM plat_ifaces JOIN interfaces ON plat_ifaces.interface=interfaces.id '.
-                           'WHERE plat_ifaces.platform=' . $platform->id . ' AND interfaces.interface="' . $db->escape($name) . '"');
+                           'WHERE plat_ifaces.platform=' . $platform->id . ' AND interfaces.name="' . $db->escape($name) . '"');
       if ($row === false) {
         return null;
       }
@@ -562,7 +632,7 @@ class InterfaceVersion {
       $row = $db->rowQuery('SELECT plat_ifaces.*, interfaces.*, platforms.* '.
                            'FROM plat_ifaces JOIN interfaces ON plat_ifaces.interface=interfaces.id '.
                            'JOIN platforms ON plat_ifaces.platform=platforms.id WHERE '.
-                           'platforms.platform="' . $db->escape($platform) . '" AND interfaces.interface="' . $db->escape($name) . '"');
+                           'platforms.version="' . $db->escape($platform) . '" AND interfaces.name="' . $db->escape($name) . '"');
       if ($row === false) {
         return null;
       }
@@ -577,38 +647,38 @@ class InterfaceVersion {
 }
 
 class Member {
-  public $id;
+  private $row;
+  private $prefix;
   public $interface;
-  public $line;
-  public $comment;
-  public $type;
-  public $typeisif;
-  public $name;
-  public $hash;
 
   public function __construct($row, $interface, $prefix = 'members.') {
-    $this->id = $row[$prefix . 'id'];
+    $this->row = $row;
+    $this->prefix = $prefix;
     $this->interface = $interface;
-    $this->line = $row[$prefix . 'line'];
-    $this->comment = $row[$prefix . 'comment'];
-    $this->type = $row[$prefix . 'type'];
-    $this->name = $row[$prefix . 'name'];
-    $this->hash = $row[$prefix . 'hash'];
-    if (isset($row['interfaces.id']) && $row['interfaces.id'] != false) {
-      $this->typeisif = true;
-    }
-    else {
-      $this->typeisif = false;
-    }
 
-    Cache::set('Member', $this->id, $this);
+    Cache::set('Member', $row[$prefix . 'id'], $this);
+  }
+
+  public function __isset($name) {
+    switch ($name) {
+      case 'sourceurl':
+      case 'typeisif':
+        return true;
+        break;
+    }
+    return isset($this->row[$this->prefix . $name]);
   }
 
   public function __get($name) {
-    if ($name == 'sourceurl') {
-      return $this->interface->platform->sourceurl . $this->interface->path . '#' . $this->line;
+    switch ($name) {
+      case 'sourceurl':
+        return $this->interface->platform->getSourceURL($this->interface->path, $this->line);
+        break;
+      case 'typeisif':
+        return (isset($this->row['interfaces.id']) && $this->row['interfaces.id'] != false);
+        break;
     }
-    return null;
+    return $this->row[$this->prefix . $name];
   }
 
   public static function getOrCreate($row, $interface, $prefix = 'members.') {
@@ -631,29 +701,113 @@ class Member {
 }
 
 class Attribute extends Member {
-  public $readonly;
+  public function __isset($name) {
+    switch ($name) {
+      case 'attributes':
+      case 'readonly':
+      case 'noscript':
+      case 'notxpcom':
+        return true;
+        break;
+      case 'binaryname':
+        return $this->text != '';
+        break;
+    }
+    return parent::__get($name);
+  }
 
-  public function __construct($row, $interface, $prefix = 'members.') {
-    parent::__construct($row, $interface, $prefix);
-    $this->readonly = $row[$prefix . 'text'];
+  public function __get($name) {
+    switch ($name) {
+      case 'attributes':
+        $type = '';
+        if ($this->noscript) {
+          $type .= 'noscript, ';
+        }
+        if ($this->notxpcom) {
+          $type .= 'notxpcom, ';
+        }
+        if (isset($this->binaryname)) {
+          $type .= 'binaryname(' . $this->binaryname . '), ';
+        }
+        if ($type != '') {
+          $type = substr($type, 0, -2);
+        }
+        return $type;
+        break;
+      case 'readonly':
+        return ($this->flags & FLAG_READONLY) != 0;
+        break;
+      case 'noscript':
+        return ($this->flags & FLAG_NOSCRIPT) != 0;
+        break;
+      case 'notxpcom':
+        return ($this->flags & FLAG_NOTXPCOM) != 0;
+        break;
+      case 'binaryname':
+        return $this->text;
+        break;
+    }
+    return parent::__get($name);
   }
 }
 
 class Constant extends Member {
-  public $value;
-
-  public function __construct($row, $interface, $prefix = 'members.') {
-    parent::__construct($row, $interface, $prefix);
-    $this->value = $row[$prefix . 'text'];
+  public function __get($name) {
+    if ($name == 'value') {
+      return $this->text;
+    }
+    return parent::__get($name);
   }
 }
 
 class Method extends Member {
   private $params;
 
+  public function __isset($name) {
+    switch ($name) {
+      case 'attributes':
+      case 'params':
+      case 'noscript':
+      case 'notxpcom':
+        return true;
+        break;
+      case 'binaryname':
+        return $this->text != '';
+        break;
+    }
+    return parent::__get($name);
+  }
+
   public function __get($name) {
-    if ($name == 'params') {
-      return $this->getParameters();
+    switch ($name) {
+      case 'attributes':
+        $type = '';
+        if ($this->noscript) {
+          $type .= 'noscript, ';
+        }
+        if ($this->notxpcom) {
+          $type .= 'notxpcom, ';
+        }
+        if (isset($this->binaryname)) {
+          $type .= 'binaryname(' . $this->binaryname . '), ';
+        }
+        if ($type != '') {
+          $type = substr($type, 0, -2);
+        }
+        return $type;
+        break;
+      case 'params':
+        return $this->getParameters();
+        break;
+      case 'noscript':
+        return ($this->flags & FLAG_NOSCRIPT) != 0;
+        break;
+      case 'notxpcom':
+        return ($this->flags & FLAG_NOTXPCOM) != 0;
+        break;
+      case 'binaryname':
+        return $this->text;
+        break;
     }
     return parent::__get($name);
   }
@@ -664,7 +818,7 @@ class Method extends Member {
     if (!isset($this->params)) {
       $this->params = array();
       $rows = $db->arrayQuery('SELECT parameters.*,interfaces.id FROM '.
-                              'parameters LEFT JOIN interfaces ON parameters.type=interfaces.interface '.
+                              'parameters LEFT JOIN interfaces ON parameters.type=interfaces.name '.
                               'WHERE member=' . $this->id . ' ORDER BY parameters.pos');
       foreach ($rows as $row) {
         array_push($this->params, new Parameter($row, $this));
@@ -675,21 +829,93 @@ class Method extends Member {
 }
 
 class Parameter {
+  private $prefix;
+  private $row;
   public $method;
-  public $type;
-  public $typeisif;
-  public $name;
 
   public function __construct($row, $method, $prefix = 'parameters.') {
+    $this->row = $row;
+    $this->prefix = $prefix;
     $this->method = $method;
-    $this->type = $row[$prefix . 'type'];
-    $this->name = $row[$prefix . 'name'];
-    if (isset($row['interfaces.id']) && $row['interfaces.id'] != false) {
-      $this->typeisif = true;
+  }
+
+  public function __isset($name) {
+    switch ($name) {
+      case 'attributes':
+      case 'typeisif':
+      case 'const':
+      case 'array':
+      case 'retval':
+      case 'shared':
+      case 'optional':
+        return true;
+        break;
+      case 'iid_is':
+        return $this->iidis != '';
+        break;
+      case 'size_is':
+        return $this->sizeis != '';
+        break;
     }
-    else {
-      $this->typeisif = false;
+    return isset($this->row[$this->prefix . $name]);
+  }
+
+  public function __get($name) {
+    switch ($name) {
+      case 'attributes':
+        $type = '';
+        if ($this->const) {
+          $type .= 'const, ';
+        }
+        if ($this->array) {
+          $type .= 'array, ';
+        }
+        if ($this->retval) {
+          $type .= 'retval, ';
+        }
+        if ($this->shared) {
+          $type .= 'shared, ';
+        }
+        if ($this->optional) {
+          $type .= 'optional, ';
+        }
+        if (isset($this->iid_is)) {
+          $type .= 'iid_is(' . $this->iid_is . '), ';
+        }
+        if (isset($this->size_is)) {
+          $type .= 'size_is(' . $this->size_is . '), ';
+        }
+        if ($type != '') {
+          $type = substr($type, 0, -2);
+        }
+        return $type;
+        break;
+      case 'typeisif':
+        return (isset($this->row['interfaces.id']) && $this->row['interfaces.id'] != false);
+        break;
+      case 'const':
+        return ($this->flags & FLAG_CONST) != 0;
+        break;
+      case 'array':
+        return ($this->flags & FLAG_ARRAY) != 0;
+        break;
+      case 'retval':
+        return ($this->flags & FLAG_RETVAL) != 0;
+        break;
+      case 'shared':
+        return ($this->flags & FLAG_SHARED) != 0;
+        break;
+      case 'optional':
+        return ($this->flags & FLAG_OPTIONAL) != 0;
+        break;
+      case 'iid_is':
+        return $this->iidis;
+        break;
+      case 'size_is':
+        return $this->sizeis;
+        break;
     }
+    return $this->row[$this->prefix . $name];
   }
 }
 
@@ -709,36 +935,36 @@ class PlatformDiff {
     $this->left = $left;
     $this->right = $right;
 
-    $rows = $db->arrayQuery('SELECT interfaces.id, interfaces.interface FROM '.
+    $rows = $db->arrayQuery('SELECT interfaces.* FROM '.
                             '(SELECT * FROM plat_ifaces WHERE platform=' . $right->id .') AS pi1 '.
                             'LEFT JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $left->id . ') AS pi2 '.
                             'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id '.
-                            'WHERE pi2.platform IS NULL ORDER BY interfaces.interface');
+                            'WHERE pi2.platform IS NULL ORDER BY interfaces.name');
     foreach ($rows as $row) {
       array_push($this->added, XPCOMInterface::getOrCreate($row));
     }
 
-    $rows = $db->arrayQuery('SELECT interfaces.id, interfaces.interface FROM '.
+    $rows = $db->arrayQuery('SELECT interfaces.* FROM '.
                             '(SELECT * FROM plat_ifaces WHERE platform=' . $left->id .') AS pi1 '.
                             'LEFT JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $right->id . ') AS pi2 '.
                             'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id '.
-                            'WHERE pi2.platform IS NULL ORDER BY interfaces.interface');
+                            'WHERE pi2.platform IS NULL ORDER BY interfaces.name');
     foreach ($rows as $row) {
       array_push($this->removed, XPCOMInterface::getOrCreate($row));
     }
 
-    $rows = $db->arrayQuery('SELECT interfaces.id, interfaces.interface FROM '.
+    $rows = $db->arrayQuery('SELECT interfaces.* FROM '.
                             '(SELECT * FROM plat_ifaces WHERE platform=' . $left->id .') AS pi1 '.
                             'JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $right->id . ') AS pi2 '.
-                            'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id WHERE pi1.hash=pi2.hash ORDER BY interfaces.interface');
+                            'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id WHERE pi1.hash=pi2.hash ORDER BY interfaces.name');
     foreach ($rows as $row) {
       array_push($this->unchanged, XPCOMInterface::getOrCreate($row));
     }
 
-    $rows = $db->arrayQuery('SELECT interfaces.id, interfaces.interface FROM '.
+    $rows = $db->arrayQuery('SELECT interfaces.* FROM '.
                             '(SELECT * FROM plat_ifaces WHERE platform=' . $left->id .') AS pi1 '.
                             'JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $right->id . ') AS pi2 '.
-                            'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id WHERE pi1.hash<>pi2.hash ORDER BY interfaces.interface');
+                            'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id WHERE pi1.hash<>pi2.hash ORDER BY interfaces.name');
     foreach ($rows as $row) {
       array_push($this->modified, XPCOMInterface::getOrCreate($row));
     }

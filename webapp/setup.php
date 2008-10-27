@@ -20,6 +20,13 @@ function error($title, $text) {
   exit;
 }
 
+function redirect($path) {
+  global $webroot;
+
+  header('Location: http://' . $_SERVER['HTTP_HOST'] . '/' . $webroot . $path);
+  exit;
+}
+
 $smarty = new APISmarty();
 $smarty->assign('ROOT', $webroot);
 
