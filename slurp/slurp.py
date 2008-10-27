@@ -58,13 +58,13 @@ class Slurp(object):
   parser = None
   dbc = None
   
-  def __init__(self, platform, url, cachedir, db, idldir):
+  def __init__(self, platname, platversion, url, sourceurl, cachedir, db, idldir):
     self.idldirs = self.__buildPath(idldir)
     self.parser = xpidl.IDLParser(cachedir)
     if os.path.isfile(db):
-      self.__addPlatform(db, platform, url)
+      self.__addPlatform(db, platname, platversion, url, sourceurl)
     else:
-      self.__createDatabase(db, platform, url)
+      self.__createDatabase(db, platname, platversion, url, sourceurl)
 
   def __buildPath(self, dir):
     path = []
@@ -73,11 +73,11 @@ class Slurp(object):
         path.append(root)
     return path
 
-  def __createDatabase(self, db, platform, url):
+  def __createDatabase(self, db, platname, platversion, url, sourceurl):
     self.dbc = sqlite3.connect(db)
     c = self.dbc.cursor()
-    c.execute('CREATE TABLE platforms (id INTEGER PRIMARY KEY AUTOINCREMENT, platform TEXT UNIQUE, url TEXT)')
-    c.execute('CREATE TABLE interfaces (id INTEGER PRIMARY KEY AUTOINCREMENT, interface TEXT UNIQUE)')
+    c.execute('CREATE TABLE platforms (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, version TEXT UNIQUE, url TEXT, sourceurl TEXT)')
+    c.execute('CREATE TABLE interfaces (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE)')
     c.execute('CREATE TABLE plat_ifaces (id INTEGER PRIMARY KEY AUTOINCREMENT, platform INTEGER, interface INTEGER, base TEXT, flags INTEGER, iid TEXT, comment TEXT, path TEXT, line INTEGER, hash TEXT)')
     c.execute('CREATE INDEX pi_plat ON plat_ifaces (platform)');
     c.execute('CREATE UNIQUE INDEX pi_id ON plat_ifaces (platform, interface)');
@@ -85,19 +85,21 @@ class Slurp(object):
     c.execute('CREATE UNIQUE INDEX mem_id ON members (pint, name)');
     c.execute('CREATE TABLE parameters (member INTEGER, pos INTEGER, type TEXT, name TEXT, flags INTEGER, sizeis TEXT, iidis TEXT)')
     c.execute('CREATE UNIQUE INDEX param_idx ON parameters (member, pos)');
-    c.execute('INSERT INTO platforms (platform, url) VALUES (?,?)', (platform,url))
+    c.execute('INSERT INTO platforms (name, version, url, sourceurl) VALUES (?,?,?,?)',
+              (platname, platversion, url, sourceurl))
     self.platform = c.lastrowid
     self.dbc.commit()
     c.close()
 
 
-  def __addPlatform(self, db, platform, url):
+  def __addPlatform(self, db, platname, platversion, url, sourceurl):
     self.dbc = sqlite3.connect(db)
     c = self.dbc.cursor()
-    c.execute('SELECT id FROM platforms WHERE platform=?', (platform,))
+    c.execute('SELECT id FROM platforms WHERE version=?', (platversion,))
     pl = c.fetchone()
     if pl is None:
-      c.execute('INSERT INTO platforms (platform, url) VALUES (?,?)', (platform,url))
+      c.execute('INSERT INTO platforms (name, version, url, sourceurl) VALUES (?,?,?,?)',
+                (platname, platversion, url, sourceurl))
       self.platform = c.lastrowid
     else:
       self.platform = pl[0]
@@ -114,10 +116,10 @@ class Slurp(object):
 
   def __addInterface(self, interface, path):
     c = self.dbc.cursor()
-    c.execute('SELECT id from interfaces WHERE interface=?', (interface.name,))
+    c.execute('SELECT id from interfaces WHERE name=?', (interface.name,))
     id = c.fetchone()
     if id is None:
-      c.execute('INSERT INTO interfaces (interface) VALUES (?)', (interface.name,))
+      c.execute('INSERT INTO interfaces (name) VALUES (?)', (interface.name,))
       id = c.lastrowid
     else:
       id = id[0]
@@ -194,21 +196,21 @@ class Slurp(object):
         self.slurpFile(fullpath, fullpath[len(dir) + 1:])
 
 def displayUsage():
-  print "Usage: slurp.py <platform> <source url> <cache dir> <database> <idl path>"
+  print "Usage: slurp.py <platform name> <platform version> <platform url> <source url> <cache dir> <database> <idl path>"
 
 if __name__ == '__main__':
-  if len(sys.argv) < 6:
-    displayUsage()
-    sys.exit()
-  if not os.path.isdir(sys.argv[3]):
+  if len(sys.argv) < 8:
     displayUsage()
     sys.exit()
   if not os.path.isdir(sys.argv[5]):
     displayUsage()
     sys.exit()
-  s = Slurp(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
-  if len(sys.argv) > 6:
-    fullpath = sys.argv[6]
-    s.slurpFile(fullpath, fullpath[len(sys.argv[5]) + 1:])
+  if not os.path.isdir(sys.argv[7]):
+    displayUsage()
+    sys.exit()
+  s = Slurp(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7])
+  if len(sys.argv) > 8:
+    fullpath = sys.argv[8]
+    s.slurpFile(fullpath, fullpath[len(sys.argv[7]) + 1:])
   else:
-    s.slurpFiles(sys.argv[5])
+    s.slurpFiles(sys.argv[7])
