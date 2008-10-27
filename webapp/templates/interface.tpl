@@ -4,7 +4,7 @@
   <h2>Appears in:</h2>
   <ul>
     {foreach from=$interface->versions item="item"}
-      <li><a href="{$ROOT}/platform/{$item->platform->name}/interface/{$interface->name}">{$item->platform}</a></li>
+      <li><a href="{$ROOT}/platform/{$item->platform->version}/interface/{$interface->name}">{$item->platform}</a></li>
     {/foreach}
   </ul>
 </div>
@@ -14,7 +14,7 @@
   <ul>
     {foreach from=$interface->versions item="item"}
       {if $item->hash ne $interface->hash}
-        <li><a href="{$ROOT}/compare/interface/{$interface->name}/{$item->platform->name}/{$interface->platform->name}">{$item->platform}</a></li>
+        <li><a href="{$ROOT}/compare/interface/{$interface->name}/{$item->platform->version}/{$interface->platform->version}">{$item->platform}</a></li>
       {/if}
     {/foreach}
   </ul>
@@ -30,7 +30,7 @@
 </div>
 
 <div class="body">
-  <h1>{$interface} Interface (from platform <a href="{$ROOT}/platform/{$platform->name}">{$platform}</a>) - <a href="{$interface->sourceurl}">Source</a></h1>
+  <h1>{$interface} Interface (from platform <a href="{$ROOT}/platform/{$platform->version}">{$platform}</a>) - <a href="{$interface->sourceurl}">Source</a></h1>
   <div class="code">
     <pre class="comment">{$interface->comment}</pre>
     {include file="includes/interface.tpl" interface=$interface}

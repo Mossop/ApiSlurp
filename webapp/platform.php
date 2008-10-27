@@ -5,7 +5,7 @@ if (!isset($_GET['platform'])) {
   error('Invalid Request', 'This URL is malformed');
 }
 
-$platform = Platform::getByName($_GET['platform']);
+$platform = Platform::getByVersion($_GET['platform']);
 
 if ($platform == null) {
   error('Unknown Platform', 'The platform ' . $_GET['platform'] . ' does not exist in the database.');

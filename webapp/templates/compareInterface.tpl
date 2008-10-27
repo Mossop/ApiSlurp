@@ -15,10 +15,10 @@ function toggleVisible() {ldelim}
       </td>
     </tr>
     <tr>
-      <td class="before"><h2><a href="{$ROOT}/platform/{$diff->left->platform->name}/interface/{$diff->left->name}">{$diff->left->platform}</a> - 
-                             <a href="{$diff->left->platform->sourceurl}{$diff->left->path}">Source</a></h2></td>
-      <td class="after"><h2><a href="{$ROOT}/platform/{$diff->right->platform->name}/interface/{$diff->right->name}">{$diff->right->platform->name}</a> - 
-                             <a href="{$diff->right->platform->sourceurl}{$diff->right->path}">Source</a></h2></td>
+      <td class="before"><h2><a href="{$ROOT}/platform/{$diff->left->platform->version}/interface/{$diff->left->name}">{$diff->left->platform}</a> - 
+                             <a href="{$diff->left->sourceurl}">Source</a></h2></td>
+      <td class="after"><h2><a href="{$ROOT}/platform/{$diff->right->platform->version}/interface/{$diff->right->name}">{$diff->right->platform}</a> - 
+                             <a href="{$diff->right->sourceurl}">Source</a></h2></td>
     </tr>
     <tr class="commentrow">
       <td class="before">
