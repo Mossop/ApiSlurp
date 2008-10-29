@@ -985,25 +985,59 @@ class InterfaceDiff {
     $this->left = $left;
     $this->right = $right;
 
-    $this->constants = $this->getMemberPairs($left->constants, $right->constants, 'member_line_compare');
-    $this->attributes = $this->getMemberPairs($left->attributes, $right->attributes, 'member_name_compare');
-    $this->methods = $this->getMemberPairs($left->methods, $right->methods, 'member_name_compare');
+    $this->constants = $this->getLineMemberPairs($left->constants, $right->constants);
+    $this->attributes = $this->getNameMemberPairs($left->attributes, $right->attributes);
+    $this->methods = $this->getNameMemberPairs($left->methods, $right->methods);
   }
 
-  private function getMemberPairs($left, $right, $compare) {
+  private function getLineMemberPairs($left, $right) {
+    $pairs = array();
+
+    $names = array();
+    $pos = 0;
+    while ($pos < count($left)) {
+      $names[$left[$pos]->name] = $pos;
+      $pos++;
+    }
+
+    $r = reset($right);
+    while ($r !== false) {
+      if (isset($names[$r->name])) {
+        array_push($pairs, new MemberPair($left[$names[$r->name]], $r));
+        unset($left[$names[$r->name]]);
+      }
+      else {
+        array_push($pairs, new MemberPair(null, $r));
+      }
+      $r = next($right);
+    }
+
+    $l = reset($left);
+    while ($l !== false) {
+      $pos = 0;
+      while (($pos < count($pairs)) && (($pairs[$pos]->left == null) ||
+                                        ($pairs[$pos]->left->line < $l->line))) {
+        
+        $pos++;
+      }
+      array_splice($pairs, $pos, 0, array(new MemberPair($l, null)));
+      $l = next($left);
+    }
+
+    return $pairs;
+  }
+
+  private function getNameMemberPairs($left, $right) {
     $pairs = array();
     $l = reset($left);
     $r = reset($right);
 
     while ($l !== false || $r !== false) {
-      if ($l !== false && $r !== false) {
-        $dif = $compare($l, $r);
-      }
-      if ($dif < 0 || $r === false) {
+      if ($r === false || $l->name < $r->name) {
         array_push($pairs, new MemberPair($l, null));
         $l = next($left);
       }
-      else if ($dif > 0 || $l === false) {
+      else if ($l === false || $r->name < $l->name) {
         array_push($pairs, new MemberPair(null, $r));
         $r = next($right);
       }
