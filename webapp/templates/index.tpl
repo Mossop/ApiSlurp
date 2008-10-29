@@ -8,7 +8,7 @@
     {/foreach}
   </ul>
   <h2>All Interfaces</h2>
-  <ul>
+  <ul class="interfacelist">
     {foreach from=$interfaces item="item"}
       <li>
         <a href="{$ROOT}/interface/{$item->name}">{$item}</a>

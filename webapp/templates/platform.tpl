@@ -26,7 +26,7 @@
 <div class="body">
   <h1>Platform {$platform} Index</h1>
   <h2>Interfaces</h2>
-  <ul>
+  <ul class="interfacelist">
     {foreach from=$interfaces item="item"}
       <li><a href="{$ROOT}/platform/{$platform->version}/interface/{$item->name}">{$item}</a></li>
     {/foreach}

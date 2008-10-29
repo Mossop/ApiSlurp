@@ -1,3 +1,5 @@
+/* General layout rules */
+
 #header {
   background-image: url('../images/mozilla-banner.gif');
   background-repeat: no-repeat;
@@ -62,42 +64,56 @@
   margin-top: 0;
 }
 
+/* Index page rules */
+
+.interfacelist {
+  -moz-column-count: 2;
+}
+
 .variants {
   vertical-align: super;
   font-size: 70%;
 }
 
-.code {
-  font-family: monospace;
-  margin: 1em 0 1em 40px;
-}
-
+/* Interface rules */
 .controls {
   text-align: center;
 }
 
-.diff {
-  width: 100%;
-}
-
-.before {
-  width: 50%;
-}
-
-.after {
-  width: 50%;
+.hidesame .unchanged {
+  display: none;
 }
 
 .diff h2 {
   text-align: center;
 }
 
+
+.added .after {
+  background-color: lightgreen;
+}
+
+.removed .before {
+  background-color: rgb(255, 204, 153);
+}
+
+.matching {
+}
+
+.modified {
+  background-color: lightblue;
+}
 .commentrow td {
   padding-top: 1em;
 }
 
 .signaturerow td {
   padding-bottom: 1em;
+}
+
+.member, .idl {
+  font-family: monospace;
+  margin: 1em 0 1em 40px;
 }
 
 .diff .signature {
@@ -113,14 +129,11 @@
   white-space: nowrap;
 }
 
-.hidesame .unchanged {
-  display: none;
-}
-
 .comment {
   color: grey;
-  padding-left: 20px;
+  padding-left: 4em;
   margin-bottom: 0.5em;
+  font-size: 90%;
 }
 
 .sourcelink {
@@ -146,19 +159,4 @@
 
 .value {
   color: purple;
-}
-
-.added .after {
-  background-color: lightgreen;
-}
-
-.removed .before {
-  background-color: rgb(255, 204, 153);
-}
-
-.matching {
-}
-
-.modified {
-  background-color: lightblue;
 }

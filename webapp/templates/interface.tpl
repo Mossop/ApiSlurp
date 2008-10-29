@@ -31,27 +31,27 @@
 
 <div class="body">
   <h1>{$interface} Interface (from platform <a href="{$ROOT}/platform/{$platform->version}">{$platform}</a>) - <a href="{$interface->sourceurl}">Source</a></h1>
-  <div class="code">
+  <div class="idl">
     <pre class="comment">{$interface->comment}</pre>
     {include file="includes/interface.tpl" interface=$interface}
   </div>
   <h2><a name="constants">Constants</a></h2>
   {foreach from=$interface->constants item="item"}
-    <div class="code">
+    <div class="member constant">
       <pre class="comment">{$item->comment}</pre>
       {include file="includes/constant.tpl" constant=$item}
     </div>
   {/foreach}
   <h2><a name="attributes">Attributes</a></h2>
   {foreach from=$interface->attributes item="item"}
-    <div class="code">
+    <div class="member attribute">
       <pre class="comment">{$item->comment}</pre>
       {include file="includes/attribute.tpl" attribute=$item}
     </div>
   {/foreach}
   <h2><a name="methods">Methods</a></h2>
   {foreach from=$interface->methods item="item"}
-    <div class="code">
+    <div class="member method">
       <pre class="comment">{$item->comment}</pre>
       {include file="includes/method.tpl" method=$item}
     </div>

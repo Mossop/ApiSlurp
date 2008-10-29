@@ -29,10 +29,10 @@ function toggleVisible() {ldelim}
       </td>
     </tr>
     <tr class="signaturerow">
-      <td class="before">
+      <td class="before idl">
         {include file="includes/interface.tpl" interface=$diff->left}
       </td>
-      <td class="after">
+      <td class="after idl">
         {include file="includes/interface.tpl" interface=$diff->right}
       </td>
     </tr>
@@ -53,12 +53,12 @@ function toggleVisible() {ldelim}
         </td>
       </tr>
       <tr class="signaturerow {$item->state}">
-        <td class="before">
+        <td class="before member constant">
           {if $item->state ne "added"}
             {include file="includes/constant.tpl" constant=$item->left}
           {/if}
         </td>
-        <td class="after">
+        <td class="after member constant">
           {if $item->state ne "removed"}
             {include file="includes/constant.tpl" constant=$item->right}
           {/if}
@@ -83,12 +83,12 @@ function toggleVisible() {ldelim}
         </td>
       </tr>
       <tr class="signaturerow {$item->state}">
-        <td class="before">
+        <td class="before member attribute">
           {if $item->state ne "added"}
             {include file="includes/attribute.tpl" attribute=$item->left}
           {/if}
         </td>
-        <td class="after">
+        <td class="after member attribute">
           {if $item->state ne "removed"}
             {include file="includes/attribute.tpl" attribute=$item->right}
           {/if}
@@ -113,12 +113,12 @@ function toggleVisible() {ldelim}
         </td>
       </tr>
       <tr class="signaturerow {$item->state}">
-        <td class="before">
+        <td class="before member method">
           {if $item->state ne "added"}
             {include file="includes/method.tpl" method=$item->left}
           {/if}
         </td>
-        <td class="after">
+        <td class="after member method">
           {if $item->state ne "removed"}
             {include file="includes/method.tpl" method=$item->right}
           {/if}
