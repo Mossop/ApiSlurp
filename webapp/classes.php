@@ -1033,11 +1033,11 @@ class InterfaceDiff {
     $r = reset($right);
 
     while ($l !== false || $r !== false) {
-      if ($r === false || $l->name < $r->name) {
+      if ($r === false || ($l !== false && $l->name < $r->name)) {
         array_push($pairs, new MemberPair($l, null));
         $l = next($left);
       }
-      else if ($l === false || $r->name < $l->name) {
+      else if ($l === false || ($r !== false && $r->name < $l->name)) {
         array_push($pairs, new MemberPair(null, $r));
         $r = next($right);
       }
