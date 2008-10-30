@@ -78,7 +78,7 @@ class Slurp(object):
     c = self.dbc.cursor()
     c.execute('CREATE TABLE platforms (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, version TEXT UNIQUE, url TEXT, sourceurl TEXT)')
     c.execute('CREATE TABLE interfaces (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE)')
-    c.execute('CREATE TABLE plat_ifaces (id INTEGER PRIMARY KEY AUTOINCREMENT, platform INTEGER, interface INTEGER, base TEXT, flags INTEGER, iid TEXT, comment TEXT, path TEXT, line INTEGER, hash TEXT)')
+    c.execute('CREATE TABLE plat_ifaces (id INTEGER PRIMARY KEY AUTOINCREMENT, platform INTEGER, interface INTEGER, base TEXT, flags INTEGER, iid TEXT, comment TEXT, module TEXT, path TEXT, line INTEGER, hash TEXT)')
     c.execute('CREATE INDEX pi_plat ON plat_ifaces (platform)');
     c.execute('CREATE UNIQUE INDEX pi_id ON plat_ifaces (platform, interface)');
     c.execute('CREATE TABLE members (id INTEGER PRIMARY KEY AUTOINCREMENT, pint INTEGER, name TEXT, kind TEXT, type TEXT, flags INTEGER, comment TEXT, line INTEGER, hash TEXT, text TEXT)')
@@ -127,9 +127,10 @@ class Slurp(object):
     flags += SCRIPTABLE if interface.attributes.scriptable else 0
     flags += NOSCRIPT if interface.attributes.noscript else 0
     flags += FUNCTION if interface.attributes.function else 0
-    c.execute('INSERT INTO plat_ifaces (platform,interface,base,iid,flags,comment,path,line) VALUES (?,?,?,?,?,?,?,?)',
+    module = path.split("/")[0]
+    c.execute('INSERT INTO plat_ifaces (platform,interface,base,iid,flags,comment,module,path,line) VALUES (?,?,?,?,?,?,?,?,?)',
               (self.platform, id, interface.base, interface.attributes.uuid,
-               flags, self.__mungeComment(interface.doccomments), path, interface.location._lineno))
+               flags, self.__mungeComment(interface.doccomments), module, path, interface.location._lineno))
     id = c.lastrowid
     self.dbc.commit()
     c.close()
