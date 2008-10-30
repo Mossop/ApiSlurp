@@ -109,10 +109,12 @@
 }
 .commentrow td {
   padding-top: 1em;
+  vertical-align: bottom;
 }
 
 .signaturerow td {
   padding-bottom: 1em;
+  vertical-align: top;
 }
 
 .member, .idl {
