@@ -5,5 +5,5 @@
     *}{else}{*
       *}<span class="keyword">{$attr->name}</span>{*
     *}{/if}{*
-  *}{if $smarty.foreach.attrlist.last}]{else}, {/if}{*
+  *}{if $smarty.foreach.attrlist.last}] {else}, {/if}{*
 *}{/foreach}
