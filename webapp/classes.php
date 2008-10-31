@@ -517,6 +517,16 @@ class XPCOMInterface {
   }
 }
 
+class IDLAttribute {
+  public $name;
+  public $value;
+
+  public function __construct($name, $value = '') {
+    $this->name = $name;
+    $this->value = $value;
+  }
+}
+
 class InterfaceVersion {
   private $row;
   private $prefix;
@@ -719,20 +729,17 @@ class Attribute extends Member {
   public function __get($name) {
     switch ($name) {
       case 'attributes':
-        $type = '';
+        $attrs = array();
         if ($this->noscript) {
-          $type .= 'noscript, ';
+          array_push($attrs, new IDLAttribute('noscript'));
         }
         if ($this->notxpcom) {
-          $type .= 'notxpcom, ';
+          array_push($attrs, new IDLAttribute('notxpcom'));
         }
         if (isset($this->binaryname)) {
-          $type .= 'binaryname(' . $this->binaryname . '), ';
+          array_push($attrs, new IDLAttribute('binaryname', $this->binaryname));
         }
-        if ($type != '') {
-          $type = substr($type, 0, -2);
-        }
-        return $type;
+        return $attrs;
         break;
       case 'readonly':
         return ($this->flags & FLAG_READONLY) != 0;
@@ -781,19 +788,17 @@ class Method extends Member {
   public function __get($name) {
     switch ($name) {
       case 'attributes':
-        $type = '';
+        $attrs = array();
         if ($this->noscript) {
-          $type .= 'noscript, ';
+          array_push($attrs, new IDLAttribute('noscript'));
         }
         if ($this->notxpcom) {
-          $type .= 'notxpcom, ';
+          array_push($attrs, new IDLAttribute('notxpcom'));
         }
         if (isset($this->binaryname)) {
-          $type .= 'binaryname(' . $this->binaryname . '), ';
+          array_push($attrs, new IDLAttribute('binaryname', $this->binaryname));
         }
-        if ($type != '') {
-          $type = substr($type, 0, -2);
-        }
+        return $attrs;
         return $type;
         break;
       case 'params':
@@ -863,32 +868,29 @@ class Parameter {
   public function __get($name) {
     switch ($name) {
       case 'attributes':
-        $type = '';
+        $attrs = array();
         if ($this->const) {
-          $type .= 'const, ';
+          array_push($attrs, new IDLAttribute('const'));
         }
         if ($this->array) {
-          $type .= 'array, ';
+          array_push($attrs, new IDLAttribute('array'));
         }
         if ($this->retval) {
-          $type .= 'retval, ';
+          array_push($attrs, new IDLAttribute('retval'));
         }
         if ($this->shared) {
-          $type .= 'shared, ';
+          array_push($attrs, new IDLAttribute('shared'));
         }
         if ($this->optional) {
-          $type .= 'optional, ';
+          array_push($attrs, new IDLAttribute('optional'));
         }
         if (isset($this->iid_is)) {
-          $type .= 'iid_is(' . $this->iid_is . '), ';
+          array_push($attrs, new IDLAttribute('iid_is', $this->iid_is));
         }
         if (isset($this->size_is)) {
-          $type .= 'size_is(' . $this->size_is . '), ';
+          array_push($attrs, new IDLAttribute('size_is', $this->size_is));
         }
-        if ($type != '') {
-          $type = substr($type, 0, -2);
-        }
-        return $type;
+        return $attrs;
         break;
       case 'typeisif':
         return (isset($this->row['interfaces.id']) && $this->row['interfaces.id'] != false);
