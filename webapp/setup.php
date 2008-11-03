@@ -35,7 +35,7 @@ if (!is_file($dbpath)) {
 }
 
 try {
-  $db = new PDODB('sqlite:' . realpath($dbpath));
+  $db = new PDO('sqlite:' . realpath($dbpath), '', '', array(PDO::ATTR_PERSISTENT => true));
 }
 catch (Exception $e) {
   error('Corrupt database', 'The database could not be opened: ' . $e->getMessage());

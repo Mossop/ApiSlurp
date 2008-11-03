@@ -44,7 +44,7 @@ define('COLUMNS_MEMBERS',     'members.id AS members_id, ' .
                               'members.hash AS members_hash, ' .
                               'members.text AS members_text');
 
-define('COLUMNS_PARAMETERS',  'parameters.id AS parameters_member, ' .
+define('COLUMNS_PARAMETERS',  'parameters.member AS parameters_member, ' .
                               'parameters.pos AS parameters_pos, ' .
                               'parameters.direction AS parameters_direction, ' .
                               'parameters.type AS parameters_type, ' .
@@ -200,118 +200,6 @@ class APISmarty extends Smarty {
   }
 }
 
-abstract class Database {
-  public function escape($str) {
-    return addslashes($str);
-  }
-
-  abstract public function arrayQuery($query);
-
-  public function singleQuery($query) {
-    $rows = $this->arrayQuery($query);
-    if ($rows === false) {
-      return $rows;
-    }
-    return $rows[0][0];
-  }
-
-  public function columnQuery($query) {
-    $column = array();
-    $rows = $this->arrayQuery($query);
-    if ($rows === false) {
-      return $rows;
-    }
-    foreach ($rows as $row) {
-      array_push($column, $row[0]);
-    }
-    return $column;
-  }
-
-  public function rowQuery($query) {
-    $rows = $this->arrayQuery($query);
-    if ($rows === false || count($rows) == 0) {
-      return false;
-    }
-    return $rows[0];
-  }
-}
-
-class SQLiteDB extends Database {
-  private $dbres;
-
-  public function __construct($filename) {
-    $this->dbres = sqlite_popen($filename);
-  }
-
-  public function escape($str) {
-    return sqlite_escape_string($str);
-  }
-
-  public function arrayQuery($query) {
-    return sqlite_array_query($this->dbres, $query);
-  }
-
-  public function singleQuery($query) {
-    return sqlite_single_query($this->dbres, $query, true);
-  }
-
-  public function columnQuery($query) {
-    return sqlite_single_query($this->dbres, $query, false);
-  }
-}
-
-class PDODB extends Database {
-  private $dbres;
-
-  public function __construct($dsn) {
-    $this->dbres = new PDO($dsn, '', '', array(PDO::ATTR_PERSISTENT => true));
-  }
-
-  public function escape($str) {
-    return sqlite_escape_string($str);
-  }
-
-  public function arrayQuery($query) {
-    $stmt = $this->dbres->prepare($query);
-    if ($stmt->execute()) {
-      $results = $stmt->fetchAll();
-      $stmt->closeCursor();
-      return $results;
-    }
-    return false;
-  }
-
-  public function singleQuery($query) {
-    $stmt = $this->dbres->prepare($query);
-    if ($stmt->execute()) {
-      $results = $stmt->fetch();
-      $stmt->closeCursor();
-      return $results[0];
-    }
-    return false;
-  }
-
-  public function columnQuery($query) {
-    $stmt = $this->dbres->prepare($query);
-    if ($stmt->execute()) {
-      $results = $stmt->fetchAll(PDO::FETCH_COLUMN);
-      $stmt->closeCursor();
-      return $results;
-    }
-    return false;
-  }
-
-  public function rowQuery($query) {
-    $stmt = $this->dbres->prepare($query);
-    if ($stmt->execute()) {
-      $results = $stmt->fetch();
-      $stmt->closeCursor();
-      return $results;
-    }
-    return false;
-  }
-}
-
 $versioncomparator = new VersionComparator();
 
 function member_name_compare($a, $b) {
@@ -397,10 +285,11 @@ class Platform {
     global $db;
 
     $interfaces = array();
-    $rows = $db->arrayQuery('SELECT ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_INTERFACES .
-                            ' FROM plat_ifaces JOIN interfaces ON interfaces.id=plat_ifaces.interface '.
-                            'WHERE platform=' . $this->id . ' ORDER BY interfaces.name');
-    foreach ($rows as $row) {
+    $stmt = $db->prepare('SELECT ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_INTERFACES . ' ' .
+                         'FROM plat_ifaces JOIN interfaces ON interfaces.id=plat_ifaces.interface '.
+                         'WHERE platform=? ORDER BY interfaces.name');
+    $stmt->execute(array($this->id));
+    while ($row = $stmt->fetch()) {
       $interface = XPCOMInterface::getOrCreate($row);
       array_push($interfaces, InterfaceVersion::getOrCreate($row,
                                                             $interface,
@@ -418,10 +307,13 @@ class Platform {
     return new Platform($row, $prefix);
   }
 
-  public static function getByVersion($name) {
+  public static function getByVersion($version) {
     global $db;
 
-    $row = $db->rowQuery('SELECT ' . COLUMNS_PLATFORMS . ' FROM platforms WHERE version="' . $db->escape($name) . '"');
+    $stmt = $db->prepare('SELECT ' . COLUMNS_PLATFORMS . ' FROM platforms WHERE version=?');
+    $stmt->execute(array($version));
+    $row = $stmt->fetch();
+    $stmt->closeCursor();
     if ($row === false) {
       return null;
     }
@@ -432,8 +324,8 @@ class Platform {
     global $db;
 
     $platforms = array();
-    $rows = $db->arrayQuery('SELECT ' . COLUMNS_PLATFORMS . ' FROM platforms');
-    foreach ($rows as $row) {
+    $stmt = $db->query('SELECT ' . COLUMNS_PLATFORMS . ' FROM platforms');
+    while ($row = $stmt->fetch()) {
       array_push($platforms, Platform::getOrCreate($row));
     }
     return $platforms;
@@ -492,10 +384,11 @@ class XPCOMInterface {
     }
 
     $this->versions = array();
-    $rows = $db->arrayQuery('SELECT ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_PLATFORMS . ' FROM '.
-                            'plat_ifaces JOIN platforms ON plat_ifaces.platform=platforms.id '.
-                            'WHERE plat_ifaces.interface=' . $this->id);
-    foreach ($rows as $row) {
+    $stmt = $db->prepare('SELECT ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_PLATFORMS . ' FROM '.
+                         'plat_ifaces JOIN platforms ON plat_ifaces.platform=platforms.id '.
+                         'WHERE plat_ifaces.interface=?');
+    $stmt->execute(array($this->id));
+    while ($row = $stmt->fetch()) {
       $platform = Platform::getOrCreate($row);
       array_push($this->versions, InterfaceVersion::getOrCreate($row,
                                                                 $this,
@@ -528,26 +421,28 @@ class XPCOMInterface {
     global $db;
 
     $versions = array();
-    $rows = $db->arrayQuery('SELECT ' . COLUMNS_INTERFACES . ', ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_PLATFORMS .
-                            ' FROM plat_ifaces JOIN interfaces ON plat_ifaces.interface=interfaces.id '.
-                            'JOIN platforms ON plat_ifaces.platform=platforms.id WHERE interfaces.name="' . $db->escape($name) . '"');
-    if ($rows === false || count($rows) == 0) {
+    $stmt = $db->prepare('SELECT ' . COLUMNS_INTERFACES . ', ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_PLATFORMS .
+                         ' FROM plat_ifaces JOIN interfaces ON plat_ifaces.interface=interfaces.id '.
+                         'JOIN platforms ON plat_ifaces.platform=platforms.id WHERE interfaces.name=?');
+    $stmt->execute(array($name));
+    $row = $stmt->fetch();
+    if ($row === false) {
       return null;
     }
-    if (Cache::has('XPCOMInterface', $rows[0]['interfaces_id'])) {
-      return Cache::get('XPCOMInterface', $rows[0]['interfaces_id']);
+    if (Cache::has('XPCOMInterface', $row['interfaces_id'])) {
+      return Cache::get('XPCOMInterface', $row['interfaces_id']);
     }
 
-    $interface = self::getOrCreate($rows[0]);
+    $interface = self::getOrCreate($row);
 
     $interface->versions = array();
-    foreach ($rows as $row) {
+    do {
       $platform = Platform::getOrCreate($row);
       array_push($interface->versions, InterfaceVersion::getOrCreate($row,
                                                                      $interface,
                                                                      $platform,
                                                                      $interface->name));
-    }
+    } while ($row = $stmt->fetch());
     usort($interface->versions, 'interfaceversion_compare');
     return $interface;
   }
@@ -556,13 +451,14 @@ class XPCOMInterface {
     global $db;
 
     $versions = array();
-    $rows = $db->arrayQuery('SELECT ' . COLUMNS_INTERFACES . ', ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_PLATFORMS .
-                            ' FROM plat_ifaces JOIN interfaces ON plat_ifaces.interface=interfaces.id '.
-                            'JOIN platforms ON plat_ifaces.platform=platforms.id '.
-                            'WHERE interfaces.name LIKE "%' . $db->escape($string) . '%"');
+    $stmt = $db->prepare('SELECT ' . COLUMNS_INTERFACES . ', ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_PLATFORMS .
+                         ' FROM plat_ifaces JOIN interfaces ON plat_ifaces.interface=interfaces.id '.
+                         'JOIN platforms ON plat_ifaces.platform=platforms.id '.
+                         'WHERE interfaces.name LIKE ?');
+    $stmt->execute(array('%' . $string . '%'));
 
     $interfaces = array();
-    foreach ($rows as $row) {
+    while ($row = $stmt->fetch()) {
       $interface = Cache::get('XPCOMInterface', $row['interfaces_id']);
       if ($interface == null) {
         $interface = self::getOrCreate($row);
@@ -585,12 +481,12 @@ class XPCOMInterface {
     global $db;
 
     $versions = array();
-    $rows = $db->arrayQuery('SELECT ' . COLUMNS_INTERFACES . ', ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_PLATFORMS .
-                            ' FROM plat_ifaces JOIN interfaces ON plat_ifaces.interface=interfaces.id '.
-                            'JOIN platforms ON plat_ifaces.platform=platforms.id ORDER BY interfaces.name');
+    $stmt = $db->query('SELECT ' . COLUMNS_INTERFACES . ', ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_PLATFORMS .
+                       ' FROM plat_ifaces JOIN interfaces ON plat_ifaces.interface=interfaces.id '.
+                       'JOIN platforms ON plat_ifaces.platform=platforms.id ORDER BY interfaces.name');
 
     $interfaces = array();
-    foreach ($rows as $row) {
+    while ($row = $stmt->fetch()) {
       $interface = Cache::get('XPCOMInterface', $row['interfaces_id']);
       if ($interface == null) {
         $interface = self::getOrCreate($row);
@@ -680,10 +576,11 @@ class InterfaceVersion {
 
     if (!isset($this->members)) {
       $this->members = array('constants' => array(), 'attributes' => array(), 'methods' => array());
-      $rows = $db->arrayQuery('SELECT ' . COLUMNS_MEMBERS . ', ' . COLUMNS_INTERFACES . ' FROM '.
-                              'members LEFT JOIN interfaces ON members.type=interfaces.name '.
-                              'WHERE pint=' . $this->id);
-      foreach ($rows as $row) {
+      $stmt = $db->prepare('SELECT ' . COLUMNS_MEMBERS . ', ' . COLUMNS_INTERFACES . ' FROM '.
+                           'members LEFT JOIN interfaces ON members.type=interfaces.name '.
+                           'WHERE pint=?');
+      $stmt->execute(array($this->id));
+      while ($row = $stmt->fetch()) {
         $member = Method::getOrCreate($row, $this);
         if ($member instanceof Constant) {
           array_push($this->members['constants'], $member);
@@ -715,18 +612,24 @@ class InterfaceVersion {
     global $db;
 
     if ($platform instanceof Platform) {
-      $row = $db->rowQuery('SELECT ' . COLUMNS_INTERFACES . ', ' . COLUMNS_PLAT_IFACES .
+      $stmt = $db->prepare('SELECT ' . COLUMNS_INTERFACES . ', ' . COLUMNS_PLAT_IFACES .
                            ' FROM plat_ifaces JOIN interfaces ON plat_ifaces.interface=interfaces.id ' .
-                           'WHERE plat_ifaces.platform=' . $platform->id . ' AND interfaces.name="' . $db->escape($name) . '"');
+                           'WHERE plat_ifaces.platform=? AND interfaces.name=?');
+      $stmt->execute(array($platform->id, $name));
+      $row = $stmt->fetch();
+      $stmt->closeCursor();
       if ($row === false) {
         return null;
       }
     }
     else {
-      $row = $db->rowQuery('SELECT ' . COLUMNS_INTERFACES . ', ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_PLATFORMS .
+      $stmt = $db->prepare('SELECT ' . COLUMNS_INTERFACES . ', ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_PLATFORMS .
                            ' FROM plat_ifaces JOIN interfaces ON plat_ifaces.interface=interfaces.id '.
                            'JOIN platforms ON plat_ifaces.platform=platforms.id WHERE '.
-                           'platforms.version="' . $db->escape($platform) . '" AND interfaces.name="' . $db->escape($name) . '"');
+                           'platforms.version=? AND interfaces.name=?');
+      $stmt->execute(array($platform, $name));
+      $row = $stmt->fetch();
+      $stmt->closeCursor();
       if ($row === false) {
         return null;
       }
@@ -911,10 +814,11 @@ class Method extends Member {
 
     if (!isset($this->params)) {
       $this->params = array();
-      $rows = $db->arrayQuery('SELECT ' . COLUMNS_PARAMETERS . ', ' . COLUMNS_INTERFACES . ' FROM '.
-                              'parameters LEFT JOIN interfaces ON parameters.type=interfaces.name '.
-                              'WHERE member=' . $this->id . ' ORDER BY parameters.pos');
-      foreach ($rows as $row) {
+      $stmt = $db->prepare('SELECT ' . COLUMNS_PARAMETERS . ', ' . COLUMNS_INTERFACES . ' FROM '.
+                           'parameters LEFT JOIN interfaces ON parameters.type=interfaces.name '.
+                           'WHERE member=? ORDER BY parameters.pos');
+      $stmt->execute(array($this->id));
+      while ($row = $stmt->fetch()) {
         array_push($this->params, new Parameter($row, $this));
       }
     }
@@ -1029,37 +933,43 @@ class PlatformDiff {
     $this->left = $left;
     $this->right = $right;
 
-    $rows = $db->arrayQuery('SELECT ' . COLUMNS_INTERFACES . ' FROM '.
-                            '(SELECT * FROM plat_ifaces WHERE platform=' . $right->id .') AS pi1 '.
-                            'LEFT JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $left->id . ') AS pi2 '.
-                            'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id '.
-                            'WHERE pi2.platform IS NULL ORDER BY interfaces.name');
-    foreach ($rows as $row) {
+    $stmt = $db->prepare('SELECT ' . COLUMNS_INTERFACES . ' FROM '.
+                         '(SELECT * FROM plat_ifaces WHERE platform=?) AS pi1 '.
+                         'LEFT JOIN (SELECT * FROM plat_ifaces WHERE platform=?) AS pi2 '.
+                         'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id '.
+                         'WHERE pi2.platform IS NULL ORDER BY interfaces.name');
+    $stmt->execute(array($right->id, $left->id));
+    while ($row = $stmt->fetch()) {
       array_push($this->added, XPCOMInterface::getOrCreate($row));
     }
 
-    $rows = $db->arrayQuery('SELECT ' . COLUMNS_INTERFACES . ' FROM '.
-                            '(SELECT * FROM plat_ifaces WHERE platform=' . $left->id .') AS pi1 '.
-                            'LEFT JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $right->id . ') AS pi2 '.
-                            'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id '.
-                            'WHERE pi2.platform IS NULL ORDER BY interfaces.name');
-    foreach ($rows as $row) {
+    $stmt = $db->prepare('SELECT ' . COLUMNS_INTERFACES . ' FROM '.
+                         '(SELECT * FROM plat_ifaces WHERE platform=?) AS pi1 '.
+                         'LEFT JOIN (SELECT * FROM plat_ifaces WHERE platform=?) AS pi2 '.
+                         'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id '.
+                         'WHERE pi2.platform IS NULL ORDER BY interfaces.name');
+    $stmt->execute(array($left->id, $right->id));
+    while ($row = $stmt->fetch()) {
       array_push($this->removed, XPCOMInterface::getOrCreate($row));
     }
 
-    $rows = $db->arrayQuery('SELECT ' . COLUMNS_INTERFACES . ' FROM '.
-                            '(SELECT * FROM plat_ifaces WHERE platform=' . $left->id .') AS pi1 '.
-                            'JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $right->id . ') AS pi2 '.
-                            'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id WHERE pi1.hash=pi2.hash ORDER BY interfaces.name');
-    foreach ($rows as $row) {
+    $stmt = $db->prepare('SELECT ' . COLUMNS_INTERFACES . ' FROM '.
+                         '(SELECT * FROM plat_ifaces WHERE platform=?) AS pi1 '.
+                         'JOIN (SELECT * FROM plat_ifaces WHERE platform=?) AS pi2 '.
+                         'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id '.
+                         'WHERE pi1.hash=pi2.hash ORDER BY interfaces.name');
+    $stmt->execute(array($left->id, $right->id));
+    while ($row = $stmt->fetch()) {
       array_push($this->unchanged, XPCOMInterface::getOrCreate($row));
     }
 
-    $rows = $db->arrayQuery('SELECT ' . COLUMNS_INTERFACES . ' FROM '.
-                            '(SELECT * FROM plat_ifaces WHERE platform=' . $left->id .') AS pi1 '.
-                            'JOIN (SELECT * FROM plat_ifaces WHERE platform=' . $right->id . ') AS pi2 '.
-                            'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id WHERE pi1.hash<>pi2.hash ORDER BY interfaces.name');
-    foreach ($rows as $row) {
+    $stmt = $db->prepare('SELECT ' . COLUMNS_INTERFACES . ' FROM '.
+                         '(SELECT * FROM plat_ifaces WHERE platform=?) AS pi1 '.
+                         'JOIN (SELECT * FROM plat_ifaces WHERE platform=?) AS pi2 '.
+                         'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id '.
+                         'WHERE pi1.hash<>pi2.hash ORDER BY interfaces.name');
+    $stmt->execute(array($left->id, $right->id));
+    while ($row = $stmt->fetch()) {
       array_push($this->modified, XPCOMInterface::getOrCreate($row));
     }
   }
