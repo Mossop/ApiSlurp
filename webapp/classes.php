@@ -571,28 +571,16 @@ class InterfaceVersion {
         return $this->getMembers($name);
         break;
       case 'subclasses':
-        if (!isset($this->subclasses)) {
-          $this->querySubclasses();
-        }
-        return $this->subclasses;
+        return $this->getSubclasses();
         break;
       case 'attrUsage':
-        if (!isset($this->attrUsage)) {
-          $this->queryAttributeUsage();
-        }
-        return $this->attrUsage;
+        return $this->getAttributeUsage();
         break;
       case 'methodUsage':
-        if (!isset($this->methodUsage)) {
-          $this->queryMethodUsage();
-        }
-        return $this->methodUsage;
+        return $this->getMethodUsage();
         break;
       case 'paramUsage':
-        if (!isset($this->paramUsage)) {
-          $this->queryParameterUsage();
-        }
-        return $this->paramUsage;
+        return $this->getParameterUsage();
         break;
       case 'versions':
         return $this->versions->getVersions();
@@ -642,64 +630,76 @@ class InterfaceVersion {
     return $this->members[$name];
   }
 
-  private function querySubclasses() {
+  private function getSubclasses() {
     global $db;
 
-    $this->subclasses = array();
-    $stmt = $db->prepare('SELECT ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_INTERFACES . ' ' .
-                         'FROM interfaces JOIN plat_ifaces ON interfaces.id=plat_ifaces.interface ' .
-                         'WHERE plat_ifaces.platform=? AND plat_ifaces.base=?');
-    $stmt->execute(array($this->platform->id, $this->name));
-    while ($row = $stmt->fetch()) {
-      $versions = XPCOMInterface::getOrCreate($row);
-      array_push($this->subclasses, self::getOrCreate($row, $versions, $this->platform, $versions->name));
+    if (!isset($this->subclasses)) {
+      $this->subclasses = array();
+      $stmt = $db->prepare('SELECT ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_INTERFACES . ' ' .
+                           'FROM interfaces JOIN plat_ifaces ON interfaces.id=plat_ifaces.interface ' .
+                           'WHERE plat_ifaces.platform=? AND plat_ifaces.base=?');
+      $stmt->execute(array($this->platform->id, $this->name));
+      while ($row = $stmt->fetch()) {
+        $versions = XPCOMInterface::getOrCreate($row);
+        array_push($this->subclasses, self::getOrCreate($row, $versions, $this->platform, $versions->name));
+      }
     }
+    return $this->subclasses;
   }
 
-  private function queryAttributeUsage() {
+  private function getAttributeUsage() {
     global $db;
 
-    $this->attrUsage = array();
-    $stmt = $db->prepare('SELECT ' . COLUMNS_INTERFACES . ', ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_MEMBERS . ' ' .
-                         'FROM interfaces JOIN plat_ifaces ON interfaces.id=plat_ifaces.interface JOIN members ON plat_ifaces.id=members.pint ' .
-                         'WHERE members.kind="attribute" AND members.type=? AND plat_ifaces.platform=?');
-    $stmt->execute(array($this->name, $this->platform->id));
-    while ($row = $stmt->fetch()) {
-      $versions = XPCOMInterface::getOrCreate($row);
-      $interface = self::getOrCreate($row, $versions, $this->platform, $versions->name);
-      array_push($this->attrUsage, Member::getOrCreate($row, $interface));
+    if (!isset($this->attrUsage)) {
+      $this->attrUsage = array();
+      $stmt = $db->prepare('SELECT ' . COLUMNS_INTERFACES . ', ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_MEMBERS . ' ' .
+                           'FROM interfaces JOIN plat_ifaces ON interfaces.id=plat_ifaces.interface JOIN members ON plat_ifaces.id=members.pint ' .
+                           'WHERE members.kind="attribute" AND members.type=? AND plat_ifaces.platform=?');
+      $stmt->execute(array($this->name, $this->platform->id));
+      while ($row = $stmt->fetch()) {
+        $versions = XPCOMInterface::getOrCreate($row);
+        $interface = self::getOrCreate($row, $versions, $this->platform, $versions->name);
+        array_push($this->attrUsage, Member::getOrCreate($row, $interface));
+      }
     }
+    return $this->attrUsage;
   }
 
-  private function queryMethodUsage() {
+  private function getMethodUsage() {
     global $db;
 
-    $this->methodUsage = array();
-    $stmt = $db->prepare('SELECT ' . COLUMNS_INTERFACES . ', ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_MEMBERS . ' ' .
-                         'FROM interfaces JOIN plat_ifaces ON interfaces.id=plat_ifaces.interface JOIN members ON plat_ifaces.id=members.pint ' .
-                         'WHERE members.kind="method" AND members.type=? AND plat_ifaces.platform=?');
-    $stmt->execute(array($this->name, $this->platform->id));
-    while ($row = $stmt->fetch()) {
-      $versions = XPCOMInterface::getOrCreate($row);
-      $interface = self::getOrCreate($row, $versions, $this->platform, $versions->name);
-      array_push($this->methodUsage, Member::getOrCreate($row, $interface));
+    if (!isset($this->methodUsage)) {
+      $this->methodUsage = array();
+      $stmt = $db->prepare('SELECT ' . COLUMNS_INTERFACES . ', ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_MEMBERS . ' ' .
+                           'FROM interfaces JOIN plat_ifaces ON interfaces.id=plat_ifaces.interface JOIN members ON plat_ifaces.id=members.pint ' .
+                           'WHERE members.kind="method" AND members.type=? AND plat_ifaces.platform=?');
+      $stmt->execute(array($this->name, $this->platform->id));
+      while ($row = $stmt->fetch()) {
+        $versions = XPCOMInterface::getOrCreate($row);
+        $interface = self::getOrCreate($row, $versions, $this->platform, $versions->name);
+        array_push($this->methodUsage, Member::getOrCreate($row, $interface));
+      }
     }
+    return $this->methodUsage;
   }
 
-  private function queryParameterUsage() {
+  private function getParameterUsage() {
     global $db;
 
-    $this->paramUsage = array();
-    $stmt = $db->prepare('SELECT ' . COLUMNS_INTERFACES . ', ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_MEMBERS . ' ' .
-                         'FROM interfaces JOIN plat_ifaces ON interfaces.id=plat_ifaces.interface '.
-                         'JOIN members ON plat_ifaces.id=members.pint JOIN parameters ON members.id=parameters.member ' .
-                         'WHERE members.kind="method" AND parameters.type=? AND plat_ifaces.platform=?');
-    $stmt->execute(array($this->name, $this->platform->id));
-    while ($row = $stmt->fetch()) {
-      $versions = XPCOMInterface::getOrCreate($row);
-      $interface = self::getOrCreate($row, $versions, $this->platform, $versions->name);
-      array_push($this->paramUsage, Member::getOrCreate($row, $interface));
+    if (!isset($this->paramUsage)) {
+      $this->paramUsage = array();
+      $stmt = $db->prepare('SELECT ' . COLUMNS_INTERFACES . ', ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_MEMBERS . ' ' .
+                           'FROM interfaces JOIN plat_ifaces ON interfaces.id=plat_ifaces.interface '.
+                           'JOIN members ON plat_ifaces.id=members.pint JOIN parameters ON members.id=parameters.member ' .
+                           'WHERE members.kind="method" AND parameters.type=? AND plat_ifaces.platform=?');
+      $stmt->execute(array($this->name, $this->platform->id));
+      while ($row = $stmt->fetch()) {
+        $versions = XPCOMInterface::getOrCreate($row);
+        $interface = self::getOrCreate($row, $versions, $this->platform, $versions->name);
+        array_push($this->paramUsage, Member::getOrCreate($row, $interface));
+      }
     }
+    return $this->paramUsage;
   }
 
   public static function getOrCreate($row, $versions, $platform, $name, $prefix = 'plat_ifaces_') {
