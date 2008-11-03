@@ -30,7 +30,10 @@
 </div>
 
 <div class="body">
-  <h1>{$interface} Interface (from platform <a href="{$ROOT}/platform/{$platform->version}">{$platform}</a>) - <a href="{$interface->sourceurl}">Source</a></h1>
+  <h1>{$interface} Interface
+      (from platform <a href="{$ROOT}/platform/{$interface->platform->version}">{$interface->platform}</a>) -
+      <a href="{$interface->sourceurl}">Source</a> -
+      <a href="{$ROOT}/platform/{$interface->platform->version}/interface/{$interface->name}/usage">Usage</a></h1>
   <div class="idl">
     <pre class="comment">{$interface->comment}</pre>
     {include file="includes/interface.tpl" interface=$interface}

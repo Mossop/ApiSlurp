@@ -20,6 +20,6 @@ else {
 }
 
 $smarty->assign('interface', $interface);
-$smarty->prepare('interface.tpl', $interface->id);
+$smarty->prepare('usage.tpl', $interface->id);
 $smarty->display();
 ?>
