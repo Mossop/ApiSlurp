@@ -10,8 +10,8 @@
 
 <div class="body">
   <h1>Comparing platform
-      <a href="{$ROOT}/platform/{$platform1->version}">{$diff->left}</a> to platform
-      <a href="{$ROOT}/platform/{$platform2->version}">{$diff->right}</a></h1>
+      <a href="{$ROOT}/platform/{$diff->left->version}">{$diff->left}</a> to platform
+      <a href="{$ROOT}/platform/{$diff->right->version}">{$diff->right}</a></h1>
   <h2><a name="removed">Removed Interfaces</a></h2>
   <ul class="interfacelist">
     {foreach from=$diff->removed item="item"}
