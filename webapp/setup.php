@@ -28,19 +28,22 @@ function redirect($path) {
 }
 
 $smarty = new APISmarty();
-$smarty->assign('ROOT', $webroot);
+$smarty->assign('ROOT', $CONFIG['webroot']);
 
-if (!is_file($dbpath)) {
+if (!is_file($CONFIG['dbpath'])) {
   error('No database', 'The API database was not found.');
 }
 
 try {
-  $db = new PDO('sqlite:' . realpath($dbpath), '', '', array(PDO::ATTR_PERSISTENT => true));
+  $db = new PDO('sqlite:' . realpath($CONFIG['dbpath']), '', '',
+                array(PDO::ATTR_PERSISTENT => true));
 }
 catch (Exception $e) {
   error('Corrupt database', 'The database could not be opened: ' . $e->getMessage());
 }
 
-$smarty->caching = false;
+if (isset($CONFIG['caching']) && $CONFIG['caching'] == true) {
+  $smarty->caching = true;
+}
 
 ?>

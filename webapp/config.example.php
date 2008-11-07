@@ -1,6 +1,9 @@
 <?php
 
-$dbpath = 'api.sqlite';
-$webroot = '/apidocs';
+$CONFIG = array(
+  'dbpath' => 'api.sqlite',
+  'webroot' => '',
+  'caching' => true
+);
 
 ?>
