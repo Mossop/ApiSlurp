@@ -14,13 +14,13 @@ define('FLAG_OPTIONAL', 16);
 
 define('COLUMNS_INTERFACES',  'interfaces.id AS interfaces_id, ' .
                               'interfaces.name AS interfaces_name');
-  
+
 define('COLUMNS_PLATFORMS',   'platforms.id AS platforms_id, ' .
                               'platforms.name AS platforms_name, ' .
                               'platforms.version AS platforms_version, ' .
                               'platforms.url AS platforms_url, ' .
                               'platforms.sourceurl AS platforms_sourceurl');
-  
+
 define('COLUMNS_PLAT_IFACES', 'plat_ifaces.id AS plat_ifaces_id, ' .
                               'plat_ifaces.platform AS plat_ifaces_platform, ' .
                               'plat_ifaces.interface AS plat_ifaces_interface, ' .
@@ -171,11 +171,12 @@ class APISmarty extends Smarty {
   private $compileid;
 
   public function __construct() {
+    global $CONFIG;
     parent::__construct();
 
     $this->template_dir         = 'templates/';
-    $this->compile_dir          = 'compiled/';
-    $this->cache_dir            = 'cache/';
+    $this->compile_dir          = $CONFIG['compiledir'] . '/';
+    $this->cache_dir            = $CONFIG['cachedir'] . '/';
     $this->cache_modified_check = true;
 
     $this->starttime = microtime(true);

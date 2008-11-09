@@ -1,10 +1,25 @@
 <?php
-if (!is_dir('compiled') || !is_dir('cache') || !is_file('smarty/Smarty.class.php')) {
+$CONFIG = array(
+  'compiledir' => 'compiled',
+  'cachedir' => 'cache',
+  'smartydir' => 'smarty',
+  'dbpath' => 'api.sqlite',
+  'webroot' => '',
+  'caching' => false
+);
+if (!is_file('config.php')) {
+  print 'Web-app not properly configured. Copy config.example.php to config.php and edit as necessary.';
+  exit;
+}
+
+if (!is_dir($CONFIG['compiledir']) ||
+    !is_dir($CONFIG['cachedir']) ||
+    !is_file($CONFIG['smartydir'] . '/Smarty.class.php')) {
   print 'Web-app not properly set up. Create compile and cache directories and install smarty.';
   exit;
 }
 
-require_once('smarty/Smarty.class.php');
+require_once($CONFIG['smartydir'] . '/Smarty.class.php');
 require_once('classes.php');
 require_once('config.php');
 
@@ -31,7 +46,7 @@ $smarty = new APISmarty();
 $smarty->assign('ROOT', $CONFIG['webroot']);
 
 if (!is_file($CONFIG['dbpath'])) {
-  error('No database', 'The API database was not found.');
+  error('No database', 'The API database was not found. Check the app configuration.');
 }
 
 try {
@@ -42,7 +57,7 @@ catch (Exception $e) {
   error('Corrupt database', 'The database could not be opened: ' . $e->getMessage());
 }
 
-if (isset($CONFIG['caching']) && $CONFIG['caching'] == true) {
+if ($CONFIG['caching'] == true) {
   $smarty->caching = true;
 }
 
