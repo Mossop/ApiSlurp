@@ -38,7 +38,7 @@ function error($title, $text) {
 function redirect($path) {
   global $webroot;
 
-  header('Location: http://' . $_SERVER['HTTP_HOST'] . '/' . $webroot . $path);
+  header('Location: http://' . $_SERVER['HTTP_HOST'] . $webroot . $path);
   exit;
 }
 

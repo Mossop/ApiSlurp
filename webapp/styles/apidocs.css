@@ -13,6 +13,20 @@
   font-size: 70%;
 }
 
+#navbar {
+  font-size: 80%;
+  border-bottom: 1px solid rgb(2, 2, 4);
+}
+
+.navbox {
+  float: right;
+  padding: 2px 5px 2px 5px;
+}
+
+#breadcrumbs {
+  padding: 2px 0 2px 10px;
+}
+
 #content {
   padding: 10px 10px 10px 10px;
 }

@@ -17,9 +17,13 @@ if ($platform2 == null) {
 
 if ($versioncomparator->compareVersions($platform1->version, $platform2->version) > 0) {
   redirect('/compare/platform/' . $platform2->version . '/' . $platform1->version);
+//  $temp = $platform1;
+//  $platform1 = $platform2;
+//  $platform2 = $temp;
 }
 
 $smarty->prepare('comparePlatform.tpl', $platform1->id.'.'.$platform2->id);
+$smarty->assign('platforms', Platform::getAllPlatforms());
 $smarty->assign("diff", new PlatformDiff($platform1, $platform2));
 $smarty->display();
 ?>

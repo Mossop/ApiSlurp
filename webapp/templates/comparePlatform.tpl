@@ -1,13 +1,37 @@
 {include file="header.tpl" title="Comparing platform `$diff->left` to platform `$diff->right`"}
-<div id="overview">
-<div class="block">
-  <p><a href="#removed">Removed Interfaces ({$diff->removed|@count})</a></p>
-  <p><a href="#added">Added Interfaces ({$diff->added|@count})</a></p>
-  <p><a href="#modified">Modified Interfaces ({$diff->modified|@count})</a></p>
-  <p><a href="#matching">Unchanged Interfaces ({$diff->unchanged|@count})</a></p>
-</div>
+<script type="text/javascript">
+function leftSelect(version) {ldelim}
+window.location.href = '{$ROOT}/compare/platform/' + version + '/{$diff->right->version}';
+{rdelim}
+
+function rightSelect(version) {ldelim}
+window.location.href = '{$ROOT}/compare/platform/{$diff->left->version}/' + version;
+{rdelim}
+</script>
+
+<div id="navbar">
+<p id="breadcrumbs">
+  <a href="{$ROOT}">Mozilla XPCOM</a> &raquo;
+  <select onchange="leftSelect(this.value)">
+    {foreach from=$platforms item="item"}
+      {if $item->id ne $diff->right->id}
+        <option value="{$item->version}"{if $item->id eq $diff->left->id} selected="selected"{/if}>{$item}</option>
+      {/if}
+    {/foreach}
+  </select> &raquo;
+  <a href="{$ROOT}/platform/{$diff->left->version}">Interfaces</a> &raquo;
+  compare to
+  <select onchange="rightSelect(this.value)">
+    {foreach from=$platforms item="item"}
+      {if $item->id ne $diff->left->id}
+        <option value="{$item->version}"{if $item->id eq $diff->right->id} selected="selected"{/if}>{$item}</option>
+      {/if}
+    {/foreach}
+  </select>
+</p>
 </div>
 
+<div id="content">
 <div class="body">
   <h1>Comparing platform
       <a href="{$ROOT}/platform/{$diff->left->version}">{$diff->left}</a> to platform
@@ -36,5 +60,6 @@
       <li><a href="{$ROOT}/platform/{$diff->right->version}/interface/{$item->name}">{$item}</a></li>
     {/foreach}
   </ul>
+</div>
 </div>
 {include file="footer.tpl"}

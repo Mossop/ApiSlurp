@@ -1,39 +1,48 @@
-{include file="header.tpl" title="$interface Interface (from $platform)"}
-<div id="overview">
-<div class="block">
-  <h2>Appears in:</h2>
-  <ul>
-    {foreach from=$interface->versions item="item"}
-      <li><a href="{$ROOT}/platform/{$item->platform->version}/interface/{$interface->name}">{$item->platform}</a></li>
-    {/foreach}
-  </ul>
-</div>
+{include file="header.tpl" title="$interface Interface"}
+<script type="text/javascript">
+function platformSelect(version) {ldelim}
+  if (!version)
+    return;
+  window.location.href = '{$ROOT}/platform/' + version + '/interface/{$interface}';
+{rdelim}
 
-<div class="block">
-  <h2>Different in:</h2>
-  <ul>
+function diffSelect(version) {ldelim}
+  if (!version)
+    return;
+  window.location.href = '{$ROOT}/compare/interface/{$interface}/{$interface->platform->version}/' + version;
+{rdelim}
+</script>
+
+<div id="navbar">
+<p class="navbox">
+  <a href="{$ROOT}/platform/{$interface->platform->version}/interface/{$interface->name}/usage">Interface Usage</a>
+  <a href="{$interface->sourceurl}">View IDL</a>
+  Compare to:
+  <select onchange="diffSelect(this.value)">
+    <option value="" selected="selected">--</option>
     {foreach from=$interface->versions item="item"}
       {if $item->hash ne $interface->hash}
-        <li><a href="{$ROOT}/compare/interface/{$interface->name}/{$item->platform->version}/{$interface->platform->version}">{$item->platform}</a></li>
+        <option value="{$item->platform->version}">{$item->platform}</option>
       {/if}
     {/foreach}
-  </ul>
+  </select>
+</p>
+
+<p id="breadcrumbs">
+  <a href="{$ROOT}">Mozilla XPCOM</a> &raquo;
+  <select onchange="platformSelect(this.value)">
+    {foreach from=$interface->versions item="item"}
+      <option value="{$item->platform->version}"{if $item->platform->id eq $interface->platform->id} selected="selected"{/if}>{$item->platform}</option>
+    {/foreach}
+  </select> &raquo;
+  <a href="{$ROOT}/platform/{$interface->platform->version}">Interfaces</a> &raquo;
+  {$interface}
+</p>
 </div>
 
-<div class="block">
-  <ul>
-    <li><a href="#constants">Constants ({$interface->constants|@count})</a></li>
-    <li><a href="#attributes">Attributes ({$interface->attributes|@count})</a></li>
-    <li><a href="#methods">Methods ({$interface->methods|@count})</a></li>
-  </ul>
-</div>
-</div>
-
+<div id="content">
 <div class="body">
-  <h1>{$interface} Interface
-      (from platform <a href="{$ROOT}/platform/{$interface->platform->version}">{$interface->platform}</a>) -
-      <a href="{$interface->sourceurl}">Source</a> -
-      <a href="{$ROOT}/platform/{$interface->platform->version}/interface/{$interface->name}/usage">Usage</a></h1>
+  <h1>{$interface} Interface</h1>
   <div class="idl">
     <pre class="comment">{$interface->comment}</pre>
     {include file="includes/interface.tpl" interface=$interface}
@@ -59,5 +68,6 @@
       {include file="includes/method.tpl" method=$item}
     </div>
   {/foreach}
+</div>
 </div>
 {include file="footer.tpl"}

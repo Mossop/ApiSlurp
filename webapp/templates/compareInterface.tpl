@@ -1,11 +1,43 @@
 {include file="header.tpl" title="Comparing `$diff->right` between platform `$diff->left->platform` and platform `$diff->right->platform`"}
 <script type="text/javascript">
+function leftSelect(version) {ldelim}
+window.location.href = '{$ROOT}/compare/interface/{$diff->left}/' + version + '/{$diff->right->platform->version}';
+{rdelim}
+
+function rightSelect(version) {ldelim}
+window.location.href = '{$ROOT}/compare/interface/{$diff->left}/{$diff->left->platform->version}/' + version;
+{rdelim}
+
 function toggleVisible() {ldelim}
   var checkbox = document.getElementById("hidesame");
   document.getElementById("diff").className = checkbox.checked ? "diff hidesame" : "diff";
 {rdelim}
 </script>
 
+<div id="navbar">
+<p id="breadcrumbs">
+  <a href="{$ROOT}">Mozilla XPCOM</a> &raquo;
+  <select onchange="leftSelect(this.value)">
+    {foreach from=$diff->versions item="item"}
+      {if $item->platform->id ne $diff->right->platform->id}
+        <option value="{$item->platform->version}"{if $item->platform->id eq $diff->left->platform->id} selected="selected"{/if}>{$item->platform}</option>
+      {/if}
+    {/foreach}
+  </select> &raquo;
+  <a href="{$ROOT}/platform/{$diff->left->platform->version}">Interfaces</a> &raquo;
+  <a href="{$ROOT}/platform/{$diff->left->platform->version}/interface/{$diff->left}">{$diff->left}</a> &raquo;
+  compare to
+  <select onchange="rightSelect(this.value)">
+    {foreach from=$diff->versions item="item"}
+      {if $item->platform->id ne $diff->left->platform->id}
+        <option value="{$item->platform->version}"{if $item->platform->id eq $diff->right->platform->id} selected="selected"{/if}>{$item->platform}</option>
+      {/if}
+    {/foreach}
+  </select>
+</p>
+</div>
+
+<div id="content">
 <div class="body">
   <table id="diff" class="diff">
     <tr>

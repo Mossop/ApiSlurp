@@ -8,4 +8,3 @@
 </head>
 <body>
 <div id="header"></div>
-<div id="content">
