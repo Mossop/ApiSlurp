@@ -16,7 +16,7 @@ function platformSelect(version) {ldelim}
 </p>
 
 <p id="breadcrumbs">
-  <img src="{$ROOT}/silk/bricks.png" /> <a href="{$ROOT}">Mozilla XPCOM</a> &raquo;
+  <img src="{$ROOT}/silk/bricks.png" /> <a href="{$HOME}">Mozilla XPCOM</a> &raquo;
   <select onchange="platformSelect(this.value)">
     <option value="">--</option>
     {foreach from=$platforms item="item"}

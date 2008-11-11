@@ -16,7 +16,7 @@ function toggleVisible() {ldelim}
 
 <div id="navbar">
 <p id="breadcrumbs">
-  <img src="{$ROOT}/silk/bricks.png" /> <a href="{$ROOT}">Mozilla XPCOM</a> &raquo;
+  <img src="{$ROOT}/silk/bricks.png" /> <a href="{$HOME}">Mozilla XPCOM</a> &raquo;
   <select onchange="mainSelect(this.value)">
     {foreach from=$diff->versions item="item"}
       {if $item->platform->id ne $diff->target->platform->id}

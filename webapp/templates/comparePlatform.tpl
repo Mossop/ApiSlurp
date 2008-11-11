@@ -18,7 +18,7 @@ function targetSelect(version) {ldelim}
 </p>
 
 <p id="breadcrumbs">
-  <img src="{$ROOT}/silk/bricks.png" /> <a href="{$ROOT}">Mozilla XPCOM</a> &raquo;
+  <img src="{$ROOT}/silk/bricks.png" /> <a href="{$HOME}">Mozilla XPCOM</a> &raquo;
   <select onchange="mainSelect(this.value)">
     {foreach from=$platforms item="item"}
       {if $item->id ne $diff->target->id}

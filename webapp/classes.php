@@ -179,6 +179,14 @@ class APISmarty extends Smarty {
     $this->cache_dir            = $CONFIG['cachedir'] . '/';
     $this->cache_modified_check = true;
 
+    $this->assign('ROOT', $CONFIG['webroot']);
+    if ($CONFIG['webroot'] == '') {
+      $this->assign('HOME', '/');
+    }
+    else {
+      $this->assign('HOME', $CONFIG['webroot']);
+    }
+
     $this->starttime = microtime(true);
   }
 

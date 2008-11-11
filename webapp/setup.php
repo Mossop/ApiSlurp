@@ -43,7 +43,6 @@ function redirect($path) {
 }
 
 $smarty = new APISmarty();
-$smarty->assign('ROOT', $CONFIG['webroot']);
 
 if (!is_file($CONFIG['dbpath'])) {
   error('No database', 'The API database was not found. Check the app configuration.');

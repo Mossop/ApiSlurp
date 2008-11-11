@@ -49,7 +49,7 @@ function diffSelect(version) {ldelim}
 </p>
 
 <p id="breadcrumbs">
-  <img src="{$ROOT}/silk/bricks.png" /> <a href="{$ROOT}">Mozilla XPCOM</a> &raquo;
+  <img src="{$ROOT}/silk/bricks.png" /> <a href="{$HOME}">Mozilla XPCOM</a> &raquo;
   <select onchange="platformSelect(this.value)">
     {foreach from=$interface->versions item="item"}
       <option value="{$item->platform->version}"{if $item->platform->id eq $interface->platform->id} selected="selected"{/if}>{$item->platform}</option>
