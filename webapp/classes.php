@@ -537,6 +537,8 @@ class XPCOMInterface {
   public static function getAllInterfacesByModule() {
     global $db;
 
+    // XXX Reverse sorting on platform ID will generally give us the newest interface
+    // first, but it isn't guaranteed
     $stmt = $db->query('SELECT ' . COLUMNS_INTERFACES . ', ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_PLATFORMS .
                        ' FROM plat_ifaces JOIN interfaces ON plat_ifaces.interface=interfaces.id '.
                        'JOIN platforms ON plat_ifaces.platform=platforms.id ORDER BY interfaces.name,platforms.id DESC');
@@ -1097,24 +1099,34 @@ class Parameter {
 class PlatformDiff {
   public $left;
   public $right;
+  public $main;
+  public $target;
 
   public $added = array();
   public $removed = array();
   public $modified = array();
   public $unchanged = array();
 
-  public function __construct($left, $right) {
-    global $db;
+  public function __construct($main, $target) {
+    global $db, $versioncomparator;
 
-    $this->left = $left;
-    $this->right = $right;
+    $this->main = $main;
+    $this->target = $target;
+    if ($versioncomparator->compareVersions($main->version, $target->version) > 0) {
+      $this->left = $target;
+      $this->right = $main;
+    }
+    else {
+      $this->left = $main;
+      $this->right = $target;
+    }
 
     $stmt = $db->prepare('SELECT ' . COLUMNS_INTERFACES . ' FROM '.
                          '(SELECT * FROM plat_ifaces WHERE platform=?) AS pi1 '.
                          'LEFT JOIN (SELECT * FROM plat_ifaces WHERE platform=?) AS pi2 '.
                          'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id '.
                          'WHERE pi2.platform IS NULL ORDER BY interfaces.name');
-    $stmt->execute(array($right->id, $left->id));
+    $stmt->execute(array($this->right->id, $this->left->id));
     while ($row = $stmt->fetch()) {
       array_push($this->added, XPCOMInterface::getOrCreate($row));
     }
@@ -1124,7 +1136,7 @@ class PlatformDiff {
                          'LEFT JOIN (SELECT * FROM plat_ifaces WHERE platform=?) AS pi2 '.
                          'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id '.
                          'WHERE pi2.platform IS NULL ORDER BY interfaces.name');
-    $stmt->execute(array($left->id, $right->id));
+    $stmt->execute(array($this->left->id, $this->right->id));
     while ($row = $stmt->fetch()) {
       array_push($this->removed, XPCOMInterface::getOrCreate($row));
     }
@@ -1134,7 +1146,7 @@ class PlatformDiff {
                          'JOIN (SELECT * FROM plat_ifaces WHERE platform=?) AS pi2 '.
                          'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id '.
                          'WHERE pi1.hash=pi2.hash ORDER BY interfaces.name');
-    $stmt->execute(array($left->id, $right->id));
+    $stmt->execute(array($this->left->id, $this->right->id));
     while ($row = $stmt->fetch()) {
       array_push($this->unchanged, XPCOMInterface::getOrCreate($row));
     }
@@ -1144,7 +1156,7 @@ class PlatformDiff {
                          'JOIN (SELECT * FROM plat_ifaces WHERE platform=?) AS pi2 '.
                          'ON pi1.interface=pi2.interface JOIN interfaces ON pi1.interface=interfaces.id '.
                          'WHERE pi1.hash<>pi2.hash ORDER BY interfaces.name');
-    $stmt->execute(array($left->id, $right->id));
+    $stmt->execute(array($this->left->id, $this->right->id));
     while ($row = $stmt->fetch()) {
       array_push($this->modified, XPCOMInterface::getOrCreate($row));
     }
@@ -1154,21 +1166,30 @@ class PlatformDiff {
 class InterfaceDiff {
   public $left;
   public $right;
+  public $main;
+  public $target;
 
   public $constants = array();
   public $attributes = array();
   public $methods = array();
 
-  public function __construct($left, $right) {
-    global $db;
+  public function __construct($main, $target) {
+    global $db,$versioncomparator;
 
-    $this->left = $left;
-    $this->right = $right;
-    $this->versions = $right->versions;
+    $this->main = $main;
+    $this->target = $target;
+    if ($versioncomparator->compareVersions($main->platform->version, $target->platform->version) > 0) {
+      $this->left = $target;
+      $this->right = $main;
+    }
+    else {
+      $this->left = $main;
+      $this->right = $target;
+    }
 
-    $this->constants = $this->getLineMemberPairs($left->constants, $right->constants);
-    $this->attributes = $this->getNameMemberPairs($left->attributes, $right->attributes);
-    $this->methods = $this->getNameMemberPairs($left->methods, $right->methods);
+    $this->constants = $this->getLineMemberPairs($this->left->constants, $this->right->constants);
+    $this->attributes = $this->getNameMemberPairs($this->left->attributes, $this->right->attributes);
+    $this->methods = $this->getNameMemberPairs($this->left->methods, $this->right->methods);
   }
 
   public function __toString() {

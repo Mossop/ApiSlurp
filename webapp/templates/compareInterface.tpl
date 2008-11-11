@@ -1,11 +1,11 @@
 {include file="header.tpl" title="Comparing `$diff` between `$diff->left->platform` and `$diff->right->platform`"}
 <script type="text/javascript">
-function leftSelect(version) {ldelim}
-  window.location.href = '{$ROOT}/compare/interface/{$diff}/' + version + '/{$diff->right->platform->version}';
+function mainSelect(version) {ldelim}
+  window.location.href = '{$ROOT}/compare/interface/{$diff}/' + version + '/{$diff->target->platform->version}';
 {rdelim}
 
-function rightSelect(version) {ldelim}
-  window.location.href = '{$ROOT}/compare/interface/{$diff}/{$diff->left->platform->version}/' + version;
+function targetSelect(version) {ldelim}
+  window.location.href = '{$ROOT}/compare/interface/{$diff}/{$diff->main->platform->version}/' + version;
 {rdelim}
 
 function toggleVisible() {ldelim}
@@ -17,20 +17,20 @@ function toggleVisible() {ldelim}
 <div id="navbar">
 <p id="breadcrumbs">
   <img src="{$ROOT}/silk/bricks.png" /> <a href="{$ROOT}">Mozilla XPCOM</a> &raquo;
-  <select onchange="leftSelect(this.value)">
+  <select onchange="mainSelect(this.value)">
     {foreach from=$diff->versions item="item"}
-      {if $item->platform->id ne $diff->right->platform->id}
-        <option value="{$item->platform->version}"{if $item->platform->id eq $diff->left->platform->id} selected="selected"{/if}>{$item->platform}</option>
+      {if $item->platform->id ne $diff->target->platform->id}
+        <option value="{$item->platform->version}"{if $item->platform->id eq $diff->main->platform->id} selected="selected"{/if}>{$item->platform}</option>
       {/if}
     {/foreach}
   </select> &raquo;
-  <a href="{$ROOT}/platform/{$diff->left->platform->version}">Interfaces</a> &raquo;
-  <a href="{$ROOT}/platform/{$diff->left->platform->version}/interface/{$diff}">{$diff}</a> &raquo;
+  <a href="{$ROOT}/platform/{$diff->main->platform->version}">Interfaces</a> &raquo;
+  <a href="{$ROOT}/platform/{$diff->main->platform->version}/interface/{$diff}">{$diff}</a> &raquo;
   compare to
-  <select onchange="rightSelect(this.value)">
+  <select onchange="targetSelect(this.value)">
     {foreach from=$diff->versions item="item"}
-      {if $item->platform->id ne $diff->left->platform->id}
-        <option value="{$item->platform->version}"{if $item->platform->id eq $diff->right->platform->id} selected="selected"{/if}>{$item->platform}</option>
+      {if $item->platform->id ne $diff->main->platform->id}
+        <option value="{$item->platform->version}"{if $item->platform->id eq $diff->target->platform->id} selected="selected"{/if}>{$item->platform}</option>
       {/if}
     {/foreach}
   </select>

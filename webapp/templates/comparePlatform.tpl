@@ -1,12 +1,12 @@
 {include file="header.tpl" title="Comparing <a href=\"$ROOT/platform/`$diff->left->version`\">`$diff->left`</a> to <a href=\"$ROOT/platform/`$diff->right->version`\">`$diff->right`</a>"}
 <script type="text/javascript" src="{$ROOT}/scripts/filter.js"></script>
 <script type="text/javascript">
-function leftSelect(version) {ldelim}
-  window.location.href = '{$ROOT}/compare/platform/' + version + '/{$diff->right->version}';
+function mainSelect(version) {ldelim}
+  window.location.href = '{$ROOT}/compare/platform/' + version + '/{$diff->target->version}';
 {rdelim}
 
-function rightSelect(version) {ldelim}
-  window.location.href = '{$ROOT}/compare/platform/{$diff->left->version}/' + version;
+function targetSelect(version) {ldelim}
+  window.location.href = '{$ROOT}/compare/platform/{$diff->main->version}/' + version;
 {rdelim}
 </script>
 
@@ -19,19 +19,19 @@ function rightSelect(version) {ldelim}
 
 <p id="breadcrumbs">
   <img src="{$ROOT}/silk/bricks.png" /> <a href="{$ROOT}">Mozilla XPCOM</a> &raquo;
-  <select onchange="leftSelect(this.value)">
+  <select onchange="mainSelect(this.value)">
     {foreach from=$platforms item="item"}
-      {if $item->id ne $diff->right->id}
-        <option value="{$item->version}"{if $item->id eq $diff->left->id} selected="selected"{/if}>{$item}</option>
+      {if $item->id ne $diff->target->id}
+        <option value="{$item->version}"{if $item->id eq $diff->main->id} selected="selected"{/if}>{$item}</option>
       {/if}
     {/foreach}
   </select> &raquo;
-  <a href="{$ROOT}/platform/{$diff->left->version}">Interfaces</a> &raquo;
+  <a href="{$ROOT}/platform/{$diff->main->version}">Interfaces</a> &raquo;
   compare to
-  <select onchange="rightSelect(this.value)">
+  <select onchange="targetSelect(this.value)">
     {foreach from=$platforms item="item"}
-      {if $item->id ne $diff->left->id}
-        <option value="{$item->version}"{if $item->id eq $diff->right->id} selected="selected"{/if}>{$item}</option>
+      {if $item->id ne $diff->main->id}
+        <option value="{$item->version}"{if $item->id eq $diff->target->id} selected="selected"{/if}>{$item}</option>
       {/if}
     {/foreach}
   </select>
