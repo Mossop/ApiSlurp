@@ -1,4 +1,4 @@
 <div class="interface signature {$class}">
   <div class="attributes">[{if $interface->scriptable}{include file="includes/attributes/scriptable.tpl"}, {/if}{if $interface->noscript}{include file="includes/attributes/noscript.tpl"}, {/if}{if $interface->function}{include file="includes/attributes/function.tpl"}, {/if}{include file="includes/attributes/uuid.tpl" value=$interface->iid}]</div>
-  <div class="header"><span class="keyword">interface</span> <span class="type">{$interface->name}</span> : <span class="type"><a href="{$ROOT}/platform/{$interface->platform->version}/interface/{$interface->base}">{$interface->base}</a></span></div>
+  <div class="header"><span class="keyword">interface</span> <span class="type">{$interface->name}</span>{if $interface->base} : <span class="type"><a href="{$ROOT}/platform/{$interface->platform->version}/interface/{$interface->base}">{$interface->base}</a></span>{/if}</div>
 </div>

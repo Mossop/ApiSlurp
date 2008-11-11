@@ -35,6 +35,10 @@ function diffSelect(version) {ldelim}
   <img src="{$ROOT}/silk/sitemap_color.png" />
   <a href="{$ROOT}/platform/{$interface->platform->version}/interface/{$interface->name}/usage">Interface Usage</a>
 </p>
+<p class="navbox">
+  <img src="https://developer.mozilla.org/favicon.ico" />
+  <a href="https://developer.mozilla.org/en/{$interface->name|capitalize:true}">More information</a>
+</p>
 
 <p id="breadcrumbs">
   <img src="{$ROOT}/silk/bricks.png" /> <a href="{$ROOT}">Mozilla XPCOM</a> &raquo;
