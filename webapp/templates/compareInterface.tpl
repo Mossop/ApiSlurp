@@ -1,11 +1,11 @@
 {include file="header.tpl" title="Comparing `$diff` between `$diff->left->platform` and `$diff->right->platform`"}
 <script type="text/javascript">
 function leftSelect(version) {ldelim}
-window.location.href = '{$ROOT}/compare/interface/{$diff}/' + version + '/{$diff->right->platform->version}';
+  window.location.href = '{$ROOT}/compare/interface/{$diff}/' + version + '/{$diff->right->platform->version}';
 {rdelim}
 
 function rightSelect(version) {ldelim}
-window.location.href = '{$ROOT}/compare/interface/{$diff}/{$diff->left->platform->version}/' + version;
+  window.location.href = '{$ROOT}/compare/interface/{$diff}/{$diff->left->platform->version}/' + version;
 {rdelim}
 
 function toggleVisible() {ldelim}
