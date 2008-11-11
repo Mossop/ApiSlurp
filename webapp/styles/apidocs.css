@@ -18,6 +18,14 @@
   border-bottom: 1px solid rgb(2, 2, 4);
 }
 
+#navbar img {
+  vertical-align: middle
+}
+
+#navbar a {
+  color: blue;
+}
+
 .navbox {
   float: right;
   padding: 2px 5px 2px 5px;
@@ -41,15 +49,6 @@
   font-size: 120%;
   font-weight: bold;
   margin-bottom: 0.5em;
-}
-
-.body ul {
-  padding-left: 40px;
-  margin-bottom: 0.5em;
-}
-
-.body li {
-  list-style-type: disc;
 }
 
 .body p {
@@ -85,7 +84,7 @@
 /* Index page rules */
 
 .interfacelist {
-  -moz-column-count: 2;
+  -moz-column-count: 3;
 }
 
 .variants {

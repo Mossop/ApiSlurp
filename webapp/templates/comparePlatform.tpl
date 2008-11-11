@@ -11,7 +11,7 @@ window.location.href = '{$ROOT}/compare/platform/{$diff->left->version}/' + vers
 
 <div id="navbar">
 <p id="breadcrumbs">
-  <a href="{$ROOT}">Mozilla XPCOM</a> &raquo;
+  <img src="{$ROOT}/silk/bricks.png" /> <a href="{$ROOT}">Mozilla XPCOM</a> &raquo;
   <select onchange="leftSelect(this.value)">
     {foreach from=$platforms item="item"}
       {if $item->id ne $diff->right->id}

@@ -15,8 +15,6 @@ function diffSelect(version) {ldelim}
 
 <div id="navbar">
 <p class="navbox">
-  <a href="{$ROOT}/platform/{$interface->platform->version}/interface/{$interface->name}/usage">Interface Usage</a>
-  <a href="{$interface->sourceurl}">View IDL</a>
   Compare to:
   <select onchange="diffSelect(this.value)">
     <option value="" selected="selected">--</option>
@@ -28,8 +26,17 @@ function diffSelect(version) {ldelim}
   </select>
 </p>
 
+<p class="navbox">
+  <img src="{$ROOT}/silk/script_go.png" />
+  <a href="{$interface->sourceurl}">View IDL</a>
+</p>
+<p class="navbox">
+  <img src="{$ROOT}/silk/sitemap_color.png" />
+  <a href="{$ROOT}/platform/{$interface->platform->version}/interface/{$interface->name}/usage">Interface Usage</a>
+</p>
+
 <p id="breadcrumbs">
-  <a href="{$ROOT}">Mozilla XPCOM</a> &raquo;
+  <img src="{$ROOT}/silk/bricks.png" /> <a href="{$ROOT}">Mozilla XPCOM</a> &raquo;
   <select onchange="platformSelect(this.value)">
     {foreach from=$interface->versions item="item"}
       <option value="{$item->platform->version}"{if $item->platform->id eq $interface->platform->id} selected="selected"{/if}>{$item->platform}</option>
