@@ -12,7 +12,9 @@ function filterList() {
   text = document.getElementById("filterbox").value.toLowerCase();
   var elements = document.getElementsByClassName("filteritem");
   for (var i = 0; i < elements.length; i++) {
-    if (elements[i].textContent.toLowerCase().indexOf(text) >= 0)
+    if (text == "")
+      elements[i].style.display = null;
+    else if (elements[i].textContent.toLowerCase().indexOf(text) >= 0)
       elements[i].style.display = null;
     else
       elements[i].style.display = "none";
@@ -26,6 +28,11 @@ function filterChange() {
 
   gFilterTimeout = window.setTimeout(filterList, 500);
 }
+
+function clearFilter() {
+  document.getElementById("filterbox").value = "";
+  filterList();
+}
 {/literal}
 </script>
 
@@ -33,6 +40,7 @@ function filterChange() {
 <p class="navbox">
   <img src="{$ROOT}/silk/find.png" />
   Filter: <input id="filterbox" type="text" onkeypress="filterChange()"/>
+  <a href="#" onclick="clearFilter(); return false"><img src="{$ROOT}/silk/cancel.png" /></a>
 </p>
 
 <p id="breadcrumbs">
