@@ -14,18 +14,26 @@ function diffSelect(version) {ldelim}
 </script>
 
 <div id="navbar">
-<p class="navbox">
-  <img src="{$ROOT}/silk/arrow_divide.png" />
-  Compare to:
-  <select onchange="diffSelect(this.value)">
-    <option value="" selected="selected">--</option>
-    {foreach from=$interface->versions item="item"}
-      {if $item->hash ne $interface->hash}
-        <option value="{$item->platform->version}">{$item->platform}</option>
-      {/if}
-    {/foreach}
-  </select>
-</p>
+{assign var="showdiff" value="false"}
+{foreach from=$interface->versions item="item"}
+  {if $item->hash ne $interface->hash}
+    {assign var="showdiff" value="true"}
+  {/if}
+{/foreach}
+{if $showdiff eq "true"}
+  <p class="navbox">
+    <img src="{$ROOT}/silk/arrow_divide.png" />
+    Compare to:
+    <select onchange="diffSelect(this.value)">
+      <option value="" selected="selected">--</option>
+      {foreach from=$interface->versions item="item"}
+        {if $item->hash ne $interface->hash}
+          <option value="{$item->platform->version}">{$item->platform}</option>
+        {/if}
+      {/foreach}
+    </select>
+  </p>
+{/if}
 
 <p class="navbox">
   <img src="{$ROOT}/silk/script_go.png" />
