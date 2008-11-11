@@ -25,7 +25,7 @@ function platformSelect(version) {ldelim}
 <div class="body">
   {if count($interface->subclasses) > 0}
     <h2>Subclasses</h2>
-    <ul>
+    <ul class="interfacelist">
       {foreach from=$interface->subclasses item="item"}
         <li><a href="{$ROOT}/platform/{$item->platform->version}/interface/{$item->name}">{$item}</a></li>
       {/foreach}
@@ -33,29 +33,38 @@ function platformSelect(version) {ldelim}
   {/if}
   {if count($interface->attrUsage) > 0}
     <h2>Attributes</h2>
-    {foreach from=$interface->attrUsage item="item"}
-      <div class="member attribute">
-        <pre class="comment">{$item->comment}</pre>
-        {include file="includes/attribute.tpl" attribute=$item}
-      </div>
+    {foreach from=$interface->attrUsage key="ti" item="list"}
+      <h3>From <a href="{$ROOT}/platform/{$interface->platform->version}/interface/{$ti}">{$ti}</a></h3>
+      {foreach from=$list item="item"}
+        <div class="member attribute">
+          <pre class="comment">{$item->comment}</pre>
+          {include file="includes/attribute.tpl" attribute=$item}
+        </div>
+      {/foreach}
     {/foreach}
   {/if}
   {if count($interface->methodUsage) > 0}
     <h2>Returns</h2>
-    {foreach from=$interface->methodUsage item="item"}
-      <div class="member attribute">
-        <pre class="comment">{$item->comment}</pre>
-        {include file="includes/method.tpl" method=$item}
-      </div>
+    {foreach from=$interface->methodUsage key="ti" item="list"}
+      <h3>From <a href="{$ROOT}/platform/{$interface->platform->version}/interface/{$ti}">{$ti}</a></h3>
+      {foreach from=$list item="item"}
+        <div class="member attribute">
+          <pre class="comment">{$item->comment}</pre>
+          {include file="includes/method.tpl" method=$item}
+        </div>
+      {/foreach}
     {/foreach}
   {/if}
   {if count($interface->paramUsage) > 0}
     <h2>Parameters</h2>
-    {foreach from=$interface->paramUsage item="item"}
-      <div class="member attribute">
-        <pre class="comment">{$item->comment}</pre>
-        {include file="includes/method.tpl" method=$item}
-      </div>
+    {foreach from=$interface->paramUsage key="ti" item="list"}
+      <h3>From <a href="{$ROOT}/platform/{$interface->platform->version}/interface/{$ti}">{$ti}</a></h3>
+      {foreach from=$list item="item"}
+        <div class="member attribute">
+          <pre class="comment">{$item->comment}</pre>
+          {include file="includes/method.tpl" method=$item}
+        </div>
+      {/foreach}
     {/foreach}
   {/if}
   {if count($interface->subclasses) == 0}

@@ -662,7 +662,7 @@ class InterfaceVersion {
       $this->subclasses = array();
       $stmt = $db->prepare('SELECT ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_INTERFACES . ' ' .
                            'FROM interfaces JOIN plat_ifaces ON interfaces.id=plat_ifaces.interface ' .
-                           'WHERE plat_ifaces.platform=? AND plat_ifaces.base=?');
+                           'WHERE plat_ifaces.platform=? AND plat_ifaces.base=? ORDER BY interfaces.name');
       $stmt->execute(array($this->platform->id, $this->name));
       while ($row = $stmt->fetch()) {
         $versions = XPCOMInterface::getOrCreate($row);
@@ -679,12 +679,19 @@ class InterfaceVersion {
       $this->attrUsage = array();
       $stmt = $db->prepare('SELECT ' . COLUMNS_INTERFACES . ', ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_MEMBERS . ' ' .
                            'FROM interfaces JOIN plat_ifaces ON interfaces.id=plat_ifaces.interface JOIN members ON plat_ifaces.id=members.pint ' .
-                           'WHERE members.kind="attribute" AND members.type=? AND plat_ifaces.platform=?');
+                           'WHERE members.kind="attribute" AND members.type=? AND plat_ifaces.platform=? '.
+                           'ORDER BY interfaces.name,members.name');
       $stmt->execute(array($this->name, $this->platform->id));
       while ($row = $stmt->fetch()) {
         $versions = XPCOMInterface::getOrCreate($row);
         $interface = self::getOrCreate($row, $versions, $this->platform, $versions->name);
-        array_push($this->attrUsage, Member::getOrCreate($row, $interface));
+        $member = Member::getOrCreate($row, $interface);
+        if (!isset($this->attrUsage[$interface->name])) {
+          $this->attrUsage[$interface->name] = array($member);
+        }
+        else {
+          array_push($this->attrUsage[$interface->name], $member);
+        }
       }
     }
     return $this->attrUsage;
@@ -697,12 +704,19 @@ class InterfaceVersion {
       $this->methodUsage = array();
       $stmt = $db->prepare('SELECT ' . COLUMNS_INTERFACES . ', ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_MEMBERS . ' ' .
                            'FROM interfaces JOIN plat_ifaces ON interfaces.id=plat_ifaces.interface JOIN members ON plat_ifaces.id=members.pint ' .
-                           'WHERE members.kind="method" AND members.type=? AND plat_ifaces.platform=?');
+                           'WHERE members.kind="method" AND members.type=? AND plat_ifaces.platform=? '.
+                           'ORDER BY interfaces.name,members.name');
       $stmt->execute(array($this->name, $this->platform->id));
       while ($row = $stmt->fetch()) {
         $versions = XPCOMInterface::getOrCreate($row);
         $interface = self::getOrCreate($row, $versions, $this->platform, $versions->name);
-        array_push($this->methodUsage, Member::getOrCreate($row, $interface));
+        $member = Member::getOrCreate($row, $interface);
+        if (!isset($this->methodUsage[$interface->name])) {
+          $this->methodUsage[$interface->name] = array($member);
+        }
+        else {
+          array_push($this->methodUsage[$interface->name], $member);
+        }
       }
     }
     return $this->methodUsage;
@@ -716,12 +730,19 @@ class InterfaceVersion {
       $stmt = $db->prepare('SELECT ' . COLUMNS_INTERFACES . ', ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_MEMBERS . ' ' .
                            'FROM interfaces JOIN plat_ifaces ON interfaces.id=plat_ifaces.interface '.
                            'JOIN members ON plat_ifaces.id=members.pint JOIN parameters ON members.id=parameters.member ' .
-                           'WHERE members.kind="method" AND parameters.type=? AND plat_ifaces.platform=?');
+                           'WHERE members.kind="method" AND parameters.type=? AND plat_ifaces.platform=? '.
+                           'ORDER BY interfaces.name,parameters.name');
       $stmt->execute(array($this->name, $this->platform->id));
       while ($row = $stmt->fetch()) {
         $versions = XPCOMInterface::getOrCreate($row);
         $interface = self::getOrCreate($row, $versions, $this->platform, $versions->name);
-        array_push($this->paramUsage, Member::getOrCreate($row, $interface));
+        $member = Member::getOrCreate($row, $interface);
+        if (!isset($this->paramUsage[$interface->name])) {
+          $this->paramUsage[$interface->name] = array($member);
+        }
+        else {
+          array_push($this->paramUsage[$interface->name], $member);
+        }
       }
     }
     return $this->paramUsage;
