@@ -23,33 +23,50 @@ function platformSelect(version) {ldelim}
 
 <div id="content">
 <div class="body">
-  <h2>Subclasses</h2>
-  <ul>
-    {foreach from=$interface->subclasses item="item"}
-      <li><a href="{$ROOT}/platform/{$item->platform->version}/interface/{$item->name}">{$item}</a></li>
+  {if count($interface->subclasses) > 0}
+    <h2>Subclasses</h2>
+    <ul>
+      {foreach from=$interface->subclasses item="item"}
+        <li><a href="{$ROOT}/platform/{$item->platform->version}/interface/{$item->name}">{$item}</a></li>
+      {/foreach}
+    </ul>
+  {/if}
+  {if count($interface->attrUsage) > 0}
+    <h2>Attributes</h2>
+    {foreach from=$interface->attrUsage item="item"}
+      <div class="member attribute">
+        <pre class="comment">{$item->comment}</pre>
+        {include file="includes/attribute.tpl" attribute=$item}
+      </div>
     {/foreach}
-  </ul>
-  <h2>Attributes</h2>
-  {foreach from=$interface->attrUsage item="item"}
-    <div class="member attribute">
-      <pre class="comment">{$item->comment}</pre>
-      {include file="includes/attribute.tpl" attribute=$item}
-    </div>
-  {/foreach}
-  <h2>Returns</h2>
-  {foreach from=$interface->methodUsage item="item"}
-    <div class="member attribute">
-      <pre class="comment">{$item->comment}</pre>
-      {include file="includes/method.tpl" method=$item}
-    </div>
-  {/foreach}
-  <h2>Parameters</h2>
-  {foreach from=$interface->paramUsage item="item"}
-    <div class="member attribute">
-      <pre class="comment">{$item->comment}</pre>
-      {include file="includes/method.tpl" method=$item}
-    </div>
-  {/foreach}
+  {/if}
+  {if count($interface->methodUsage) > 0}
+    <h2>Returns</h2>
+    {foreach from=$interface->methodUsage item="item"}
+      <div class="member attribute">
+        <pre class="comment">{$item->comment}</pre>
+        {include file="includes/method.tpl" method=$item}
+      </div>
+    {/foreach}
+  {/if}
+  {if count($interface->paramUsage) > 0}
+    <h2>Parameters</h2>
+    {foreach from=$interface->paramUsage item="item"}
+      <div class="member attribute">
+        <pre class="comment">{$item->comment}</pre>
+        {include file="includes/method.tpl" method=$item}
+      </div>
+    {/foreach}
+  {/if}
+  {if count($interface->subclasses) == 0}
+    {if count($interface->attrUsage) == 0}
+      {if count($interface->methodUsage) == 0}
+        {if count($interface->paramUsage) == 0}
+          <p>This interface is not used by any other interfaces.</p>
+        {/if}
+      {/if}
+    {/if}
+  {/if}
 </div>
 </div>
 {include file="footer.tpl"}
