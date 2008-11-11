@@ -1,0 +1,1 @@
+<span class="keyword" title="The size of this array is given by the {$value} parameter">size_is</span>(<span class="name">{$value}</span>)

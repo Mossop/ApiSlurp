@@ -1,0 +1,1 @@
+<span class="keyword" title="The caller gets a reference to the value but should not release it">shared</span>

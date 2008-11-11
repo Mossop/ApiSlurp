@@ -192,6 +192,10 @@
   color: darkred;
 }
 
+.keyword[title] {
+  border-bottom: 1px dashed darkred;
+}
+
 .name {
   color: green;
 }

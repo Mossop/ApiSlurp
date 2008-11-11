@@ -1,0 +1,1 @@
+<span class="keyword" title="This will be called {$value} in C++">binaryname</span>(<span class="name">{$value}</span>)
