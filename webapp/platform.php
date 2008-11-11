@@ -13,7 +13,7 @@ if ($platform == null) {
 
 $smarty->prepare('platform.tpl', $platform->id);
 $smarty->assign('platform', $platform);
-$smarty->assign('interfaces', $platform->getInterfaces());
+$smarty->assign('modules', $platform->getInterfacesByModule());
 $smarty->assign('platforms', Platform::getAllPlatforms());
 $smarty->display();
 ?>

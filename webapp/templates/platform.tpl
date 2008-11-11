@@ -66,11 +66,14 @@ function filterChange() {
 <div id="content">
 <div class="body">
   <h1>Platform {$platform} Interfaces</h1>
-  <ul class="interfacelist">
-    {foreach from=$interfaces item="item"}
-      <li class="filteritem"><a href="{$ROOT}/platform/{$platform->version}/interface/{$item->name}">{$item}</a></li>
-    {/foreach}
-  </ul>
+  {foreach from=$modules key="module" item="interfaces"}
+    <h2>{$module}</h2>
+    <ul class="interfacelist">
+      {foreach from=$interfaces item="item"}
+        <li class="filteritem"><a href="{$ROOT}/platform/{$platform->version}/interface/{$item->name}">{$item}</a></li>
+      {/foreach}
+    </ul>
+  {/foreach}
 </div>
 </div>
 {include file="footer.tpl"}

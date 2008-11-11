@@ -300,6 +300,30 @@ class Platform {
     return $interfaces;
   }
 
+  public function getInterfacesByModule() {
+    global $db;
+
+    $modules = array();
+    $stmt = $db->prepare('SELECT ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_INTERFACES . ' ' .
+                         'FROM plat_ifaces JOIN interfaces ON interfaces.id=plat_ifaces.interface '.
+                         'WHERE platform=? ORDER BY plat_ifaces.module,interfaces.name');
+    $stmt->execute(array($this->id));
+    while ($row = $stmt->fetch()) {
+      $versions = XPCOMInterface::getOrCreate($row);
+      $interface = InterfaceVersion::getOrCreate($row,
+                                                 $versions,
+                                                 $this,
+                                                 $versions->name);
+      if (!isset($modules[$interface->module])) {
+        $modules[$interface->module] = array($interface);
+      }
+      else {
+        array_push($modules[$interface->module], $interface);
+      }
+    }
+    return $modules;
+  }
+
   public static function getOrCreate($row, $prefix = 'platforms_') {
     $result = Cache::get('Platform', $row[$prefix . 'id']);
     if ($result != null) {
