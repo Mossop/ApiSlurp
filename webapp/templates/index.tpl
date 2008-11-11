@@ -28,18 +28,23 @@ function platformSelect(version) {ldelim}
 
 <div id="content">
 <div class="body">
-  <ul class="interfacelist filtersection">
-    {foreach from=$interfaces item="item"}
-      <li class="filteritem">
-        <a href="{$ROOT}/interface/{$item->name}">{$item}</a>
-        {if $item->oldest == $item->newest}
-          <span class="variants">({$item->newest->platform->version})</span>
-        {else}
-          <span class="variants">({$item->oldest->platform->version} - {$item->newest->platform->version})</span>
-        {/if}
-      </li>
-    {/foreach}
-  </ul>
+  {foreach from=$modules key="module" item="list"}
+    <div class="filtersection">
+      <h2>{$module}</h2>
+      <ul class="interfacelist">
+        {foreach from=$list item="item"}
+          <li class="filteritem">
+            <a href="{$ROOT}/interface/{$item->name}">{$item}</a>
+            {if $item->oldest == $item->newest}
+              <span class="variants">({$item->newest->platform->version})</span>
+            {else}
+              <span class="variants">({$item->oldest->platform->version} - {$item->newest->platform->version})</span>
+            {/if}
+          </li>
+        {/foreach}
+      </ul>
+    </div>
+  {/foreach}
 </div>
 </div>
 {include file="footer.tpl"}

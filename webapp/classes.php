@@ -361,10 +361,12 @@ class XPCOMInterface {
   private $row;
   private $prefix;
   private $versions;
+  private $versionsSorted;
 
   private function __construct($row, $prefix = 'interfaces_') {
     $this->row = $row;
     $this->prefix = $prefix;
+    $this->versionsSorted = false;
 
     Cache::set('XPCOMInterface', $row[$prefix . 'id'], $this);
   }
@@ -405,6 +407,10 @@ class XPCOMInterface {
     global $db;
 
     if (isset($this->versions)) {
+      if (!$this->versionsSorted) {
+        $this->versionsSorted = true;
+        usort($this->versions, 'interfaceversion_compare');
+      }
       return $this->versions;
     }
 
@@ -421,6 +427,7 @@ class XPCOMInterface {
                                                                 $this->name));
     }
     usort($this->versions, 'interfaceversion_compare');
+    $this->versionsSorted = true;
     return $this->versions;
   }
 
@@ -468,7 +475,6 @@ class XPCOMInterface {
                                                                      $platform,
                                                                      $interface->name));
     } while ($row = $stmt->fetch());
-    usort($interface->versions, 'interfaceversion_compare');
     return $interface;
   }
 
@@ -497,7 +503,6 @@ class XPCOMInterface {
                                                                      $interface,
                                                                      $platform,
                                                                      $interface->name));
-      usort($interface->versions, 'interfaceversion_compare');
     }
     return $interfaces;
   }
@@ -525,9 +530,40 @@ class XPCOMInterface {
                                                                      $interface,
                                                                      $platform,
                                                                      $interface->name));
-      usort($interface->versions, 'interfaceversion_compare');
     }
     return $interfaces;
+  }
+
+  public static function getAllInterfacesByModule() {
+    global $db;
+
+    $stmt = $db->query('SELECT ' . COLUMNS_INTERFACES . ', ' . COLUMNS_PLAT_IFACES . ', ' . COLUMNS_PLATFORMS .
+                       ' FROM plat_ifaces JOIN interfaces ON plat_ifaces.interface=interfaces.id '.
+                       'JOIN platforms ON plat_ifaces.platform=platforms.id ORDER BY interfaces.name,platforms.id DESC');
+
+    $modules = array();
+    while ($row = $stmt->fetch()) {
+      $interface = Cache::get('XPCOMInterface', $row['interfaces_id']);
+      if ($interface == null) {
+        $interface = self::getOrCreate($row);
+        if (isset($modules[$row['plat_ifaces_module']])) {
+          array_push($modules[$row['plat_ifaces_module']], $interface);
+        }
+        else {
+          $modules[$row['plat_ifaces_module']] = array($interface);
+        }
+      }
+      if (!isset($interface->versions)) {
+        $interface->versions = array();
+      }
+      $platform = Platform::getOrCreate($row);
+      array_push($interface->versions, InterfaceVersion::getOrCreate($row,
+                                                                     $interface,
+                                                                     $platform,
+                                                                     $interface->name));
+    }
+    ksort($modules);
+    return $modules;
   }
 }
 
