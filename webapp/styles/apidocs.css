@@ -101,8 +101,25 @@
   text-align: center;
 }
 
+.controls input {
+  vertical-align: baseline;
+}
+
 .hidesame .unchanged {
   display: none;
+}
+
+.diff {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.diff .before {
+  width: 50%;
+}
+
+.diff .after {
+  width: 50%;
 }
 
 .diff h2 {

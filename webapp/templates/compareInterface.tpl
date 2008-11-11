@@ -1,11 +1,11 @@
-{include file="header.tpl" title="Comparing `$diff->right` between platform `$diff->left->platform` and platform `$diff->right->platform`"}
+{include file="header.tpl" title="Comparing `$diff` between `$diff->left->platform` and `$diff->right->platform`"}
 <script type="text/javascript">
 function leftSelect(version) {ldelim}
-window.location.href = '{$ROOT}/compare/interface/{$diff->left}/' + version + '/{$diff->right->platform->version}';
+window.location.href = '{$ROOT}/compare/interface/{$diff}/' + version + '/{$diff->right->platform->version}';
 {rdelim}
 
 function rightSelect(version) {ldelim}
-window.location.href = '{$ROOT}/compare/interface/{$diff->left}/{$diff->left->platform->version}/' + version;
+window.location.href = '{$ROOT}/compare/interface/{$diff}/{$diff->left->platform->version}/' + version;
 {rdelim}
 
 function toggleVisible() {ldelim}
@@ -25,7 +25,7 @@ function toggleVisible() {ldelim}
     {/foreach}
   </select> &raquo;
   <a href="{$ROOT}/platform/{$diff->left->platform->version}">Interfaces</a> &raquo;
-  <a href="{$ROOT}/platform/{$diff->left->platform->version}/interface/{$diff->left}">{$diff->left}</a> &raquo;
+  <a href="{$ROOT}/platform/{$diff->left->platform->version}/interface/{$diff}">{$diff}</a> &raquo;
   compare to
   <select onchange="rightSelect(this.value)">
     {foreach from=$diff->versions item="item"}
@@ -41,16 +41,13 @@ function toggleVisible() {ldelim}
 <div class="body">
   <table id="diff" class="diff">
     <tr>
-      <td colspan="2">
-        <h2>{$diff->right} Interface</h2>
-        <div class="controls"><input type="checkbox" id="hidesame" name="hidesame" onchange="toggleVisible()"/><label for="hidesame">Hide unchanged items</label></div>
-      </td>
+      <td class="before"><h2><a href="{$ROOT}/platform/{$diff->left->platform->version}/interface/{$diff->left->name}">{$diff} in {$diff->left->platform}</a></h2></td>
+      <td class="after"><h2><a href="{$ROOT}/platform/{$diff->right->platform->version}/interface/{$diff->right->name}">{$diff} in {$diff->right->platform}</a></h2></td>
     </tr>
     <tr>
-      <td class="before"><h2><a href="{$ROOT}/platform/{$diff->left->platform->version}/interface/{$diff->left->name}">{$diff->left->platform}</a> - 
-                             <a href="{$diff->left->sourceurl}">Source</a></h2></td>
-      <td class="after"><h2><a href="{$ROOT}/platform/{$diff->right->platform->version}/interface/{$diff->right->name}">{$diff->right->platform}</a> - 
-                             <a href="{$diff->right->sourceurl}">Source</a></h2></td>
+      <td colspan="2">
+        <div class="controls"><input type="checkbox" id="hidesame" name="hidesame" onchange="toggleVisible()"/> <label for="hidesame">Hide unchanged items</label></div>
+      </td>
     </tr>
     <tr class="commentrow">
       <td class="before">

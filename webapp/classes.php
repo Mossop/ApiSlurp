@@ -1097,7 +1097,6 @@ class PlatformDiff {
 class InterfaceDiff {
   public $left;
   public $right;
-  public $versions;
 
   public $constants = array();
   public $attributes = array();
@@ -1113,6 +1112,22 @@ class InterfaceDiff {
     $this->constants = $this->getLineMemberPairs($left->constants, $right->constants);
     $this->attributes = $this->getNameMemberPairs($left->attributes, $right->attributes);
     $this->methods = $this->getNameMemberPairs($left->methods, $right->methods);
+  }
+
+  public function __toString() {
+    return $this->name;
+  }
+
+  public function __get($name) {
+    switch ($name) {
+      case 'versions':
+        return $this->right->versions;
+        break;
+      case 'name':
+        return $this->right->name;
+        break;
+    }
+    return null;
   }
 
   private function getLineMemberPairs($left, $right) {
