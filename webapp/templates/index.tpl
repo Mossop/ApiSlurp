@@ -31,6 +31,7 @@ function filterChange() {
 
 <div id="navbar">
 <p class="navbox">
+  <img src="{$ROOT}/silk/find.png" />
   Filter: <input id="filterbox" type="text" onkeypress="filterChange()"/>
 </p>
 

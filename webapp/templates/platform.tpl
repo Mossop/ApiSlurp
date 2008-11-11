@@ -37,6 +37,7 @@ function filterChange() {
 
 <div id="navbar">
 <p class="navbox">
+  <img src="{$ROOT}/silk/arrow_divide.png" />
   Compare to:
   <select onchange="diffSelect(this.value)">
     <option value="" selected="selected">--</option>
@@ -49,6 +50,7 @@ function filterChange() {
 </p>
 
 <p class="navbox">
+  <img src="{$ROOT}/silk/find.png" />
   Filter: <input id="filterbox" type="text" onkeypress="filterChange()"/>
 </p>
 

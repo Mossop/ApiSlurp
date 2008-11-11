@@ -15,6 +15,7 @@ function diffSelect(version) {ldelim}
 
 <div id="navbar">
 <p class="navbox">
+  <img src="{$ROOT}/silk/arrow_divide.png" />
   Compare to:
   <select onchange="diffSelect(this.value)">
     <option value="" selected="selected">--</option>
