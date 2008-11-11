@@ -1,4 +1,5 @@
 {include file="header.tpl" title="$platform Interfaces"}
+<script type="text/javascript" src="{$ROOT}/scripts/filter.js"></script>
 <script type="text/javascript">
 function platformSelect(version) {ldelim}
   if (!version)
@@ -11,35 +12,6 @@ function diffSelect(version) {ldelim}
     return;
   window.location.href = '{$ROOT}/compare/platform/{$platform->version}/' + version;
 {rdelim}
-
-{literal}
-function filterList() {
-  gFilterTimeout = null;
-  text = document.getElementById("filterbox").value.toLowerCase();
-  var elements = document.getElementsByClassName("filteritem");
-  for (var i = 0; i < elements.length; i++) {
-    if (text == "")
-      elements[i].style.display = null;
-    else if (elements[i].textContent.toLowerCase().indexOf(text) >= 0)
-      elements[i].style.display = null;
-    else
-      elements[i].style.display = "none";
-  }
-}
-
-var gFilterTimeout = null;
-function filterChange() {
-  if (gFilterTimeout)
-    window.clearTimeout(gFilterTimeout);
-
-  gFilterTimeout = window.setTimeout(filterList, 500);
-}
-
-function clearFilter() {
-  document.getElementById("filterbox").value = "";
-  filterList();
-}
-{/literal}
 </script>
 
 <div id="navbar">
@@ -76,12 +48,14 @@ function clearFilter() {
 <div id="content">
 <div class="body">
   {foreach from=$modules key="module" item="interfaces"}
-    <h2>{$module}</h2>
-    <ul class="interfacelist">
-      {foreach from=$interfaces item="item"}
-        <li class="filteritem"><a href="{$ROOT}/platform/{$platform->version}/interface/{$item->name}">{$item}</a></li>
-      {/foreach}
-    </ul>
+    <div class="filtersection">
+      <h2>{$module}</h2>
+      <ul class="interfacelist">
+        {foreach from=$interfaces item="item"}
+          <li class="filteritem"><a href="{$ROOT}/platform/{$platform->version}/interface/{$item->name}">{$item}</a></li>
+        {/foreach}
+      </ul>
+    </div>
   {/foreach}
 </div>
 </div>
