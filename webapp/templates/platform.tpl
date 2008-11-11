@@ -11,6 +11,28 @@ function diffSelect(version) {ldelim}
     return;
   window.location.href = '{$ROOT}/compare/platform/{$platform->version}/' + version;
 {rdelim}
+
+{literal}
+function filterList() {
+  gFilterTimeout = null;
+  text = document.getElementById("filterbox").value.toLowerCase();
+  var elements = document.getElementsByClassName("filteritem");
+  for (var i = 0; i < elements.length; i++) {
+    if (elements[i].textContent.toLowerCase().indexOf(text) >= 0)
+      elements[i].style.display = null;
+    else
+      elements[i].style.display = "none";
+  }
+}
+
+var gFilterTimeout = null;
+function filterChange() {
+  if (gFilterTimeout)
+    window.clearTimeout(gFilterTimeout);
+
+  gFilterTimeout = window.setTimeout(filterList, 500);
+}
+{/literal}
 </script>
 
 <div id="navbar">
@@ -24,6 +46,10 @@ function diffSelect(version) {ldelim}
       {/if}
     {/foreach}
   </select>
+</p>
+
+<p class="navbox">
+  Filter: <input id="filterbox" type="text" onkeypress="filterChange()"/>
 </p>
 
 <p id="breadcrumbs">
@@ -42,7 +68,7 @@ function diffSelect(version) {ldelim}
   <h1>Platform {$platform} Interfaces</h1>
   <ul class="interfacelist">
     {foreach from=$interfaces item="item"}
-      <li><a href="{$ROOT}/platform/{$platform->version}/interface/{$item->name}">{$item}</a></li>
+      <li class="filteritem"><a href="{$ROOT}/platform/{$platform->version}/interface/{$item->name}">{$item}</a></li>
     {/foreach}
   </ul>
 </div>
