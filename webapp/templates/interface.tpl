@@ -50,7 +50,6 @@ function diffSelect(version) {ldelim}
 
 <div id="content">
 <div class="body">
-  <h1>{$interface} Interface</h1>
   <div class="idl">
     <pre class="comment">{$interface->comment}</pre>
     {include file="includes/interface.tpl" interface=$interface}

@@ -7,7 +7,6 @@
 
 <div id="content">
 <div class="body">
-<h1>Error: {$error}</h2>
 <p>{$message}</p>
 </div>
 </div>

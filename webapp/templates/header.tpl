@@ -6,7 +6,9 @@
 <link rel="stylesheet" href="{$ROOT}/styles/apidocs.css" type="text/css" media="screen" />
 <link rel="icon" href="{$ROOT}/silk/bricks.png" type="image/png">
 <link rel="shortcut icon" href="{$ROOT}/silk/bricks.png" type="image/png">
-<title>{$title}</title>
+<title>{$title|strip_tags:false}</title>
 </head>
 <body>
-<div id="header"></div>
+<div id="header">
+  <h1>{$title}</h1>
+</div>

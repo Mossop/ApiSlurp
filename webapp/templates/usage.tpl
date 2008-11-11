@@ -1,4 +1,4 @@
-{include file="header.tpl" title="$interface Interface (from $interface->platform)"}
+{include file="header.tpl" title="Usage of $interface Interface"}
 <script type="text/javascript">
 function platformSelect(version) {ldelim}
   if (!version)
@@ -23,7 +23,6 @@ function platformSelect(version) {ldelim}
 
 <div id="content">
 <div class="body">
-  <h1>Usage of {$interface} Interface</h1>
   <h2>Subclasses</h2>
   <ul>
     {foreach from=$interface->subclasses item="item"}

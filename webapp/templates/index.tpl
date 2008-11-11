@@ -1,4 +1,4 @@
-{include file="header.tpl" title="API Index"}
+{include file="header.tpl" title="All Interfaces"}
 <script type="text/javascript">
 function platformSelect(version) {ldelim}
   if (!version)
@@ -56,7 +56,6 @@ function clearFilter() {
 
 <div id="content">
 <div class="body">
-  <h1>All Interfaces</h1>
   <ul class="interfacelist">
     {foreach from=$interfaces item="item"}
       <li class="filteritem">

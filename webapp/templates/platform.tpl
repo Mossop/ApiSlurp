@@ -1,4 +1,4 @@
-{include file="header.tpl" title="Platform $platform Index"}
+{include file="header.tpl" title="$platform Interfaces"}
 <script type="text/javascript">
 function platformSelect(version) {ldelim}
   if (!version)
@@ -75,7 +75,6 @@ function clearFilter() {
 
 <div id="content">
 <div class="body">
-  <h1>Platform {$platform} Interfaces</h1>
   {foreach from=$modules key="module" item="interfaces"}
     <h2>{$module}</h2>
     <ul class="interfacelist">

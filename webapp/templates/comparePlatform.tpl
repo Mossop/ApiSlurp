@@ -1,4 +1,4 @@
-{include file="header.tpl" title="Comparing platform `$diff->left` to platform `$diff->right`"}
+{include file="header.tpl" title="Comparing <a href=\"$ROOT/platform/`$diff->left->version`\">`$diff->left`</a> to <a href=\"$ROOT/platform/`$diff->right->version`\">`$diff->right`</a>"}
 <script type="text/javascript">
 function leftSelect(version) {ldelim}
 window.location.href = '{$ROOT}/compare/platform/' + version + '/{$diff->right->version}';
@@ -33,9 +33,6 @@ window.location.href = '{$ROOT}/compare/platform/{$diff->left->version}/' + vers
 
 <div id="content">
 <div class="body">
-  <h1>Comparing platform
-      <a href="{$ROOT}/platform/{$diff->left->version}">{$diff->left}</a> to platform
-      <a href="{$ROOT}/platform/{$diff->right->version}">{$diff->right}</a></h1>
   <h2><a name="removed">Removed Interfaces</a></h2>
   <ul class="interfacelist">
     {foreach from=$diff->removed item="item"}
