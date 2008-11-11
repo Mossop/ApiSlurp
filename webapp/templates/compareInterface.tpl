@@ -68,95 +68,102 @@ function toggleVisible() {ldelim}
         {include file="includes/interface.tpl" interface=$diff->right}
       </td>
     </tr>
-    <tr>
-      <td colspan="2"><h2><a name="constants">Constants</a></h2></td>
-    </tr>
-    {foreach from=$diff->constants item="item"}
-      <tr class="commentrow {$item->state}">
-        <td class="before">
-          {if $item->state ne "added"}
-            <pre class="comment">{$item->left->comment}</pre>
-          {/if}
-        </td>
-        <td class="after">
-          {if $item->state ne "removed"}
-            <pre class="comment">{$item->right->comment}</pre>
-          {/if}
-        </td>
-      </tr>
-      <tr class="signaturerow {$item->state}">
-        <td class="before member constant">
-          {if $item->state ne "added"}
-            {include file="includes/constant.tpl" constant=$item->left}
-          {/if}
-        </td>
-        <td class="after member constant">
-          {if $item->state ne "removed"}
-            {include file="includes/constant.tpl" constant=$item->right}
-          {/if}
-        </td>
-      </tr>
-    {/foreach}
 
-    <tr>
-      <td colspan="2"><h2><a name="attributes">Attributes</a></h2></td>
-    </tr>
-    {foreach from=$diff->attributes item="item"}
-      <tr class="commentrow {$item->state}">
-        <td class="before">
-          {if $item->state ne "added"}
-            <pre class="comment">{$item->left->comment}</pre>
-          {/if}
-        </td>
-        <td class="after">
-          {if $item->state ne "removed"}
-            <pre class="comment">{$item->right->comment}</pre>
-          {/if}
-        </td>
+    {if count($diff->constants) > 0}
+      <tr>
+        <td colspan="2"><h2><a name="constants">Constants</a></h2></td>
       </tr>
-      <tr class="signaturerow {$item->state}">
-        <td class="before member attribute">
-          {if $item->state ne "added"}
-            {include file="includes/attribute.tpl" attribute=$item->left}
-          {/if}
-        </td>
-        <td class="after member attribute">
-          {if $item->state ne "removed"}
-            {include file="includes/attribute.tpl" attribute=$item->right}
-          {/if}
-        </td>
-      </tr>
-    {/foreach}
+      {foreach from=$diff->constants item="item"}
+        <tr class="commentrow {$item->state}">
+          <td class="before">
+            {if $item->state ne "added"}
+              <pre class="comment">{$item->left->comment}</pre>
+            {/if}
+          </td>
+          <td class="after">
+            {if $item->state ne "removed"}
+              <pre class="comment">{$item->right->comment}</pre>
+            {/if}
+          </td>
+        </tr>
+        <tr class="signaturerow {$item->state}">
+          <td class="before member constant">
+            {if $item->state ne "added"}
+              {include file="includes/constant.tpl" constant=$item->left}
+            {/if}
+          </td>
+          <td class="after member constant">
+            {if $item->state ne "removed"}
+              {include file="includes/constant.tpl" constant=$item->right}
+            {/if}
+          </td>
+        </tr>
+      {/foreach}
+    {/if}
 
-    <tr>
-      <td colspan="2"><h2><a name="methods">Methods</a></h2></td>
-    </tr>
-    {foreach from=$diff->methods item="item"}
-      <tr class="commentrow {$item->state}">
-        <td class="before">
-          {if $item->state ne "added"}
-            <pre class="comment">{$item->left->comment}</pre>
-          {/if}
-        </td>
-        <td class="after">
-          {if $item->state ne "removed"}
-            <pre class="comment">{$item->right->comment}</pre>
-          {/if}
-        </td>
+    {if count($diff->attributes) > 0}
+      <tr>
+        <td colspan="2"><h2><a name="attributes">Attributes</a></h2></td>
       </tr>
-      <tr class="signaturerow {$item->state}">
-        <td class="before member method">
-          {if $item->state ne "added"}
-            {include file="includes/method.tpl" method=$item->left}
-          {/if}
-        </td>
-        <td class="after member method">
-          {if $item->state ne "removed"}
-            {include file="includes/method.tpl" method=$item->right}
-          {/if}
-        </td>
+      {foreach from=$diff->attributes item="item"}
+        <tr class="commentrow {$item->state}">
+          <td class="before">
+            {if $item->state ne "added"}
+              <pre class="comment">{$item->left->comment}</pre>
+            {/if}
+          </td>
+          <td class="after">
+            {if $item->state ne "removed"}
+              <pre class="comment">{$item->right->comment}</pre>
+            {/if}
+          </td>
+        </tr>
+        <tr class="signaturerow {$item->state}">
+          <td class="before member attribute">
+            {if $item->state ne "added"}
+              {include file="includes/attribute.tpl" attribute=$item->left}
+            {/if}
+          </td>
+          <td class="after member attribute">
+            {if $item->state ne "removed"}
+              {include file="includes/attribute.tpl" attribute=$item->right}
+            {/if}
+          </td>
+        </tr>
+      {/foreach}
+    {/if}
+
+    {if count($diff->methods) > 0}
+      <tr>
+        <td colspan="2"><h2><a name="methods">Methods</a></h2></td>
       </tr>
-    {/foreach}
+      {foreach from=$diff->methods item="item"}
+        <tr class="commentrow {$item->state}">
+          <td class="before">
+            {if $item->state ne "added"}
+              <pre class="comment">{$item->left->comment}</pre>
+            {/if}
+          </td>
+          <td class="after">
+            {if $item->state ne "removed"}
+              <pre class="comment">{$item->right->comment}</pre>
+            {/if}
+          </td>
+        </tr>
+        <tr class="signaturerow {$item->state}">
+          <td class="before member method">
+            {if $item->state ne "added"}
+              {include file="includes/method.tpl" method=$item->left}
+            {/if}
+          </td>
+          <td class="after member method">
+            {if $item->state ne "removed"}
+              {include file="includes/method.tpl" method=$item->right}
+            {/if}
+          </td>
+        </tr>
+      {/foreach}
+    {/if}
   </table>
 </div>
 {include file="footer.tpl"}
