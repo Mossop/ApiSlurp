@@ -6,6 +6,14 @@ function platformSelect(version) {ldelim}
     return;
   window.location.href = '{$ROOT}/platform/' + version;
 {rdelim}
+
+{*{literal}
+$(document).ready(function() {
+  $("h2").click(function() {
+    $(this).next().animate({ opacity: "toggle" }, 250);
+  });
+});
+{/literal}*}
 </script>
 
 <div id="navbar">

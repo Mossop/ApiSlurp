@@ -12,6 +12,14 @@ function diffSelect(version) {ldelim}
     return;
   window.location.href = '{$ROOT}/compare/platform/{$platform->version}/' + version;
 {rdelim}
+
+{*{literal}
+$(document).ready(function() {
+  $("h2").click(function() {
+    $(this).next().animate({ opacity: "toggle" }, 250);
+  });
+});
+{/literal}*}
 </script>
 
 <div id="navbar">

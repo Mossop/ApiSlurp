@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="{$ROOT}/styles/apidocs.css" type="text/css" media="screen" />
 <link rel="icon" href="{$ROOT}/silk/bricks.png" type="image/png">
 <link rel="shortcut icon" href="{$ROOT}/silk/bricks.png" type="image/png">
+<script type="text/javascript" src="{$ROOT}/scripts/jquery-1.2.6.min.js"></script>
 <title>{$title|strip_tags:false}</title>
 </head>
 <body>

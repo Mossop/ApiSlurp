@@ -56,12 +56,18 @@
 
 .body h2 {
   font-size: 120%;
+  margin: 0 20px 0.5em 20px;
+  text-align: center;
+  padding: 2px;
+  color: black;
   font-weight: bold;
-  margin-bottom: 0.5em;
+  /*background: silver;
+  cursor: pointer;
+  -moz-border-radius: 10px;*/
 }
 
 .body ul {
-  margin-bottom: 0.5em;
+  margin-bottom: 2em;
 }
 
 .body p {

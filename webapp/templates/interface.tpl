@@ -11,6 +11,14 @@ function diffSelect(version) {ldelim}
     return;
   window.location.href = '{$ROOT}/compare/interface/{$interface}/{$interface->platform->version}/' + version;
 {rdelim}
+
+{*{literal}
+$(document).ready(function() {
+  $("h2").click(function() {
+    $(this).next().animate({ opacity: "toggle" }, 250);
+  });
+});
+{/literal}*}
 </script>
 
 <div id="navbar">
@@ -68,30 +76,36 @@ function diffSelect(version) {ldelim}
   </div>
   {if count($interface->constants) > 0}
     <h2><a name="constants">Constants</a></h2>
-    {foreach from=$interface->constants item="item"}
-      <div class="member constant">
-        <pre class="comment">{$item->comment}</pre>
-        {include file="includes/constant.tpl" constant=$item}
-      </div>
-    {/foreach}
+    <div>
+      {foreach from=$interface->constants item="item"}
+        <div class="member constant">
+          <pre class="comment">{$item->comment}</pre>
+          {include file="includes/constant.tpl" constant=$item}
+        </div>
+      {/foreach}
+    </div>
   {/if}
   {if count($interface->attributes) > 0}
     <h2><a name="attributes">Attributes</a></h2>
-    {foreach from=$interface->attributes item="item"}
-      <div class="member attribute">
-        <pre class="comment">{$item->comment}</pre>
-        {include file="includes/attribute.tpl" attribute=$item}
-      </div>
-    {/foreach}
+    <div>
+      {foreach from=$interface->attributes item="item"}
+        <div class="member attribute">
+          <pre class="comment">{$item->comment}</pre>
+          {include file="includes/attribute.tpl" attribute=$item}
+        </div>
+      {/foreach}
+    </div>
   {/if}
   {if count($interface->methods) > 0}
     <h2><a name="methods">Methods</a></h2>
-    {foreach from=$interface->methods item="item"}
-      <div class="member method">
-        <pre class="comment">{$item->comment}</pre>
-        {include file="includes/method.tpl" method=$item}
-      </div>
-    {/foreach}
+    <div>
+      {foreach from=$interface->methods item="item"}
+        <div class="member method">
+          <pre class="comment">{$item->comment}</pre>
+          {include file="includes/method.tpl" method=$item}
+        </div>
+      {/foreach}
+    </div>
   {/if}
 </div>
 </div>
