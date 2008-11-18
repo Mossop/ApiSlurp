@@ -22,12 +22,6 @@
   color: blue;
 }
 
-#footer p {
-  margin: 10px;
-  text-align: right;
-  font-size: 70%;
-}
-
 #navbar {
   font-size: 80%;
   border-bottom: 1px solid rgb(2, 2, 4);

@@ -165,7 +165,6 @@ class VersionComparator {
 }
 
 class APISmarty extends Smarty {
-  private $starttime;
   private $template;
   private $cacheid;
   private $compileid;
@@ -186,8 +185,6 @@ class APISmarty extends Smarty {
     else {
       $this->assign('HOME', $CONFIG['webroot']);
     }
-
-    $this->starttime = microtime(true);
   }
 
   public function prepare($template, $cacheid = null, $compileid = null) {
@@ -202,9 +199,6 @@ class APISmarty extends Smarty {
   }
 
   public function display() {
-    $time = round(100 * (microtime(true) - $this->starttime)) / 100;
-    $this->assign('parsetime', $time);
-
     parent::display($this->template, $this->cacheid, $this->compileid);
   }
 }
