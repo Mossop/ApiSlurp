@@ -28,7 +28,7 @@ $(document).ready(function() {
   <select onchange="platformSelect(this.value)">
     <option value="">--</option>
     {foreach from=$platforms item="item"}
-      <option value="{$item->version}">{$item}</option>
+      <option value="{$item->version|escape:'url'}">{$item|escape}</option>
     {/foreach}
   </select>
 </p>
@@ -38,15 +38,15 @@ $(document).ready(function() {
 <div class="body">
   {foreach from=$modules key="module" item="list"}
     <div class="filtersection">
-      <h2>{$module}</h2>
+      <h2>{$module|escape}</h2>
       <ul class="interfacelist">
         {foreach from=$list item="item"}
           <li class="filteritem">
-            <a href="{$ROOT}/interface/{$item->name}">{$item}</a>
+            <a href="{$ROOT}/interface/{$item->name|escape:'url'}">{$item|escape}</a>
             {if $item->oldest == $item->newest}
-              <span class="variants">({$item->newest->platform->version})</span>
+              <span class="variants">({$item->newest->platform->version|escape})</span>
             {else}
-              <span class="variants">({$item->oldest->platform->version} - {$item->newest->platform->version})</span>
+              <span class="variants">({$item->oldest->platform->version|escape} - {$item->newest->platform->version|escape})</span>
             {/if}
           </li>
         {/foreach}

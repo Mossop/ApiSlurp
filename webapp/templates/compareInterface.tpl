@@ -1,11 +1,11 @@
 {include file="header.tpl" title="Comparing `$diff` between `$diff->left->platform` and `$diff->right->platform`"}
 <script type="text/javascript">
 function mainSelect(version) {ldelim}
-  window.location.href = '{$ROOT}/compare/interface/{$diff}/' + version + '/{$diff->target->platform->version}';
+  window.location.href = '{$ROOT}/compare/interface/{$diff|escape:'url'}/' + version + '/{$diff->target->platform->version|escape:'url'}';
 {rdelim}
 
 function targetSelect(version) {ldelim}
-  window.location.href = '{$ROOT}/compare/interface/{$diff}/{$diff->main->platform->version}/' + version;
+  window.location.href = '{$ROOT}/compare/interface/{$diff|escape:'url'}/{$diff->main->platform->version|escape:'url'}/' + version;
 {rdelim}
 
 function toggleVisible() {ldelim}
@@ -20,17 +20,17 @@ function toggleVisible() {ldelim}
   <select onchange="mainSelect(this.value)">
     {foreach from=$diff->versions item="item"}
       {if $item->platform->id ne $diff->target->platform->id}
-        <option value="{$item->platform->version}"{if $item->platform->id eq $diff->main->platform->id} selected="selected"{/if}>{$item->platform}</option>
+        <option value="{$item->platform->version|escape:'url'}"{if $item->platform->id eq $diff->main->platform->id} selected="selected"{/if}>{$item->platform|escape}</option>
       {/if}
     {/foreach}
   </select> &raquo;
-  <a href="{$ROOT}/platform/{$diff->main->platform->version}">Interfaces</a> &raquo;
-  <a href="{$ROOT}/platform/{$diff->main->platform->version}/interface/{$diff}">{$diff}</a> &raquo;
+  <a href="{$ROOT}/platform/{$diff->main->platform->version|escape:'url'}">Interfaces</a> &raquo;
+  <a href="{$ROOT}/platform/{$diff->main->platform->version|escape:'url'}/interface/{$diff|escape:'url'}">{$diff|escape}</a> &raquo;
   compare to
   <select onchange="targetSelect(this.value)">
     {foreach from=$diff->versions item="item"}
       {if $item->platform->id ne $diff->main->platform->id}
-        <option value="{$item->platform->version}"{if $item->platform->id eq $diff->target->platform->id} selected="selected"{/if}>{$item->platform}</option>
+        <option value="{$item->platform->version|escape:'url'}"{if $item->platform->id eq $diff->target->platform->id} selected="selected"{/if}>{$item->platform|escape}</option>
       {/if}
     {/foreach}
   </select>
@@ -41,8 +41,8 @@ function toggleVisible() {ldelim}
 <div class="body">
   <table id="diff" class="diff">
     <tr>
-      <td class="before"><h2><a href="{$ROOT}/platform/{$diff->left->platform->version}/interface/{$diff->left->name}">{$diff} in {$diff->left->platform}</a></h2></td>
-      <td class="after"><h2><a href="{$ROOT}/platform/{$diff->right->platform->version}/interface/{$diff->right->name}">{$diff} in {$diff->right->platform}</a></h2></td>
+      <td class="before"><h2><a href="{$ROOT}/platform/{$diff->left->platform->version|escape:'url'}/interface/{$diff->left->name|escape:'url'}">{$diff|escape} in {$diff->left->platform|escape}</a></h2></td>
+      <td class="after"><h2><a href="{$ROOT}/platform/{$diff->right->platform->version|escape:'url'}/interface/{$diff->right->name|escape:'url'}">{$diff|escape} in {$diff->right->platform|escape}</a></h2></td>
     </tr>
     <tr>
       <td colspan="2">
@@ -51,10 +51,10 @@ function toggleVisible() {ldelim}
     </tr>
     <tr class="commentrow">
       <td class="before">
-        <pre class="comment">{$diff->left->comment}</pre>
+        <pre class="comment">{$diff->left->comment|escape}</pre>
       </td>
       <td class="after">
-        <pre class="comment">{$diff->right->comment}</pre>
+        <pre class="comment">{$diff->right->comment|escape}</pre>
       </td>
     </tr>
     <tr class="signaturerow">
@@ -74,12 +74,12 @@ function toggleVisible() {ldelim}
         <tr class="commentrow {$item->state}">
           <td class="before">
             {if $item->state ne "added"}
-              <pre class="comment">{$item->left->comment}</pre>
+              <pre class="comment">{$item->left->comment|escape}</pre>
             {/if}
           </td>
           <td class="after">
             {if $item->state ne "removed"}
-              <pre class="comment">{$item->right->comment}</pre>
+              <pre class="comment">{$item->right->comment|escape}</pre>
             {/if}
           </td>
         </tr>
@@ -106,12 +106,12 @@ function toggleVisible() {ldelim}
         <tr class="commentrow {$item->state}">
           <td class="before">
             {if $item->state ne "added"}
-              <pre class="comment">{$item->left->comment}</pre>
+              <pre class="comment">{$item->left->comment|escape}</pre>
             {/if}
           </td>
           <td class="after">
             {if $item->state ne "removed"}
-              <pre class="comment">{$item->right->comment}</pre>
+              <pre class="comment">{$item->right->comment|escape}</pre>
             {/if}
           </td>
         </tr>
@@ -138,12 +138,12 @@ function toggleVisible() {ldelim}
         <tr class="commentrow {$item->state}">
           <td class="before">
             {if $item->state ne "added"}
-              <pre class="comment">{$item->left->comment}</pre>
+              <pre class="comment">{$item->left->comment|escape}</pre>
             {/if}
           </td>
           <td class="after">
             {if $item->state ne "removed"}
-              <pre class="comment">{$item->right->comment}</pre>
+              <pre class="comment">{$item->right->comment|escape}</pre>
             {/if}
           </td>
         </tr>

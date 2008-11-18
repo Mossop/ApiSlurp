@@ -1,1 +1,1 @@
-<span class="keyword">uuid</span>(<span class="value">{$value}</span>)
+<span class="keyword">uuid</span>(<span class="value">{$value|escape}</span>)

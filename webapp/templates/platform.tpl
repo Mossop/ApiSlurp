@@ -10,7 +10,7 @@ function platformSelect(version) {ldelim}
 function diffSelect(version) {ldelim}
   if (!version)
     return;
-  window.location.href = '{$ROOT}/compare/platform/{$platform->version}/' + version;
+  window.location.href = '{$ROOT}/compare/platform/{$platform->version|escape:'url'}/' + version;
 {rdelim}
 
 {*{literal}
@@ -30,7 +30,7 @@ $(document).ready(function() {
     <option value="" selected="selected">--</option>
     {foreach from=$platforms item="item"}
       {if $item->id ne $platform->id}
-        <option value="{$item->version}">{$item}</option>
+        <option value="{$item->version|escape:'url'}">{$item|escape}</option>
       {/if}
     {/foreach}
   </select>
@@ -46,7 +46,7 @@ $(document).ready(function() {
   <img src="{$ROOT}/silk/bricks.png" /> <a href="{$HOME}">Mozilla XPCOM</a> &raquo;
   <select onchange="platformSelect(this.value)">
     {foreach from=$platforms item="item"}
-      <option value="{$item->version}"{if $item->id eq $platform->id} selected="selected"{/if}>{$item}</option>
+      <option value="{$item->version|escape:'url'}"{if $item->id eq $platform->id} selected="selected"{/if}>{$item|escape}</option>
     {/foreach}
   </select> &raquo;
   Interfaces
@@ -57,10 +57,10 @@ $(document).ready(function() {
 <div class="body">
   {foreach from=$modules key="module" item="interfaces"}
     <div class="filtersection">
-      <h2>{$module}</h2>
+      <h2>{$module|escape}</h2>
       <ul class="interfacelist">
         {foreach from=$interfaces item="item"}
-          <li class="filteritem"><a href="{$ROOT}/platform/{$platform->version}/interface/{$item->name}">{$item}</a></li>
+          <li class="filteritem"><a href="{$ROOT}/platform/{$platform->version|escape:'url'}/interface/{$item->name|escape:'url'}">{$item|escape}</a></li>
         {/foreach}
       </ul>
     </div>

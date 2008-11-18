@@ -11,5 +11,5 @@
 </head>
 <body>
 <div id="header">
-  <h1>{$title}</h1>
+  <h1>{$title|escape}</h1>
 </div>

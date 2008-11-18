@@ -13,7 +13,7 @@ function platformSelect(version) {ldelim}
   <select onchange="platformSelect(this.value)">
     <option value="">--</option>
     {foreach from=$platforms item="item"}
-      <option value="{$item->version}">{$item}</option>
+      <option value="{$item->version|escape:'url'}">{$item|escape}</option>
     {/foreach}
   </select>
 </p>
@@ -23,7 +23,7 @@ function platformSelect(version) {ldelim}
 <div class="body">
   <ul>
     {foreach from=$interfaces item="item"}
-      <li><a href="{$ROOT}/interface/{$item->name}">{$item}</a></li>
+      <li><a href="{$ROOT}/interface/{$item->name|escape:'url'}">{$item|escape}</a></li>
     {/foreach}
   </ul>
 </div>
