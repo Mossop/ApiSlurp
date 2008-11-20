@@ -36,9 +36,9 @@ function error($title, $text) {
 }
 
 function redirect($path) {
-  global $webroot;
+  global $CONFIG;
 
-  header('Location: http://' . $_SERVER['HTTP_HOST'] . $webroot . $path);
+  header('Location: http://' . $_SERVER['HTTP_HOST'] . $CONFIG['webroot'] . $path);
   exit;
 }
 
