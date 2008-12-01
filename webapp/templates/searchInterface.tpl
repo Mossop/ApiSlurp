@@ -21,11 +21,15 @@ function platformSelect(version) {ldelim}
 
 <div id="content">
 <div class="body">
-  <ul>
-    {foreach from=$interfaces item="item"}
-      <li><a href="{$ROOT}/interface/{$item->name|escape:'url'}">{$item|escape}</a></li>
-    {/foreach}
-  </ul>
+  {if count($interfaces) > 0}
+    <ul>
+      {foreach from=$interfaces item="item"}
+        <li><a href="{$ROOT}/interface/{$item->name|escape:'url'}">{$item|escape}</a></li>
+      {/foreach}
+    </ul>
+  {else}
+    <p>No interfaces match the search "{$query}".</p>
+  {/if}
 </div>
 </div>
 {include file="footer.tpl"}
