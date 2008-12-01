@@ -1,4 +1,4 @@
-{include file="header.tpl" title="Comparing <a href=\"$ROOT/platform/`$diff->left->version`\">`$diff->left`</a> to <a href=\"$ROOT/platform/`$diff->right->version`\">`$diff->right`</a>"}
+{include file="header.tpl" title="Comparing `$diff->left` to `$diff->right`"}
 <script type="text/javascript" src="{$ROOT}/scripts/filter.js"></script>
 <script type="text/javascript">
 function mainSelect(version) {ldelim}
