@@ -38,7 +38,7 @@
 #
 # ***** END LICENSE BLOCK *****
 
-import xpidl, sys, os, sqlite3, md5, re
+import xpidl, xpt, sys, os, sqlite3, md5, re
 
 NOSCRIPT = 1
 NOTXPCOM = 2
@@ -57,21 +57,16 @@ class Slurp(object):
   idldirs = None
   parser = None
   dbc = None
+  interfaces = None
   
-  def __init__(self, platname, platversion, url, sourceurl, cachedir, db, idldir):
-    self.idldirs = self.__buildPath(idldir)
+  def __init__(self, platname, platversion, url, sourceurl, cachedir, db):
+    self.idldirs = []
+    self.interfaces = dict()
     self.parser = xpidl.IDLParser(cachedir)
     if os.path.isfile(db):
       self.__addPlatform(db, platname, platversion, url, sourceurl)
     else:
       self.__createDatabase(db, platname, platversion, url, sourceurl)
-
-  def __buildPath(self, dir):
-    path = []
-    for root, dirs, files in os.walk(dir):
-      if len(files) > 0:
-        path.append(root)
-    return path
 
   def __createDatabase(self, db, platname, platversion, url, sourceurl):
     self.dbc = sqlite3.connect(db)
@@ -136,58 +131,78 @@ class Slurp(object):
     c.close()
     return id
 
+  def appendSearchPath(self, dir):
+    for root, dirs, files in os.walk(dir):
+      if len(files) > 0:
+        self.idldirs.append(root)
+
+  def addSearchXPT(self, file):
+    xptfile = xpt.XPT(file)
+    for interface in xptfile.interfaces:
+      if interface.iid != "unknown":
+        if self.interfaces.has_key(interface.name):
+          if self.interfaces[interface.name] != interface.iid:
+            raise Exception, "Multiple interfaces with the name " + interface.name
+        else:
+          self.interfaces[interface.name] = interface.iid
+
   def slurpFile(self, filename, path):
     if not os.path.isfile(filename):
       raise IOError, "Unknown file " + filename
     text = open(filename, 'r').read()
-    idl = self.parser.parse(text, filename=filename)
-    idl.resolve(self.idldirs, self.parser)
-    for interface in idl.getNames():
-      if interface.location._file == filename and interface.kind == 'interface':
-        print "Slurping %s" % interface.name
-        iid = self.__addInterface(interface, path)
-        interfacehash = md5.new(interface.name + "," + interface.attributes.uuid)
-        c = self.dbc.cursor()
-        for member in interface.namemap:
-          text = str(member).strip()
-          flags = 0
-          if member.kind == "method":
-            text = member.binaryname
-            flags += NOSCRIPT if member.noscript else 0
-            flags += NOTXPCOM if member.notxpcom else 0
-            hash = "%s,%s,%s,%s,%s" % (member.kind, member.name, member.type, member.binaryname, flags)
-          elif member.kind == "attribute":
-            flags += NOSCRIPT if member.noscript else 0
-            flags += NOTXPCOM if member.notxpcom else 0
-            flags += READONLY if member.readonly else 0
-            text = member.binaryname
-            hash = "%s,%s,%s,%s,%s" % (member.kind, member.name, member.type, member.binaryname, flags)
-          elif member.kind == "const":
-            text = member.getValue()
-            hash = "%s,%s,%s,%s" % (member.kind, member.name, member.type, member.getValue())
-          memberhash = md5.new(hash)
-          interfacehash.update(hash)
-          c.execute('INSERT INTO members (pint, kind, type, name, flags, comment, text, line) VALUES (?,?,?,?,?,?,?,?)',
-                    (iid, member.kind, member.type, member.name, flags, self.__mungeComment(member.doccomments), text, member.location._lineno))
-          mid = c.lastrowid
-          if member.kind == "method":
-            pos = 0
-            for param in member.params:
-              flags = 0
-              flags += CONST if param.const else 0
-              flags += ARRAY if param.array else 0
-              flags += RETVAL if param.retval else 0
-              flags += SHARED if param.shared else 0
-              flags += OPTIONAL if param.optional else 0
-              memberhash.update(",%s %s %s %s %s" % (flags, param.size_is, param.iid_is, param.paramtype, param.type))
-              c.execute('INSERT INTO parameters (member, pos, direction, type, name, flags, sizeis, iidis) VALUES (?,?,?,?,?,?,?,?)',
-                        (mid, pos, param.paramtype, param.type, param.name, flags, param.size_is, param.iid_is))
-              pos += 1
-          c.execute('UPDATE members SET hash=? WHERE id=?', (memberhash.hexdigest(), mid))
-        c.execute('UPDATE plat_ifaces SET hash=? WHERE id=?',
-                  (interfacehash.hexdigest(), iid))
-        self.dbc.commit()
-        c.close()
+    try:
+      idl = self.parser.parse(text, filename=filename)
+      idl.resolve(self.idldirs, self.parser)
+      for interface in idl.getNames():
+        if interface.location._file == filename and interface.kind == 'interface' and self.interfaces.has_key(interface.name) and self.interfaces[interface.name] == interface.attributes.uuid:
+          del self.interfaces[interface.name]
+          iid = self.__addInterface(interface, path)
+          interfacehash = md5.new(interface.name + "," + interface.attributes.uuid)
+          c = self.dbc.cursor()
+          for member in interface.namemap:
+            text = str(member).strip()
+            flags = 0
+            if member.kind == "method":
+              text = member.binaryname
+              flags += NOSCRIPT if member.noscript else 0
+              flags += NOTXPCOM if member.notxpcom else 0
+              hash = "%s,%s,%s,%s,%s" % (member.kind, member.name, member.type, member.binaryname, flags)
+            elif member.kind == "attribute":
+              flags += NOSCRIPT if member.noscript else 0
+              flags += NOTXPCOM if member.notxpcom else 0
+              flags += READONLY if member.readonly else 0
+              text = member.binaryname
+              hash = "%s,%s,%s,%s,%s" % (member.kind, member.name, member.type, member.binaryname, flags)
+            elif member.kind == "const":
+              text = member.getValue()
+              hash = "%s,%s,%s,%s" % (member.kind, member.name, member.type, member.getValue())
+            memberhash = md5.new(hash)
+            interfacehash.update(hash)
+            c.execute('INSERT INTO members (pint, kind, type, name, flags, comment, text, line) VALUES (?,?,?,?,?,?,?,?)',
+                      (iid, member.kind, member.type, member.name, flags, self.__mungeComment(member.doccomments), text, member.location._lineno))
+            mid = c.lastrowid
+            if member.kind == "method":
+              pos = 0
+              for param in member.params:
+                flags = 0
+                flags += CONST if param.const else 0
+                flags += ARRAY if param.array else 0
+                flags += RETVAL if param.retval else 0
+                flags += SHARED if param.shared else 0
+                flags += OPTIONAL if param.optional else 0
+                memberhash.update(",%s %s %s %s %s" % (flags, param.size_is, param.iid_is, param.paramtype, param.type))
+                c.execute('INSERT INTO parameters (member, pos, direction, type, name, flags, sizeis, iidis) VALUES (?,?,?,?,?,?,?,?)',
+                          (mid, pos, param.paramtype, param.type, param.name, flags, param.size_is, param.iid_is))
+                pos += 1
+            c.execute('UPDATE members SET hash=? WHERE id=?', (memberhash.hexdigest(), mid))
+          c.execute('UPDATE plat_ifaces SET hash=? WHERE id=?',
+                    (interfacehash.hexdigest(), iid))
+          self.dbc.commit()
+          c.close()
+    except xpidl.IDLError:
+      print "warning: Unable to parse idl file %s." % path
+      return
+
 
   def slurpFiles(self, dir):
     dir = os.path.abspath(dir)
@@ -197,7 +212,7 @@ class Slurp(object):
         self.slurpFile(fullpath, fullpath[len(dir) + 1:])
 
 def displayUsage():
-  print "Usage: slurp.py <platform name> <platform version> <platform url> <source url> <cache dir> <database> <idl path>"
+  print "Usage: slurp.py <platform name> <platform version> <platform url> <source url> <cache dir> <database> <source path>"
 
 if __name__ == '__main__':
   if len(sys.argv) < 8:
@@ -209,9 +224,12 @@ if __name__ == '__main__':
   if not os.path.isdir(sys.argv[7]):
     displayUsage()
     sys.exit()
-  s = Slurp(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7])
-  if len(sys.argv) > 8:
-    fullpath = sys.argv[8]
-    s.slurpFile(fullpath, fullpath[len(sys.argv[7]) + 1:])
-  else:
-    s.slurpFiles(sys.argv[7])
+  s = Slurp(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6])
+  idldir = os.path.join(sys.argv[7], 'idl')
+  for file in os.listdir(sys.argv[7]):
+    if file[-4:] == ".xpt":
+      s.addSearchXPT(os.path.join(sys.argv[7], file))
+  s.appendSearchPath(idldir)
+  s.slurpFiles(idldir)
+  for interface in s.interfaces.keys():
+    print "warning: Interface %s ({%s}) not found." % (interface, s.interfaces[interface])
