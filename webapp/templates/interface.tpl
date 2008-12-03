@@ -45,7 +45,7 @@ $(document).ready(function() {
 
 <p class="navbox">
   <img src="{$ROOT}/silk/script_go.png" />
-  <a href="{$interface->sourceurl|escape:'url'}">View IDL</a>
+  <a href="{$interface->sourceurl}">View IDL</a>
 </p>
 <p class="navbox">
   <img src="{$ROOT}/silk/sitemap_color.png" />
