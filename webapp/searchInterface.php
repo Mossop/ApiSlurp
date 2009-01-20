@@ -11,6 +11,7 @@ if (count($interfaces) == 1) {
   redirect('/interface/' . $interfaces[0]->name);
 }
 
+$smarty->caching = false;
 $smarty->prepare('searchInterface.tpl', $query);
 $smarty->assign('platforms', Platform::getAllPlatforms());
 $smarty->assign('interfaces', $interfaces);
