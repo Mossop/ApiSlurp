@@ -17,7 +17,7 @@
     </ul>
   {% endfor %}
   {% for interface in component.interfaces.all %}
-    <li><a href="{% url xpcomref.views.interface name=interface %}">{{ interface }}</a>
+    <li><a href="{% url xpcomref.views.interface name=interface %}">{{ interface }}</a> {% templatetag openbrace %}{{ interface.iid }}{% templatetag closebrace %}
   {% endfor %}
   </ul>
 {% endfor %}

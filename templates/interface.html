@@ -6,7 +6,7 @@
 {% block body %}
 <ul class="bulletlist">
 {% for interface in interfaces %}
-  <li>{{ interface.name }}
+  <li>{{ interface }} {% templatetag openbrace %}{{ interface.iid }}{% templatetag closebrace %}
   <ul class="bulletlist">
   {% for version in interface.interfaceversion_set.all %}
     <li>{{ version.version }}
