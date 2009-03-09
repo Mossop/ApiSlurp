@@ -1,7 +1,7 @@
 {% extends "apidoc.html" %}
 
 {% block head %}
-<script type="text/javascript" src="{% url xpcomref.views.index %}/scripts/filter.js"></script>
+<script type="text/javascript" src="{% url xpcomref.views.index %}scripts/filter.js"></script>
 {% endblock %}
 
 {% block title %}All Components{% endblock %}
@@ -13,9 +13,9 @@
 
 {% block navboxes %}
 <p class="navbox">
-  <img src="{% url xpcomref.views.index %}/silk/find.png" />
+  <img src="{% url xpcomref.views.index %}silk/find.png" />
   Filter: <input id="filterbox" type="text" onkeypress="filterChange()"/>
-  <a href="#" onclick="clearFilter(); return false"><img src="{% url xpcomref.views.index %}/silk/cancel.png" /></a>
+  <a href="#" onclick="clearFilter(); return false"><img src="{% url xpcomref.views.index %}silk/cancel.png" /></a>
 </p>
 {% endblock %}
 
