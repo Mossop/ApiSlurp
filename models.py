@@ -9,14 +9,14 @@ class Application(models.Model):
 
 class Version(models.Model):
   application = models.ForeignKey(Application)
-  version = models.CharField(max_length=20)
+  version = models.CharField(max_length=20, db_index=True)
   gecko = models.CharField(max_length=20)
 
   def __unicode__(self):
     return self.version
 
 class Platform(models.Model):
-  codename = models.CharField(max_length=10, unique=True)
+  codename = models.CharField(max_length=10, unique=True, db_index=True)
   name = models.CharField(max_length=10, blank=True)
 
   def __unicode__(self):
@@ -29,11 +29,11 @@ class Interface(models.Model):
   scriptable = models.BooleanField()
   noscript = models.BooleanField()
   function = models.BooleanField()
-  name = models.CharField(max_length=50)
+  name = models.CharField(max_length=50, db_index=True)
   parent = models.ForeignKey('self', null=True)
   iid = models.CharField(max_length=36)
   comment = models.TextField()
-  module = models.CharField(max_length=20)
+  module = models.CharField(max_length=20, db_index=True)
   path = models.CharField(max_length=100)
   url = models.CharField(max_length=200)
   hash = models.CharField(max_length=32)
@@ -43,7 +43,7 @@ class Interface(models.Model):
 
 class Component(models.Model):
   versions = models.ManyToManyField(Version, through='ComponentVersion')
-  contract = models.CharField(max_length=100)
+  contract = models.CharField(max_length=100, db_index=True)
   cid = models.CharField(max_length=36)
   interfaces = models.ManyToManyField(Interface)
   hash = models.CharField(max_length=32)
@@ -63,7 +63,7 @@ class InterfaceVersion(models.Model):
 
 class Member(models.Model):
   interface = models.ForeignKey(Interface)
-  name = models.CharField(max_length=60)
+  name = models.CharField(max_length=60, db_index=True)
   comment = models.TextField()
   url = models.CharField(max_length=200)
   hash = models.CharField(max_length=32)
@@ -95,7 +95,7 @@ class Parameter(models.Model):
   shared = models.BooleanField()
   optional = models.BooleanField()
   type = models.CharField(max_length=50)
-  name = models.CharField(max_length=30)
+  name = models.CharField(max_length=30, db_index=True)
   sizeis = models.CharField(max_length=30, blank=True)
   iidis = models.CharField(max_length=30, blank=True)
 
