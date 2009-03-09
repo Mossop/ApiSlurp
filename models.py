@@ -58,7 +58,7 @@ class Component(models.Model):
     unique_together = ('contract', 'hash')
 
   def __unicode__(self):
-    return self.contractID
+    return self.contract
 
 class ComponentVersion(models.Model):
   component = models.ForeignKey(Component)
