@@ -130,6 +130,7 @@ class Slurp(object):
         p.sizeis = param.size_is if param.size_is else ''
         p.iidis = param.iid_is if param.iid_is else ''
         p.save()
+        pos += 1
 
   def addInterface(self, seen, used, version, platform, interface):
     if seen.has_key(interface.name):

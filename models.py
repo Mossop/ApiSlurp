@@ -12,6 +12,9 @@ class Version(models.Model):
   version = models.CharField(max_length=20, db_index=True)
   gecko = models.CharField(max_length=20)
 
+  class Meta:
+    unique_together = ('application', 'version')
+
   def __unicode__(self):
     return self.version
 
@@ -38,6 +41,9 @@ class Interface(models.Model):
   url = models.CharField(max_length=200)
   hash = models.CharField(max_length=32)
 
+  class Meta:
+    unique_together = ('name', 'hash')
+
   def __unicode__(self):
     return self.name
 
@@ -48,6 +54,9 @@ class Component(models.Model):
   interfaces = models.ManyToManyField(Interface)
   hash = models.CharField(max_length=32)
 
+  class Meta:
+    unique_together = ('contract', 'hash')
+
   def __unicode__(self):
     return self.contractID
 
@@ -56,10 +65,16 @@ class ComponentVersion(models.Model):
   version = models.ForeignKey(Version)
   platforms = models.ManyToManyField(Platform)
 
+  class Meta:
+    unique_together = ('component', 'version')
+
 class InterfaceVersion(models.Model):
   interface = models.ForeignKey(Interface)
   version = models.ForeignKey(Version)
   platforms = models.ManyToManyField(Platform)
+
+  class Meta:
+    unique_together = ('interface', 'version')
 
 class Member(models.Model):
   interface = models.ForeignKey(Interface)
@@ -67,6 +82,9 @@ class Member(models.Model):
   comment = models.TextField()
   url = models.CharField(max_length=200)
   hash = models.CharField(max_length=32)
+
+  class Meta:
+    unique_together = ('interface', 'name')
 
   def __unicode__(self):
     return self.name
@@ -98,6 +116,9 @@ class Parameter(models.Model):
   name = models.CharField(max_length=30, db_index=True)
   sizeis = models.CharField(max_length=30, blank=True)
   iidis = models.CharField(max_length=30, blank=True)
+
+  class Meta:
+    unique_together = ('method', 'position')
 
   def __unicode__(self):
     return self.name
