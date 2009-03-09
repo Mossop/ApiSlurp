@@ -1,7 +1,23 @@
 {% extends "apidoc.html" %}
 
+{% block head %}
+<script type="text/javascript" src="{% url xpcomref.views.index %}/scripts/filter.js"></script>
+{% endblock %}
+
 {% block title %}All Components{% endblock %}
 {% block header %}All Components{% endblock %}
+
+{% block breadcrumbs %}
+  &raquo; All Components
+{% endblock %}
+
+{% block navboxes %}
+<p class="navbox">
+  <img src="{% url xpcomref.views.index %}/silk/find.png" />
+  Filter: <input id="filterbox" type="text" onkeypress="filterChange()"/>
+  <a href="#" onclick="clearFilter(); return false"><img src="{% url xpcomref.views.index %}/silk/cancel.png" /></a>
+</p>
+{% endblock %}
 
 {% block body %}
 <div class="filtersection">
