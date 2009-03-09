@@ -49,6 +49,10 @@ ComponentBlackList = [
   re.compile('^@mozilla.org/inspector/')
 ]
 
+InterfaceBlackList = [
+  re.compile('^IDispatch$')
+]
+
 def hashit(str):
   return md5.new(str).hexdigest()
 
@@ -86,13 +90,13 @@ class Slurp(object):
   def getHashStringForInterface(self, interface):
     str = "%s,%s,%s" % (interface.name, interface.attributes.uuid, interface.base)
     str += ",%s,%s,%s" % (interface.attributes.scriptable, interface.attributes.noscript, interface.attributes.function)
-    for member in interface.namemap:
+    for member in sorted(interface.namemap, key=lambda x: x.name):
       str += ",%s" % self.getHashStringForMember(member)
     return str
 
   def getHashStringForComponent(self, cid, implements):
     str = cid
-    for interface in implements:
+    for interface in sorted(implements, key=lambda x: x.name):
       str += ",%s" % interface.hash
     return str
 
@@ -199,6 +203,13 @@ class Slurp(object):
         xptfile = XPT(os.path.join(dir, name))
         for interface in xptfile.interfaces:
           if interface.iid != "unknown":
+            good = True
+            for bad in InterfaceBlackList:
+              if bad.search(interface.name):
+                good = False
+                break
+            if not good:
+              continue
             if used.has_key(interface.name):
               print "warning: Found duplicate entry in source xpt for %s." % interface.name
             if sourceinterfaces.has_key(interface.name) and sourceinterfaces[interface.name].has_key(interface.iid):
@@ -244,6 +255,13 @@ class Slurp(object):
             break
         implements = []
       elif contract is not None:
+        good = True
+        for bad in InterfaceBlackList:
+          if bad.search(line):
+            good = False
+            break
+        if not good:
+          continue
         if seen.has_key(line):
           implements.append(seen[line])
         else:
