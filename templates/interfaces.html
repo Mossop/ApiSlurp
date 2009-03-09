@@ -4,11 +4,11 @@
 {% block header %}All Interfaces{% endblock %}
 
 {% block body %}
-{% for module, interfaces in modules.items %}
+{% for module in modules %}
   <div class="filtersection">
-    <h2>{{ module }}</h2>
+    <h2>{{ module.name }}</h2>
     <ul class="interfacelist">
-    {% for interface in interfaces %}
+    {% for interface in module.interfaces %}
       <li class="filteritem">
         <a href="{% url xpcomref.views.interface name=interface %}">{{ interface }}</a>
       </li>
