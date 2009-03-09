@@ -32,3 +32,13 @@ def components(request):
   return render_to_response('components.html', {
     'components': Component.objects.values_list('contract', flat=True).order_by('contract').distinct()
     }, context_instance=RequestContext(request))
+
+def component(request, name):
+  components = Component.objects.filter(contract=name)
+  if components.count() > 0:
+    return render_to_response('component.html', {
+      'name': name,
+      'components': components
+      }, context_instance=RequestContext(request))
+  else:
+    raise Http404

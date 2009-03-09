@@ -1,14 +1,14 @@
 {% extends "apidoc.html" %}
 
-{% block title %}Interface {{ name }}{% endblock %}
-{% block header %}Interface {{ name }}{% endblock %}
+{% block title %}Component {{ name }}{% endblock %}
+{% block header %}Component {{ name }}{% endblock %}
 
 {% block body %}
 <ul class="bulletlist">
-{% for interface in interfaces %}
-  <li>{{ interface.name }} {{ interface.iid }}
+{% for component in components %}
+  <li>{{ component.contract }} {{ component.cid }}
   <ul class="bulletlist">
-  {% for version in interface.interfaceversion_set.all %}
+  {% for version in component.componentversion_set.all %}
     <li>{{ version.version }}
     <ul class="bulletlist">
     {% for platform in version.platforms.all %}
