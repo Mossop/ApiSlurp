@@ -1,6 +1,7 @@
 from django.db import models
 
 class Application(models.Model):
+  appid = models.CharField(max_length=38, unique=True)
   name = models.CharField(max_length=50, unique=True)
 
   def __unicode__(self):

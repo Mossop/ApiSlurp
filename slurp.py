@@ -163,6 +163,7 @@ class Slurp(object):
   def scanPlatform(self, dir, sources, sourceinterfaces):
     f = open(os.path.join(dir, 'application'), 'r')
     lines = f.readlines()
+    appid = lines[0].rstrip()
     appname = lines[1].rstrip()
     vername = lines[2].rstrip()
     gecko = lines[5].rstrip()
@@ -170,9 +171,9 @@ class Slurp(object):
     f.close()
     print "Scanning application data %s %s %s." % (appname, vername, platname)
     try:
-      app = Application.objects.get(name=appname)
+      app = Application.objects.get(appid=appid)
     except Application.DoesNotExist:
-      app = Application(name=appname)
+      app = Application(appid=appid, name=appname)
       app.save()
     try:
       version = Version.objects.get(application=app, version=vername)
