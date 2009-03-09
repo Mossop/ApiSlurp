@@ -3,10 +3,10 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link rel="stylesheet" href="http://yui.yahooapis.com/2.5.2/build/reset-fonts/reset-fonts.css" type="text/css" media="screen" />
-<link rel="stylesheet" href="{% url xpcomref.views.index %}styles/apidocs.css" type="text/css" media="screen" />
-<link rel="icon" href="{% url xpcomref.views.index %}silk/bricks.png" type="image/png">
-<link rel="shortcut icon" href="{% url xpcomref.views.index %}silk/bricks.png" type="image/png">
-<script type="text/javascript" src="{% url xpcomref.views.index %}scripts/jquery-1.2.6.min.js"></script>
+<link rel="stylesheet" href="{{ MEDIA_URL }}styles/apidocs.css" type="text/css" media="screen" />
+<link rel="icon" href="{{ MEDIA_URL }}silk/bricks.png" type="image/png">
+<link rel="shortcut icon" href="{{ MEDIA_URL }}silk/bricks.png" type="image/png">
+<script type="text/javascript" src="{{ MEDIA_URL }}scripts/jquery-1.2.6.min.js"></script>
 {% block head %}{% endblock %}
 <title>{% block title %}{% endblock %}</title>
 </head>
@@ -18,7 +18,7 @@
 {% block navboxes %}{% endblock %}
 
 <p id="breadcrumbs">
-  <img src="{% url xpcomref.views.index %}silk/bricks.png" /> <a href="{% url xpcomref.views.index %}">Mozilla XPCOM</a>
+  <img src="{{ MEDIA_URL }}silk/bricks.png" /> <a href="{% url xpcomref.views.index %}">Mozilla XPCOM</a>
   {% block breadcrumbs %}{% endblock %}
 </p>
 </div>

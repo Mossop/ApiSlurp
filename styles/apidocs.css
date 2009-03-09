@@ -64,6 +64,14 @@
   margin-bottom: 2em;
 }
 
+.body ul.bulletlist {
+  margin-left: 2em;
+}
+
+.body ul.bulletlist li {
+  list-style-type: disc;
+}
+
 .body p {
   margin-bottom: 0.5em;
 }
