@@ -19,7 +19,9 @@ class Platform(models.Model):
   name = models.CharField(max_length=10, blank=True)
 
   def __unicode__(self):
-    return self.name if self.name else self.codename
+    if self.name:
+      return self.name
+    return self.codename
 
 class Interface(models.Model):
   versions = models.ManyToManyField(Version, through='InterfaceVersion')
