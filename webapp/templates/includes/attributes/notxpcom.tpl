@@ -1,1 +1,0 @@
-<span class="keyword" title="This does not follow the normal XPCOM rules and so cannot be used by scripting languages">notxpcom</span>

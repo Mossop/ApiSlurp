@@ -1,0 +1,16 @@
+{% extends "apidoc.html" %}
+
+{% block title %}All Components{% endblock %}
+{% block header %}All Components{% endblock %}
+
+{% block body %}
+<div class="filtersection">
+  <ul class="componentlist">
+  {% for component in components %}
+    <li class="filteritem">
+      <a href="boo">{{ component }}</a>
+    </li>
+  {% endfor %}
+  </ul>
+</div>
+{% endblock body %}

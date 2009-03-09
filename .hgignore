@@ -1,11 +1,6 @@
-^webapp/smarty
-^webapp/cache
-^webapp/compiled
-^webapp/api.sqlite$
-^webapp/config.php$
-^slurp/cache
-^slurp/sources
-^slurp/api.sqlite$
+^cache/
+^applications/
+^sources/
 ^[.]
 /[.]
 ~$

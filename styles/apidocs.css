@@ -96,7 +96,8 @@
 
 /* Index page rules */
 
-.interfacelist {
+.interfacelist,
+.componentlist {
   -moz-column-count: 3;
 }
 

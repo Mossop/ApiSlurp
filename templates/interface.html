@@ -1,0 +1,17 @@
+{% extends "apidoc.html" %}
+
+{% block title %}{{ name }}{% endblock %}
+{% block header %}{{ name }}{% endblock %}
+
+{% block body %}
+<ul>
+{% for interface in interfaces %}
+  <li>{{ interface.name }} {{ interface.iid }}
+  <ul>
+  {% for version in interface.versions.all %}
+    <li>{{ version }}
+  {% endfor %}
+  </ul>
+{% endfor %}
+</ul>
+{% endblock body %}

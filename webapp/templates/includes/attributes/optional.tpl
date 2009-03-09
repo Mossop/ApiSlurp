@@ -1,1 +1,0 @@
-<span class="keyword" title="This parameter is optional and may be omitted in scripting languages">optional</span>

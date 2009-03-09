@@ -1,0 +1,19 @@
+{% extends "apidoc.html" %}
+
+{% block title %}All Interfaces{% endblock %}
+{% block header %}All Interfaces{% endblock %}
+
+{% block body %}
+{% for module, interfaces in modules.items %}
+  <div class="filtersection">
+    <h2>{{ module }}</h2>
+    <ul class="interfacelist">
+    {% for interface in interfaces %}
+      <li class="filteritem">
+        <a href="{% url xpcomref.views.interface name=interface %}">{{ interface }}</a>
+      </li>
+    {% endfor %}
+    </ul>
+  </div>
+{% endfor %}
+{% endblock body %}

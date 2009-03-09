@@ -1,1 +1,0 @@
-<span class="keyword" title="The IID of this object is given by the {$value|escape} parameter">iid_is</span>(<span class="name">{$value|escape}</span>)

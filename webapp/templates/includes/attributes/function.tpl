@@ -1,1 +1,0 @@
-<span class="keyword" title="A script function may be used in place of an object and it will be called when the first method of this interface is called">function</span>
