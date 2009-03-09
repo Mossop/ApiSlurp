@@ -6,7 +6,7 @@
 {% block body %}
 <ul class="bulletlist">
 {% for component in components %}
-  <li>{{ component.contract }} {{ component.cid }}
+  <li>{{ component.contract }}
   <ul class="bulletlist">
   {% for version in component.componentversion_set.all %}
     <li>{{ version.version }}
@@ -15,6 +15,9 @@
       <li>{{ platform }}
     {% endfor %}
     </ul>
+  {% endfor %}
+  {% for interface in component.interfaces.all %}
+    <li><a href="{% url xpcomref.views.interface name=interface %}">{{ interface }}</a>
   {% endfor %}
   </ul>
 {% endfor %}
