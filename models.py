@@ -1,7 +1,7 @@
 from django.db import models
 
 class Application(models.Model):
-  appid = models.CharField(max_length=38, unique=True)
+  appid = models.CharField(max_length=36, unique=True)
   name = models.CharField(max_length=50, unique=True)
 
   def __unicode__(self):
@@ -31,7 +31,7 @@ class Interface(models.Model):
   function = models.BooleanField()
   name = models.CharField(max_length=50)
   parent = models.ForeignKey('self', null=True)
-  iid = models.CharField(max_length=38)
+  iid = models.CharField(max_length=36)
   comment = models.TextField()
   module = models.CharField(max_length=20)
   path = models.CharField(max_length=100)
@@ -44,7 +44,7 @@ class Interface(models.Model):
 class Component(models.Model):
   versions = models.ManyToManyField(Version, through='ComponentVersion')
   contract = models.CharField(max_length=100)
-  cid = models.CharField(max_length=38)
+  cid = models.CharField(max_length=36)
   interfaces = models.ManyToManyField(Interface)
   hash = models.CharField(max_length=32)
 
@@ -63,7 +63,7 @@ class InterfaceVersion(models.Model):
 
 class Member(models.Model):
   interface = models.ForeignKey(Interface)
-  name = models.CharField(max_length=30)
+  name = models.CharField(max_length=60)
   comment = models.TextField()
   url = models.CharField(max_length=200)
   hash = models.CharField(max_length=32)

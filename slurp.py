@@ -43,6 +43,12 @@ from apislurp.xpcomref.models import *
 from xpt import XPT
 from django.db import connection, transaction
 
+ComponentBlackList = [
+  re.compile('^@netscape.com/fullsoft/qfa;1$'),
+  re.compile('^@mozilla.org/commandlinehandler/general-startup;1?type=inspector$'),
+  re.compile('^@mozilla.org/inspector/')
+]
+
 def hashit(str):
   return md5.new(str).hexdigest()
 
@@ -163,7 +169,7 @@ class Slurp(object):
   def scanPlatform(self, dir, sources, sourceinterfaces):
     f = open(os.path.join(dir, 'application'), 'r')
     lines = f.readlines()
-    appid = lines[0].rstrip()
+    appid = lines[0].rstrip()[1:-1]
     appname = lines[1].rstrip()
     vername = lines[2].rstrip()
     gecko = lines[5].rstrip()
@@ -210,7 +216,7 @@ class Slurp(object):
     for line in f:
       line = line.rstrip()
       if line.startswith('C '):
-        if contract:
+        if contract is not None:
           hash = hashit(self.getHashStringForComponent(cid, implements))
           try:
             component = Component.objects.get(contract=contract, hash=hash)
@@ -230,8 +236,13 @@ class Slurp(object):
             cv.platforms.add(platform)
         line = line[2:]
         [contract, cid] = line.rsplit(',', 1)
+        cid = cid[1:-1]
+        for bad in ComponentBlackList:
+          if bad.search(contract):
+            contract = None
+            break
         implements = []
-      else:
+      elif contract is not None:
         if seen.has_key(line):
           implements.append(seen[line])
         else:
@@ -272,7 +283,7 @@ class Slurp(object):
                   if not sourceinterfaces.has_key(interface.name):
                     sourceinterfaces[interface.name] = dict()
                   if sourceinterfaces[interface.name].has_key(interface.attributes.uuid):
-                    print "warning: Duplicate interface in source %s %s." % (interface.name, interface.attributes.uuid)
+                    print "warning: Duplicate interface in source %s ({%s})." % (interface.name, interface.attributes.uuid)
                   sourceinterfaces[interface.name][interface.attributes.uuid] = interface
                   interface.path = idlfile[len(source) + 1:]
                   interface.module = interface.path.split("/")[0]
