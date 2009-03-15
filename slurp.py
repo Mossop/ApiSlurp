@@ -116,9 +116,11 @@ class Slurp(object):
       m.value = member.getValue()
     m.interface = interface
     m.name = member.name
+    m.lcname = member.name.lower()
     m.comment = self.__mungeComment(member.doccomments)
     m.hash = hashit(self.getHashStringForMember(member))
     m.url = member.url
+    m.line = member.location._lineno
     m.save()
     if member.kind == "method":
       pos = 0
@@ -149,6 +151,7 @@ class Slurp(object):
         iv.save()
     except Interface.DoesNotExist:
       iface = Interface(name=interface.name, iid=interface.attributes.uuid, hash=hash)
+      iface.lcname = interface.name.lower()
       iface.scriptable = interface.attributes.scriptable
       iface.noscript = interface.attributes.noscript
       iface.function = interface.attributes.function

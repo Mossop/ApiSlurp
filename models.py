@@ -33,6 +33,7 @@ class Interface(models.Model):
   noscript = models.BooleanField()
   function = models.BooleanField()
   name = models.CharField(max_length=50, db_index=True)
+  lcname = models.CharField(max_length=50, db_index=True)
   parent = models.ForeignKey('self', null=True)
   iid = models.CharField(max_length=36)
   comment = models.TextField()
@@ -79,7 +80,9 @@ class InterfaceVersion(models.Model):
 class Member(models.Model):
   interface = models.ForeignKey(Interface)
   name = models.CharField(max_length=60, db_index=True)
+  lcname = models.CharField(max_length=60, db_index=True)
   comment = models.TextField()
+  line = models.IntegerField()
   url = models.CharField(max_length=200)
   hash = models.CharField(max_length=32)
 

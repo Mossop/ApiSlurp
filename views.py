@@ -12,7 +12,7 @@ def interfaces(request):
   for module in mods:
     modules.append({
       'name': module,
-      'interfaces': Interface.objects.filter(module=module).values_list('name', flat=True).order_by('name').distinct()
+      'interfaces': Interface.objects.filter(module=module).values_list('name', flat=True).order_by('lcname').distinct()
       })
   return render_to_response('interfaces.html', {
     'modules': modules
