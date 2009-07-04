@@ -8,7 +8,9 @@
 {% block header %}{{ version.application.name }} {{ version }} Components{% endblock %}
 
 {% block breadcrumbs %}
-  &raquo; Applications &raquo; {{ version.application.name }} {{ version }} &raquo; Components
+  &raquo; Applications
+  &raquo; {{ version.application.name }} {{ version }}
+  &raquo; Components
 {% endblock %}
 
 {% block navboxes %}
@@ -24,7 +26,7 @@
   <ul class="componentlist">
   {% for component in components %}
     <li class="filteritem">
-      <a href="{% url xpcomref.views.component name=component|urlencode %}">{{ component }}</a>
+      <a href="{% url xpcomref.views.appcomponent name=version.application.name version=version component=component|urlencode %}">{{ component }}</a>
     </li>
   {% endfor %}
   </ul>

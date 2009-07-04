@@ -1,0 +1,24 @@
+{% extends "apidoc.html" %}
+
+{% block title %}{{ component }} in {{ version.application.name }} {{ version }}{% endblock %}
+{% block header %}{{ component }} in {{ version.application.name }} {{ version }}{% endblock %}
+
+{% block breadcrumbs %}
+  &raquo; Applications
+  &raquo; {{ version.application.name }} {{ version }}
+  &raquo; <a href="{% url xpcomref.views.appcomponents name=version.application.name version=version %}">Components</a>
+  &raquo; {{ component }}
+{% endblock %}
+
+{% block body %}
+{% for interface in componentversion.interfaces.all %}
+  {% if forloop.first %}
+    <h2>Implements</h2>
+    <ul class="implementlist interfaces">
+  {% endif %}
+  <li><a href="{% url xpcomref.views.appinterface name=version.application.name version=version interface=interface %}">{{ interface }}</a></li>
+  {% if forloop.last %}
+    </ul>
+  {% endif %}
+{% endfor %}
+{% endblock body %}

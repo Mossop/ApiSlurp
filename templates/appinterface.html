@@ -1,16 +1,12 @@
 {% extends "apidoc.html" %}
 
-{% block head %}
-<script type="text/javascript" src="{{ MEDIA_URL }}scripts/filter.js"></script>
-{% endblock %}
-
 {% block title %}{{ interface }} in {{ version.application.name }} {{ version }}{% endblock %}
 {% block header %}{{ interface }} in {{ version.application.name }} {{ version }}{% endblock %}
 
 {% block breadcrumbs %}
   &raquo; Applications
   &raquo; {{ version.application.name }} {{ version }}
-  &raquo; <a href="{% url xpcomref.views.appinterfaces name=version.application.name version=version|urlencode %}">Interfaces</a>
+  &raquo; <a href="{% url xpcomref.views.appinterfaces name=version.application.name version=version %}">Interfaces</a>
   &raquo; {{ interface }}
 {% endblock %}
 
@@ -26,6 +22,16 @@
 {% endblock %}
 
 {% block body %}
+{% for cvi in interface.componentversioninterface_set.all %}
+  {% if forloop.first %}
+    <h2>Implemented by</h2>
+    <ul class="implementlist components">
+  {% endif %}
+  <li><a href="{% url xpcomref.views.appcomponent name=version.application.name version=version component=cvi.componentversion.component|urlencode %}">{{ cvi.componentversion.component }}</a></li>
+  {% if forloop.last %}
+    </ul>
+  {% endif %}
+{% endfor %}
 <div class="idl">
   <pre class="comment">{{ interface.comment }}</pre>
   {% include "includes/interface.html" %}

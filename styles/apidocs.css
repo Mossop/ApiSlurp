@@ -72,6 +72,10 @@
   list-style-type: disc;
 }
 
+.body ul.implementlist li {
+  text-align: center;
+}
+
 .body p {
   margin-bottom: 0.5em;
 }
