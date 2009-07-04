@@ -22,7 +22,7 @@
 {% endblock %}
 
 {% block body %}
-{% for cvi in interface.componentversioninterface_set.all %}
+{% for cvi in components %}
   {% if forloop.first %}
     <h2>Implemented by</h2>
     <ul class="implementlist components">

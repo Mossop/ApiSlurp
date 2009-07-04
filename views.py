@@ -65,6 +65,7 @@ def appinterface(request, name, version, interface):
   return render_to_response('appinterface.html', {
     'version': version,
     'interface': interface,
+    'components': interface.componentversioninterface_set.filter(componentversion__version=version),
     'constants': Constant.objects.filter(interface=interface).order_by('line'),
     'attributes': Attribute.objects.filter(interface=interface).order_by('lcname'),
     'methods': Method.objects.filter(interface=interface).order_by('lcname')
