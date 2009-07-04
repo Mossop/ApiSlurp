@@ -4,11 +4,11 @@
 <script type="text/javascript" src="{{ MEDIA_URL }}scripts/filter.js"></script>
 {% endblock %}
 
-{% block title %}All Components{% endblock %}
-{% block header %}All Components{% endblock %}
+{% block title %}{{ version.application.name }} {{ version }} Components{% endblock %}
+{% block header %}{{ version.application.name }} {{ version }} Components{% endblock %}
 
 {% block breadcrumbs %}
-  &raquo; Components
+  &raquo; Applications &raquo; {{ version.application.name }} {{ version }} &raquo; Components
 {% endblock %}
 
 {% block navboxes %}

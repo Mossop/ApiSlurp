@@ -4,11 +4,11 @@
 <script type="text/javascript" src="{{ MEDIA_URL }}scripts/filter.js"></script>
 {% endblock %}
 
-{% block title %}All Interfaces{% endblock %}
-{% block header %}All Interfaces{% endblock %}
+{% block title %}{{ version.application.name }} {{ version }} Interfaces{% endblock %}
+{% block header %}{{ version.application.name }} {{ version }} Interfaces{% endblock %}
 
 {% block breadcrumbs %}
-  &raquo; Interfaces
+  &raquo; Applications &raquo; {{ version.application.name }} {{ version }} &raquo; Interfaces
 {% endblock %}
 
 {% block navboxes %}
@@ -26,7 +26,7 @@
     <ul class="interfacelist">
     {% for interface in module.interfaces %}
       <li class="filteritem">
-        <a href="{% url xpcomref.views.interface name=interface %}">{{ interface }}</a>
+        <a href="{% url xpcomref.views.appinterface name=version.application.name version=version interface=interface %}">{{ interface }}</a>
       </li>
     {% endfor %}
     </ul>

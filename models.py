@@ -52,7 +52,6 @@ class Component(models.Model):
   versions = models.ManyToManyField(Version, through='ComponentVersion')
   contract = models.CharField(max_length=100, db_index=True)
   cid = models.CharField(max_length=36)
-  interfaces = models.ManyToManyField(Interface)
   hash = models.CharField(max_length=32)
 
   class Meta:
@@ -64,10 +63,18 @@ class Component(models.Model):
 class ComponentVersion(models.Model):
   component = models.ForeignKey(Component)
   version = models.ForeignKey(Version)
-  platforms = models.ManyToManyField(Platform)
+  interfaces = models.ManyToManyField(Interface, through='ComponentVersionInterface')
 
   class Meta:
     unique_together = ('component', 'version')
+
+class ComponentVersionInterface(models.Model):
+  componentversion = models.ForeignKey(ComponentVersion)
+  interface = models.ForeignKey(Interface)
+  platforms = models.ManyToManyField(Platform)
+
+  class Meta:
+    unique_together = ('componentversion', 'interface')
 
 class InterfaceVersion(models.Model):
   interface = models.ForeignKey(Interface)
@@ -82,6 +89,7 @@ class Member(models.Model):
   name = models.CharField(max_length=60, db_index=True)
   lcname = models.CharField(max_length=60, db_index=True)
   comment = models.TextField()
+  type = models.TextField()
   line = models.IntegerField()
   url = models.CharField(max_length=200)
   hash = models.CharField(max_length=32)
@@ -108,7 +116,6 @@ class Method(Member):
 
 class Parameter(models.Model):
   method = models.ForeignKey(Method)
-  position = models.IntegerField()
   direction = models.CharField(max_length=5)
   const = models.BooleanField()
   array = models.BooleanField()
@@ -121,7 +128,7 @@ class Parameter(models.Model):
   iidis = models.CharField(max_length=30, blank=True)
 
   class Meta:
-    unique_together = ('method', 'position')
+    order_with_respect_to = 'method'
 
   def __unicode__(self):
     return self.name

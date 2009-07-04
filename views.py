@@ -4,7 +4,10 @@ from django.template import RequestContext
 from xpcomref.models import *
 
 def index(request):
-  return render_to_response('index.html', {}, context_instance=RequestContext(request));
+  applications = Version.objects.all()
+  return render_to_response('index.html', {
+    'applications': applications
+    }, context_instance=RequestContext(request))
 
 def interfaces(request):
   modules = []
@@ -25,8 +28,7 @@ def interface(request, name):
       'name': name,
       'interfaces': interfaces
       }, context_instance=RequestContext(request))
-  else:
-    raise Http404
+  raise Http404
 
 def components(request):
   return render_to_response('components.html', {
@@ -40,5 +42,64 @@ def component(request, name):
       'name': name,
       'components': components
       }, context_instance=RequestContext(request))
-  else:
-    raise Http404
+  raise Http404
+
+def appinterfaces(request, name, version):
+  versions = Version.objects.filter(version=version, application__name=name)
+  if versions.count() == 1:
+    version = versions[0]
+    modules = []
+    mods = Interface.objects.filter(versions=version).values_list('module', flat=True).order_by('module').distinct()
+    for module in mods:
+      modules.append({
+        'name': module,
+        'interfaces': Interface.objects.filter(module=module, versions=version).values_list('name', flat=True).order_by('lcname')
+        })
+    return render_to_response('appinterfaces.html', {
+      'version': version,
+      'modules': modules
+      }, context_instance=RequestContext(request))
+  raise Http404
+
+def appinterface(request, name, version, interface):
+  versions = Version.objects.filter(version=version, application__name=name)
+  if versions.count() == 1:
+    version = versions[0]
+    interfaces = Interface.objects.filter(versions=version, name=interface)
+    if interfaces.count() == 1:
+      interface = interfaces[0]
+      return render_to_response('appinterface.html', {
+        'version': version,
+        'interface': interface,
+        'constants': Constant.objects.filter(interface=interface).order_by('line'),
+        'attributes': Attribute.objects.filter(interface=interface).order_by('lcname'),
+        'methods': Method.objects.filter(interface=interface).order_by('lcname')
+        }, context_instance=RequestContext(request))
+  raise Http404
+
+def appcomponents(request, name, version):
+  versions = Version.objects.filter(version=version, application__name=name)
+  if versions.count() == 1:
+    version = versions[0]
+    return render_to_response('appcomponents.html', {
+      'version': version,
+      'components': Component.objects.filter(versions=version).values_list('contract', flat=True).order_by('contract')
+      }, context_instance=RequestContext(request))
+  raise Http404
+
+def appcomponent(request, name, version, component):
+  versions = Version.objects.filter(version=version, application__name=name)
+  if versions.count() == 1:
+    version = versions[0]
+    modules = []
+    mods = Interface.objects.filter(versions=version).values_list('module', flat=True).order_by('module').distinct()
+    for module in mods:
+      modules.append({
+        'name': module,
+        'interfaces': Interface.objects.filter(module=module, versions=version).values_list('name', flat=True).order_by('lcname')
+        })
+    return render_to_response('appcomponent.html', {
+      'version': version,
+      'modules': modules
+      }, context_instance=RequestContext(request))
+  raise Http404

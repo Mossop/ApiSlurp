@@ -17,7 +17,7 @@
     </ul>
   {% endfor %}
   {% for component in interface.component_set.all %}
-    <li><a href="{% url xpcomref.views.component name=component %}">{{ component }}</a>
+    <li><a href="{% url xpcomref.views.component name=component|urlencode %}">{{ component }}</a>
   {% endfor %}
   </ul>
 {% endfor %}

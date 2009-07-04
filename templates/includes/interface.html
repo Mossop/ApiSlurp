@@ -1,0 +1,4 @@
+<div class="interface signature {$class}">
+  <div class="attributes">[{% if interface.scriptable %}{% include "includes/attributes/scriptable.html" %}, {% endif %}{% if interface.noscript %}{% include "includes/attributes/noscript.html" %}, {% endif %}{% if interface.function %}{% include "includes/attributes/function.html" %}, {% endif %}{% include "includes/attributes/uuid.html" %}]</div>
+  <div class="header"><span class="keyword">interface</span> <span class="type">{{ interface }}</span>{% if interface.parent %} : <span class="type">{{ interface.parent }}</a></span>{% endif %}</div>
+</div>

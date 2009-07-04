@@ -1,0 +1,72 @@
+{% extends "apidoc.html" %}
+
+{% block head %}
+<script type="text/javascript" src="{{ MEDIA_URL }}scripts/filter.js"></script>
+{% endblock %}
+
+{% block title %}{{ interface }} in {{ version.application.name }} {{ version }}{% endblock %}
+{% block header %}{{ interface }} in {{ version.application.name }} {{ version }}{% endblock %}
+
+{% block breadcrumbs %}
+  &raquo; Applications
+  &raquo; {{ version.application.name }} {{ version }}
+  &raquo; <a href="{% url xpcomref.views.appinterfaces name=version.application.name version=version|urlencode %}">Interfaces</a>
+  &raquo; {{ interface }}
+{% endblock %}
+
+{% block navboxes %}
+<p class="navbox">
+  <img src="{{ MEDIA_URL }}silk/script_go.png" />
+  <a href="{{ interface.url }}">View IDL</a>
+</p>
+<p class="navbox">
+  <img src="https://developer.mozilla.org/favicon.ico" />
+  <a href="https://developer.mozilla.org/en/{{ interface.name|capfirst|urlencode }}">More information</a>
+</p>
+{% endblock %}
+
+{% block body %}
+<div class="idl">
+  <pre class="comment">{{ interface.comment }}</pre>
+  {% include "includes/interface.html" %}
+</div>
+{% for member in constants %}
+  {% if forloop.first %}
+    <h2><a name="constants">Constants</a></h2>
+    <div>
+  {% endif %}
+      <div class="member constant">
+        <pre class="comment">{{ member.comment }}</pre>
+        {% include "includes/constant.html" %}
+      </div>
+  {% if forloop.last %}
+    </div>
+  {% endif %}
+{% endfor %}
+{% for member in attributes %}
+  {% if forloop.first %}
+    <h2><a name="attributes">Attributes</a></h2>
+    <div>
+  {% endif %}
+      <div class="member attribute">
+        <pre class="comment">{{ member.comment }}</pre>
+        {% include "includes/attribute.html" %}
+      </div>
+  {% if forloop.last %}
+    </div>
+  {% endif %}
+{% endfor %}
+{% for member in methods %}
+  {% if forloop.first %}
+    <h2><a name="methods">Methods</a></h2>
+    <div>
+  {% endif %}
+      <div class="member method">
+        <pre class="comment">{{ member.method.comment }}</pre>
+        {% include "includes/method.html" %}
+      </div>
+  {% if forloop.last %}
+    </div>
+  {% endif %}
+{% endfor %}
+{% endblock body %}

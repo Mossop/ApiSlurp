@@ -1,0 +1,9 @@
+<span class="param">{% comment %}
+{% endcomment %}{% if param.const %}{% include "includes/attributes/const.html" %}{% endif %}{% comment %}
+{% endcomment %}{% if param.array %}{% include "includes/attributes/array.html" %}{% endif %}{% comment %}
+{% endcomment %}{% if param.retval %}{% include "includes/attributes/retval.html" %}{% endif %}{% comment %}
+{% endcomment %}{% if param.shared %}{% include "includes/attributes/shared.html" %}{% endif %}{% comment %}
+{% endcomment %}{% if param.optional %}{% include "includes/attributes/optional.html" %}{% endif %}{% comment %}
+{% endcomment %}{% if param.sizeis %}{% include "includes/attributes/size_is.html" %}{% endif %}{% comment %}
+{% endcomment %}{% if param.iidis %}{% include "includes/attributes/iid_is.html" %}{% endif %}{% comment %}
+{% endcomment %}<span class="keyword">{{ param.direction }}</span> <span class="type">{{ param.type }}</span> <span class="name">{{ param.name }}</span></span>

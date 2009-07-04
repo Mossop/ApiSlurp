@@ -96,8 +96,6 @@ class Slurp(object):
 
   def getHashStringForComponent(self, cid, implements):
     str = cid
-    for interface in sorted(implements, key=lambda x: x.name):
-      str += ",%s" % interface.hash
     return str
 
   def addMember(self, interface, member):
@@ -118,14 +116,14 @@ class Slurp(object):
     m.name = member.name
     m.lcname = member.name.lower()
     m.comment = self.__mungeComment(member.doccomments)
+    m.type = member.type
     m.hash = hashit(self.getHashStringForMember(member))
     m.url = member.url
     m.line = member.location._lineno
     m.save()
     if member.kind == "method":
-      pos = 0
       for param in member.params:
-        p = Parameter(method=m, position=pos, name=param.name)
+        p = Parameter(method=m, name=param.name)
         p.const = param.const
         p.array = param.array
         p.retval = param.retval
@@ -136,7 +134,6 @@ class Slurp(object):
         p.sizeis = param.size_is if param.size_is else ''
         p.iidis = param.iid_is if param.iid_is else ''
         p.save()
-        pos += 1
 
   def addInterface(self, seen, used, version, platform, interface):
     if seen.has_key(interface.name):
@@ -238,17 +235,21 @@ class Slurp(object):
           except Component.DoesNotExist:
             component = Component(contract=contract, cid=cid, hash=hash)
             component.save()
-            for interface in implements:
-              component.interfaces.add(interface)
           try:
             cv = ComponentVersion.objects.get(component=component, version=version)
           except ComponentVersion.DoesNotExist:
             cv = ComponentVersion(version=version, component=component)
             cv.save()
-          try:
-            cv.platforms.get(id=platform.id)
-          except Platform.DoesNotExist:
-            cv.platforms.add(platform)
+          for interface in implements:
+            try:
+              cvi = ComponentVersionInterface.objects.get(componentversion=cv, interface=interface)
+            except ComponentVersionInterface.DoesNotExist:
+              cvi = ComponentVersionInterface(componentversion=cv, interface=interface)
+              cvi.save()
+            try:
+              cvi.platforms.get(id=platform.id)
+            except Platform.DoesNotExist:
+              cvi.platforms.add(platform)
         line = line[2:]
         [contract, cid] = line.rsplit(',', 1)
         cid = cid[1:-1]
