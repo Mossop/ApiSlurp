@@ -8,7 +8,13 @@
 {% block header %}{{ version.application.name }} {{ version }} Interfaces{% endblock %}
 
 {% block breadcrumbs %}
-  &raquo; Applications &raquo; {{ version.application.name }} {{ version }} &raquo; Interfaces
+  &raquo; Applications
+  &raquo; <select onchange="window.location.href = this.value">
+            {% for v in versions %}
+              <option value="{% url xpcomref.views.appinterfaces name=v.application version=v %}"{% ifequal version v %} selected="selected"{% endifequal %}>{{ v.application.name }} {{ v }}</option>
+            {% endfor %}
+          </select>
+  &raquo; Interfaces
 {% endblock %}
 
 {% block navboxes %}
@@ -26,7 +32,7 @@
     <ul class="interfacelist">
     {% for interface in module.interfaces %}
       <li class="filteritem">
-        <a href="{% url xpcomref.views.appinterface name=version.application.name version=version interface=interface %}">{{ interface }}</a>
+        <a href="{% url xpcomref.views.appinterface name=version.application version=version interface=interface %}">{{ interface }}</a>
       </li>
     {% endfor %}
     </ul>

@@ -9,7 +9,11 @@
 
 {% block breadcrumbs %}
   &raquo; Applications
-  &raquo; {{ version.application.name }} {{ version }}
+  &raquo; <select onchange="window.location.href = this.value">
+            {% for v in versions %}
+              <option value="{% url xpcomref.views.appcomponents name=v.application version=v %}"{% ifequal version v %} selected="selected"{% endifequal %}>{{ v.application.name }} {{ v }}</option>
+            {% endfor %}
+          </select>
   &raquo; Components
 {% endblock %}
 
@@ -26,7 +30,7 @@
   <ul class="componentlist">
   {% for component in components %}
     <li class="filteritem">
-      <a href="{% url xpcomref.views.appcomponent name=version.application.name version=version component=component|urlencode %}">{{ component }}</a>
+      <a href="{% url xpcomref.views.appcomponent name=version.application version=version contract=component|urlencode %}">{{ component }}</a>
     </li>
   {% endfor %}
   </ul>

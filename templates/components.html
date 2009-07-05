@@ -24,7 +24,7 @@
   <ul class="componentlist">
   {% for component in components %}
     <li class="filteritem">
-      <a href="{% url xpcomref.views.component name=component|urlencode %}">{{ component }}</a>
+      <a href="{% url xpcomref.views.component name=contract|urlencode %}">{{ component }}</a>
     </li>
   {% endfor %}
   </ul>

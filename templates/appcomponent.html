@@ -6,7 +6,7 @@
 {% block breadcrumbs %}
   &raquo; Applications
   &raquo; {{ version.application.name }} {{ version }}
-  &raquo; <a href="{% url xpcomref.views.appcomponents name=version.application.name version=version %}">Components</a>
+  &raquo; <a href="{% url xpcomref.views.appcomponents name=version.application version=version %}">Components</a>
   &raquo; {{ component }}
 {% endblock %}
 
@@ -16,7 +16,7 @@
     <h2>Implements</h2>
     <ul class="implementlist interfaces">
   {% endif %}
-  <li><a href="{% url xpcomref.views.appinterface name=version.application.name version=version interface=interface %}">{{ interface }}</a></li>
+  <li><a href="{% url xpcomref.views.appinterface name=version.application version=version interface=interface %}">{{ interface }}</a></li>
   {% if forloop.last %}
     </ul>
   {% endif %}

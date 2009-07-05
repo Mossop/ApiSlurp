@@ -1,7 +1,11 @@
+from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.template import RequestContext
 from xpcomref.models import *
+
+def redirect(view, **kwargs):
+  return HttpResponseRedirect(reverse(view, kwargs=kwargs))
 
 def index(request):
   applications = Version.objects.all()
@@ -22,12 +26,10 @@ def interfaces(request):
     }, context_instance=RequestContext(request))
 
 def interface(request, name):
-  interfaces = Interface.objects.filter(name=name)
-  if interfaces.count() > 0:
-    return render_to_response('interface.html', {
-      'name': name,
-      'interfaces': interfaces
-      }, context_instance=RequestContext(request))
+  ivs = InterfaceVersion.objects.filter(interface__name=name).order_by('version')
+  if ivs.count() > 0:
+    iv = ivs[ivs.count() - 1]
+    return redirect('xpcomref.views.appinterface', name=iv.version.application, version=iv.version, interface=name)
   raise Http404
 
 def components(request):
@@ -35,13 +37,11 @@ def components(request):
     'components': Component.objects.values_list('contract', flat=True).order_by('contract').distinct()
     }, context_instance=RequestContext(request))
 
-def component(request, name):
-  components = Component.objects.filter(contract=name)
-  if components.count() > 0:
-    return render_to_response('component.html', {
-      'name': name,
-      'components': components
-      }, context_instance=RequestContext(request))
+def component(request, contract):
+  cvs = ComponentVersion.objects.filter(component__contract=contract).order_by('version')
+  if cvs.count() > 0:
+    cv = cvs[cvs.count() - 1]
+    return redirect('xpcomref.views.appcomponent', name=cv.version.application, version=cv.version, contract=contract)
   raise Http404
 
 def appinterfaces(request, name, version):
@@ -55,6 +55,7 @@ def appinterfaces(request, name, version):
       })
   return render_to_response('appinterfaces.html', {
     'version': version,
+    'versions': Version.objects.filter(application=version.application),
     'modules': modules
     }, context_instance=RequestContext(request))
   raise Http404
@@ -76,13 +77,14 @@ def appcomponents(request, name, version):
   version = Version.objects.get(version=version, application__name=name)
   return render_to_response('appcomponents.html', {
     'version': version,
+    'versions': Version.objects.filter(application=version.application),
     'components': Component.objects.filter(versions=version).values_list('contract', flat=True).order_by('contract')
     }, context_instance=RequestContext(request))
   raise Http404
 
-def appcomponent(request, name, version, component):
+def appcomponent(request, name, version, contract):
   version = Version.objects.get(version=version, application__name=name)
-  component = Component.objects.get(versions=version, contract=component)
+  component = Component.objects.get(versions=version, contract=contract)
   cv = ComponentVersion.objects.get(version=version, component=component)
   return render_to_response('appcomponent.html', {
     'version': version,

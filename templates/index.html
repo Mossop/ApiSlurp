@@ -7,8 +7,8 @@
 {% for version in applications %}
 <h2>
   {{ version.application.name }} {{ version }}
-  <a href="{% url xpcomref.views.appinterfaces name=version.application.name version=version %}">interfaces</a>
-  <a href="{% url xpcomref.views.appcomponents name=version.application.name version=version %}">components</a>
+  <a href="{% url xpcomref.views.appinterfaces name=version.application version=version %}">interfaces</a>
+  <a href="{% url xpcomref.views.appcomponents name=version.application version=version %}">components</a>
 </h2>
 {% endfor %}
 <h2><a href="{% url xpcomref.views.interfaces %}">All Interfaces</a></h2>
