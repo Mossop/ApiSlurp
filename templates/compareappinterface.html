@@ -1,0 +1,253 @@
+{% extends "apidoc.html" %}
+
+{% block head %}
+<script type="text/javascript">
+function toggleVisible() {
+  var checkbox = document.getElementById("hidesame");
+  document.getElementById("diff").className = checkbox.checked ? "diff hidesame" : "diff";
+}
+</script>
+{% endblock %}
+
+{% block title %}Comparing {{ leftinterface }} between {{ leftversion.application }} {{ leftversion }} and {{ rightversion.application }} {{ rightversion }}{% endblock %}
+{% block header %}Comparing {{ leftinterface }} between {{ leftversion.application }} {{ leftversion }} and {{ rightversion.application }} {{ rightversion }}{% endblock %}
+
+{% block breadcrumbs %}
+  &raquo; Applications
+  &raquo; <select onchange="window.location.href = this.value">
+            {% for v in interfaceversions %}
+              {% ifnotequal v.interface.hash rightinterface.hash %}
+                <option value="{% url xpcomref.views.compareappinterface leftname=v.version.application leftversion=v.version rightname=rightversion.application rightversion=rightversion interface=leftinterface %}"
+                        {% ifequal leftversion v.version %} selected="selected"{% endifequal %}>
+                  {{ v.version.application.name }} {{ v.version }}
+                </option>
+              {% endifnotequal %}
+            {% endfor %}
+          </select>
+  &raquo; <a href="{% url xpcomref.views.appinterfaces name=leftversion.application version=leftversion %}">Interfaces</a>
+  &raquo; <a href="{% url xpcomref.views.appinterface name=leftversion.application version=leftversion interface=leftinterface %}">{{ leftinterface }}</a>
+  &raquo; compare to  <select onchange="window.location.href = this.value">
+                        {% for v in interfaceversions %}
+                          {% ifnotequal v.interface.hash leftinterface.hash %}
+                            <option value="{% url xpcomref.views.compareappinterface leftname=leftversion.application leftversion=leftversion rightname=v.version.application rightversion=v.version interface=leftinterface %}"
+                                    {% ifequal rightversion v.version %} selected="selected"{% endifequal %}>
+                              {{ v.version.application.name }} {{ v.version }}
+                            </option>
+                          {% endifnotequal %}
+                        {% endfor %}
+                      </select>
+{% endblock %}
+
+{% block body %}
+<table id="diff" class="diff">
+  <tr>
+    <td class="before"><h2><a href="{% url xpcomref.views.appinterface name=leftversion.application version=leftversion interface=leftinterface %}">{{ leftinterface }} in {{ leftversion.application }} {{ leftversion }}</a></h2></td>
+    <td class="after"><h2><a href="{% url xpcomref.views.appinterface name=rightversion.application version=rightversion interface=rightinterface %}">{{ rightinterface }} in {{ rightversion.application }} {{ rightversion }}</a></h2></td>
+  </tr>
+  <tr>
+    <td colspan="2">
+      <div class="controls"><input type="checkbox" id="hidesame" name="hidesame" onchange="toggleVisible()"/> <label for="hidesame">Hide unchanged items</label></div>
+    </td>
+  </tr>
+  <tr class="commentrow">
+    <td class="before">
+      <pre class="comment">{{ leftinterface.comment }}</pre>
+    </td>
+    <td class="after">
+      <pre class="comment">{{ rightinterface.comment }}</pre>
+    </td>
+  </tr>
+  <tr class="signaturerow">
+    <td class="before idl">
+      {% with leftinterface as interface %}
+        {% include "includes/interface.html" %}
+      {% endwith %}
+    </td>
+    <td class="after idl">
+      {% with rightinterface as interface %}
+        {% include "includes/interface.html" %}
+      {% endwith %}
+    </td>
+  </tr>
+
+  {% for leftmember, rightmember in constants %}
+    {% if forloop.first %}
+      <tr>
+        <td colspan="2"><h2><a name="constants">Constants</a></h2></td>
+      </tr>
+    {% endif %}
+    {% if leftmember %}
+      {% if rightmember %}
+        {% ifequal leftmember.hash rightmember.hash %}
+          <tr class="commentrow unchanged">
+        {% else %}
+          <tr class="commentrow modified">
+        {% endifequal %}
+      {% else %}
+        <tr class="commentrow removed">
+      {% endif %}
+    {% else %}
+      <tr class="commentrow added">
+    {% endif %}
+      <td class="before">
+        {% if leftmember %}
+          <pre class="comment">{{ leftmember.comment }}</pre>
+        {% endif %}
+      </td>
+      <td class="after">
+        {% if rightmember %}
+          <pre class="comment">{{ rightmember.comment }}</pre>
+        {% endif %}
+      </td>
+    </tr>
+    {% if leftmember %}
+      {% if rightmember %}
+        {% ifequal leftmember.hash rightmember.hash %}
+          <tr class="signaturerow unchanged">
+        {% else %}
+          <tr class="signaturerow modified">
+        {% endifequal %}
+      {% else %}
+        <tr class="signaturerow removed">
+      {% endif %}
+    {% else %}
+      <tr class="signaturerow added">
+    {% endif %}
+      <td class="before member constant">
+        {% if leftmember %}
+          {% with leftmember as member %}
+            {% include "includes/constant.html" %}
+          {% endwith %}
+        {% endif %}
+      </td>
+      <td class="after member constant">
+        {% if rightmember %}
+          {% with rightmember as member %}
+            {% include "includes/constant.html" %}
+          {% endwith %}
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+
+  {% for leftmember, rightmember in attributes %}
+    {% if forloop.first %}
+      <tr>
+        <td colspan="2"><h2><a name="attributes">Attributes</a></h2></td>
+      </tr>
+    {% endif %}
+    {% if leftmember %}
+      {% if rightmember %}
+        {% ifequal leftmember.hash rightmember.hash %}
+          <tr class="commentrow unchanged">
+        {% else %}
+          <tr class="commentrow modified">
+        {% endifequal %}
+      {% else %}
+        <tr class="commentrow removed">
+      {% endif %}
+    {% else %}
+      <tr class="commentrow added">
+    {% endif %}
+      <td class="before">
+        {% if leftmember %}
+          <pre class="comment">{{ leftmember.comment }}</pre>
+        {% endif %}
+      </td>
+      <td class="after">
+        {% if rightmember %}
+          <pre class="comment">{{ rightmember.comment }}</pre>
+        {% endif %}
+      </td>
+    </tr>
+    {% if leftmember %}
+      {% if rightmember %}
+        {% ifequal leftmember.hash rightmember.hash %}
+          <tr class="signaturerow unchanged">
+        {% else %}
+          <tr class="signaturerow modified">
+        {% endifequal %}
+      {% else %}
+        <tr class="signaturerow removed">
+      {% endif %}
+    {% else %}
+      <tr class="signaturerow added">
+    {% endif %}
+      <td class="before member attribute">
+        {% if leftmember %}
+          {% with leftmember as member %}
+            {% include "includes/attribute.html" %}
+          {% endwith %}
+        {% endif %}
+      </td>
+      <td class="after member attribute">
+        {% if rightmember %}
+          {% with rightmember as member %}
+            {% include "includes/attribute.html" %}
+          {% endwith %}
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+
+  {% for leftmember, rightmember in methods %}
+    {% if forloop.first %}
+      <tr>
+        <td colspan="2"><h2><a name="methods">Methods</a></h2></td>
+      </tr>
+    {% endif %}
+    {% if leftmember %}
+      {% if rightmember %}
+        {% ifequal leftmember.hash rightmember.hash %}
+          <tr class="commentrow unchanged">
+        {% else %}
+          <tr class="commentrow modified">
+        {% endifequal %}
+      {% else %}
+        <tr class="commentrow removed">
+      {% endif %}
+    {% else %}
+      <tr class="commentrow added">
+    {% endif %}
+      <td class="before">
+        {% if leftmember %}
+          <pre class="comment">{{ leftmember.comment }}</pre>
+        {% endif %}
+      </td>
+      <td class="after">
+        {% if rightmember %}
+          <pre class="comment">{{ rightmember.comment }}</pre>
+        {% endif %}
+      </td>
+    </tr>
+    {% if leftmember %}
+      {% if rightmember %}
+        {% ifequal leftmember.hash rightmember.hash %}
+          <tr class="signaturerow unchanged">
+        {% else %}
+          <tr class="signaturerow modified">
+        {% endifequal %}
+      {% else %}
+        <tr class="signaturerow removed">
+      {% endif %}
+    {% else %}
+      <tr class="signaturerow added">
+    {% endif %}
+      <td class="before member method">
+        {% if leftmember %}
+          {% with leftmember as member %}
+            {% include "includes/method.html" %}
+          {% endwith %}
+        {% endif %}
+      </td>
+      <td class="after member method">
+        {% if rightmember %}
+          {% with rightmember as member %}
+            {% include "includes/method.html" %}
+          {% endwith %}
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+</table>
+{% endblock body %}

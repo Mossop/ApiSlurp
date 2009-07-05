@@ -1,7 +1,7 @@
 {% extends "apidoc.html" %}
 
-{% block title %}{{ interface }} in {{ version.application.name }} {{ version }}{% endblock %}
-{% block header %}{{ interface }} in {{ version.application.name }} {{ version }}{% endblock %}
+{% block title %}{{ interface }} in {{ version.application }} {{ version }}{% endblock %}
+{% block header %}{{ interface }} in {{ version.application }} {{ version }}{% endblock %}
 
 {% block breadcrumbs %}
   &raquo; Applications
@@ -15,6 +15,18 @@
 {% endblock %}
 
 {% block navboxes %}
+<p class="navbox">
+  <img src="{$ROOT}/silk/arrow_divide.png" />
+  Compare to:
+  <select onchange="window.location.href = this.value">
+    <option value="" selected="selected">--</option>
+    {% for v in interfaceversions %}
+      {% ifnotequal v.interface.hash interface.hash %}
+        <option value="{% url xpcomref.views.compareappinterface leftname=version.application leftversion=version rightname=v.version.application rightversion=v.version interface=interface %}">{{ v.version.application.name }} {{ v.version }}</option>
+      {% endifnotequal %}
+    {% endfor %}
+  </select>
+</p>
 <p class="navbox">
   <img src="{{ MEDIA_URL }}silk/script_go.png" />
   <a href="{{ interface.url }}">View IDL</a>

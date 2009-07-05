@@ -94,3 +94,86 @@ def appcomponent(request, name, version, contract):
     'componentversion': cv
     }, context_instance=RequestContext(request))
   raise Http404
+
+def compareappinterface(request, leftname, leftversion, rightname, rightversion, interface):
+  leftv = Version.objects.get(version=leftversion, application__name=leftname)
+  rightv = Version.objects.get(version=rightversion, application__name=rightname)
+  if leftv.version > rightv.version:
+    [leftv, rightv] = [rightv, leftv]
+  leftinterface = Interface.objects.get(versions=leftv, name=interface)
+  rightinterface = Interface.objects.get(versions=rightv, name=interface)
+
+  constants = []
+  left = list(Constant.objects.filter(interface=leftinterface).order_by('line'))
+  right = list(Constant.objects.filter(interface=rightinterface).order_by('line'))
+  while len(left) > 0 and len(right) > 0:
+    if left[0].name == right[0].name:
+      constants.append((left[0], right[0]))
+      left = left[1:]
+      right = right[1:]
+    elif left[0].line < right[0].line:
+      constants.append((left[0], None))
+      left = left[1:]
+    else:
+      constants.append((None, right[0]))
+      right = right[1:]
+  while len(left) > 0:
+    constants.append((left[0], None))
+    left = left[1:]
+  while len(right) > 0:
+    constants.append((None, right[0]))
+    right = right[1:]
+
+  attributes = []
+  left = list(Attribute.objects.filter(interface=leftinterface).order_by('lcname'))
+  right = list(Attribute.objects.filter(interface=rightinterface).order_by('lcname'))
+  while len(left) > 0 and len(right) > 0:
+    if left[0].name == right[0].name:
+      attributes.append((left[0], right[0]))
+      left = left[1:]
+      right = right[1:]
+    elif left[0].name < right[0].name:
+      attributes.append((left[0], None))
+      left = left[1:]
+    else:
+      attributes.append((None, right[0]))
+      right = right[1:]
+  while len(left) > 0:
+    attributes.append((left[0], None))
+    left = left[1:]
+  while len(right) > 0:
+    attributes.append((None, right[0]))
+    right = right[1:]
+
+  methods = []
+  left = list(Method.objects.filter(interface=leftinterface).order_by('lcname'))
+  right = list(Method.objects.filter(interface=rightinterface).order_by('lcname'))
+  while len(left) > 0 and len(right) > 0:
+    if left[0].name == right[0].name:
+      methods.append((left[0], right[0]))
+      left = left[1:]
+      right = right[1:]
+    elif left[0].name < right[0].name:
+      methods.append((left[0], None))
+      left = left[1:]
+    else:
+      methods.append((None, right[0]))
+      right = right[1:]
+  while len(left) > 0:
+    methods.append((left[0], None))
+    left = left[1:]
+  while len(right) > 0:
+    methods.append((None, right[0]))
+    right = right[1:]
+
+  return render_to_response('compareappinterface.html', {
+    'leftversion': leftv,
+    'rightversion': rightv,
+    'interfaceversions': InterfaceVersion.objects.filter(interface__name=interface).order_by('version'),
+    'leftinterface': leftinterface,
+    'rightinterface': rightinterface,
+    'constants': constants,
+    'attributes': attributes,
+    'methods': methods
+    }, context_instance=RequestContext(request))
+  raise Http404
