@@ -1,6 +1,6 @@
 from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response, get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, Http404
 from django.template import RequestContext
 from xpcomref.models import *
 
@@ -44,7 +44,13 @@ def component(request, contract):
   cv = cvs[cvs.count() - 1]
   return redirect('xpcomref.views.appcomponent', name=cv.version.application, version=cv.version, contract=contract)
 
-def searchinterfaces(request, string):
+def searchinterfaces(request, **kwargs):
+  if 'string' in kwargs:
+    string = kwargs['string']
+  elif 'string' in request.GET:
+    string = request.GET['string']
+  else:
+    return HttpResponseBadRequest()
   interfaces = Interface.objects.filter(name__icontains=string).values_list('name', flat=True).order_by('lcname').distinct()
   if interfaces.count() == 1:
     return interface(request, interfaces[0])
@@ -53,7 +59,13 @@ def searchinterfaces(request, string):
     'interfaces': interfaces
     }, context_instance=RequestContext(request))
 
-def searchcomponents(request, string):
+def searchcomponents(request, **kwargs):
+  if 'string' in kwargs:
+    string = kwargs['string']
+  elif 'string' in request.GET:
+    string = request.GET['string']
+  else:
+    return HttpResponseBadRequest()
   components = Component.objects.filter(contract__icontains=string).values_list('contract', flat=True).order_by('contract').distinct()
   if components.count() == 1:
     return component(request, components[0])

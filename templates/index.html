@@ -1,16 +1,49 @@
 {% extends "apidoc.html" %}
 
+{% block head %}
+<style type="text/css">
+table {
+  width: 70%;
+  margin: auto;
+}
+
+td {
+  text-align: center;
+  padding: 5px;
+}
+</style>
+{% endblock %}
+
 {% block title %}Mozilla XPCOM Reference{% endblock %}
 {% block header %}Mozilla XPCOM Reference{% endblock %}
 
 {% block body %}
-{% for version in applications %}
-<h2>
-  {{ version.application }} {{ version }}
-  <a href="{% url xpcomref.views.appinterfaces name=version.application version=version %}">interfaces</a>
-  <a href="{% url xpcomref.views.appcomponents name=version.application version=version %}">components</a>
-</h2>
-{% endfor %}
-<h2><a href="{% url xpcomref.views.interfaces %}">All Interfaces</a></h2>
-<h2><a href="{% url xpcomref.views.components %}">All Components</a></h2>
+<table width="100%">
+  <tr>
+    <td><h2><a href="{% url xpcomref.views.interfaces %}">All Interfaces</a></h2></td>
+    <td><h2><a href="{% url xpcomref.views.components %}">All Components</a></h2></td>
+  </tr>
+  <tr>
+    <td>
+      <form action="{% url xpcomref.views.searchinterfaces %}" method="GET">
+        <label for="interfaces">Search interfaces:</label>
+        <input id="interfaces" type="text" name="string" value="">
+        <input type="submit" value="Search">
+      </form>
+    </td>
+    <td>
+      <form action="{% url xpcomref.views.searchcomponents %}" method="GET">
+        <label for="components">Search components:</label>
+        <input id="components" type="text" name="string" value="">
+        <input type="submit" value="Search">
+      </form>
+    </td>
+  </tr>
+  {% for version in applications %}
+    <tr>
+      <td><a href="{% url xpcomref.views.appinterfaces name=version.application version=version %}">{{ version.application }} {{ version }} interfaces</a></td>
+      <td><a href="{% url xpcomref.views.appcomponents name=version.application version=version %}">{{ version.application }} {{ version }} components</a></td>
+    </tr>
+  {% endfor %}
+</table>
 {% endblock body %}
