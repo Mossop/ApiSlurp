@@ -113,6 +113,40 @@ def appcomponent(request, name, version, contract):
     }, context_instance=RequestContext(request))
   raise Http404
 
+def compareappinterfaces(request, leftname, leftversion, rightname, rightversion):
+  leftv = Version.objects.get(version=leftversion, application__name=leftname)
+  rightv = Version.objects.get(version=rightversion, application__name=rightname)
+  if leftv.version > rightv.version:
+    [leftv, rightv] = [rightv, leftv]
+
+  added = []
+  removed = []
+  modified = []
+  unchanged = []
+  names = Interface.objects.values_list('name', flat=True).order_by('lcname').distinct()
+  for name in names:
+    lefti = InterfaceVersion.objects.filter(version=leftv, interface__name=name)
+    righti = InterfaceVersion.objects.filter(version=rightv, interface__name=name)
+    if lefti.count() > 0 and righti.count() > 0:
+      if lefti[0].interface == righti[0].interface:
+        unchanged.append(name)
+      else:
+        modified.append(name)
+    elif lefti.count() > 0:
+      removed.append(name)
+    elif righti.count() > 0:
+      added.append(name)
+
+  return render_to_response('compareappinterfaces.html', {
+    'leftversion': leftv,
+    'rightversion': rightv,
+    'versions': Version.objects.filter(application=leftv.application),
+    'added': added,
+    'removed': removed,
+    'modified': modified,
+    'unchanged': unchanged
+    }, context_instance=RequestContext(request))
+
 def compareappinterface(request, leftname, leftversion, rightname, rightversion, interface):
   leftv = Version.objects.get(version=leftversion, application__name=leftname)
   rightv = Version.objects.get(version=rightversion, application__name=rightname)

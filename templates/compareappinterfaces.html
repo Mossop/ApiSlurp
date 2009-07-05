@@ -1,0 +1,88 @@
+{% extends "apidoc.html" %}
+
+{% block head %}
+<script type="text/javascript" src="{{ MEDIA_URL }}scripts/filter.js"></script>
+{% endblock %}
+
+{% block title %}Comparing {{ leftinterface }} between {{ leftversion.application }} {{ leftversion }} and {{ rightversion.application }} {{ rightversion }}{% endblock %}
+{% block header %}Comparing {{ leftinterface }} between {{ leftversion.application }} {{ leftversion }} and {{ rightversion.application }} {{ rightversion }}{% endblock %}
+
+{% block breadcrumbs %}
+  &raquo; Applications
+  &raquo; <select onchange="window.location.href = this.value">
+            {% for v in versions %}
+              {% ifnotequal v rightversion %}
+                <option value="{% url xpcomref.views.compareappinterfaces leftname=v.application leftversion=v rightname=rightversion.application rightversion=rightversion %}"
+                        {% ifequal leftversion v %} selected="selected"{% endifequal %}>
+                  {{ v.application }} {{ v }}
+                </option>
+              {% endifnotequal %}
+            {% endfor %}
+          </select>
+  &raquo; <a href="{% url xpcomref.views.appinterfaces name=leftversion.application version=leftversion %}">Interfaces</a>
+  &raquo; compare to  <select onchange="window.location.href = this.value">
+                        {% for v in versions %}
+                          {% ifnotequal v leftversion %}
+                            <option value="{% url xpcomref.views.compareappinterfaces leftname=leftversion.application leftversion=leftversion rightname=v.application rightversion=v %}"
+                                    {% ifequal rightversion v %} selected="selected"{% endifequal %}>
+                              {{ v.application }} {{ v }}
+                            </option>
+                          {% endifnotequal %}
+                        {% endfor %}
+                      </select>
+{% endblock %}
+
+{% block navboxes %}
+<p class="navbox">
+  <img src="{{ MEDIA_URL }}silk/find.png" />
+  Filter: <input id="filterbox" type="text" onkeypress="filterChange()"/>
+  <a href="#" onclick="clearFilter(); return false"><img src="{{ MEDIA_URL }}silk/cancel.png" /></a>
+</p>
+{% endblock %}
+
+{% block body %}
+<div class="filtersection">
+  <h2>Interfaces removed between {{ leftversion.application }} {{ leftversion }} and {{ rightversion.application }} {{ rightversion }}</h2>
+  <ul class="interfacelist">
+  {% for interface in removed %}
+    <li class="filteritem">
+      <a href="{% url xpcomref.views.appinterface name=leftversion.application version=leftversion interface=interface %}">{{ interface }}</a>
+    </li>
+  {% endfor %}
+  </ul>
+</div>
+
+<div class="filtersection">
+  <h2>Interfaces added between {{ leftversion.application }} {{ leftversion }} and {{ rightversion.application }} {{ rightversion }}</h2>
+  <ul class="interfacelist">
+  {% for interface in added %}
+    <li class="filteritem">
+      <a href="{% url xpcomref.views.appinterface name=rightversion.application version=rightversion interface=interface %}">{{ interface }}</a>
+    </li>
+  {% endfor %}
+  </ul>
+</div>
+
+<div class="filtersection">
+  <h2>Interfaces changed between {{ leftversion.application }} {{ leftversion }} and {{ rightversion.application }} {{ rightversion }}</h2>
+  <ul class="interfacelist">
+  {% for interface in modified %}
+    <li class="filteritem">
+      <a href="{% url xpcomref.views.compareappinterface leftname=leftversion.application leftversion=leftversion rightname=rightversion.application rightversion=rightversion interface=interface %}">{{ interface }}</a>
+    </li>
+  {% endfor %}
+  </ul>
+</div>
+
+<div class="filtersection">
+  <h2>Interfaces not changed between {{ leftversion.application }} {{ leftversion }} and {{ rightversion.application }} {{ rightversion }}</h2>
+  <ul class="interfacelist">
+  {% for interface in unchanged %}
+    <li class="filteritem">
+      <a href="{% url xpcomref.views.appinterface name=rightversion.application version=rightversion interface=interface %}">{{ interface }}</a>
+    </li>
+  {% endfor %}
+  </ul>
+</div>
+
+{% endblock body %}

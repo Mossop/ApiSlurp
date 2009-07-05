@@ -11,7 +11,7 @@
   &raquo; Applications
   &raquo; <select onchange="window.location.href = this.value">
             {% for v in versions %}
-              <option value="{% url xpcomref.views.appcomponents name=v.application version=v %}"{% ifequal version v %} selected="selected"{% endifequal %}>{{ v.application.name }} {{ v }}</option>
+              <option value="{% url xpcomref.views.appcomponents name=v.application version=v %}"{% ifequal version v %} selected="selected"{% endifequal %}>{{ v.application }} {{ v }}</option>
             {% endfor %}
           </select>
   &raquo; Components

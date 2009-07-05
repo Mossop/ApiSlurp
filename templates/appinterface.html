@@ -7,7 +7,7 @@
   &raquo; Applications
   &raquo; <select onchange="window.location.href = this.value">
             {% for v in interfaceversions %}
-              <option value="{% url xpcomref.views.appinterface name=v.version.application version=v.version interface=interface %}"{% ifequal version v.version %} selected="selected"{% endifequal %}>{{ v.version.application.name }} {{ v.version }}</option>
+              <option value="{% url xpcomref.views.appinterface name=v.version.application version=v.version interface=interface %}"{% ifequal version v.version %} selected="selected"{% endifequal %}>{{ v.version.application }} {{ v.version }}</option>
             {% endfor %}
           </select>
   &raquo; <a href="{% url xpcomref.views.appinterfaces name=version.application version=version %}">Interfaces</a>
@@ -22,7 +22,7 @@
     <option value="" selected="selected">--</option>
     {% for v in interfaceversions %}
       {% ifnotequal v.interface.hash interface.hash %}
-        <option value="{% url xpcomref.views.compareappinterface leftname=version.application leftversion=version rightname=v.version.application rightversion=v.version interface=interface %}">{{ v.version.application.name }} {{ v.version }}</option>
+        <option value="{% url xpcomref.views.compareappinterface leftname=version.application leftversion=version rightname=v.version.application rightversion=v.version interface=interface %}">{{ v.version.application }} {{ v.version }}</option>
       {% endifnotequal %}
     {% endfor %}
   </select>

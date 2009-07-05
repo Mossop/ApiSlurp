@@ -11,13 +11,25 @@
   &raquo; Applications
   &raquo; <select onchange="window.location.href = this.value">
             {% for v in versions %}
-              <option value="{% url xpcomref.views.appinterfaces name=v.application version=v %}"{% ifequal version v %} selected="selected"{% endifequal %}>{{ v.application.name }} {{ v }}</option>
+              <option value="{% url xpcomref.views.appinterfaces name=v.application version=v %}"{% ifequal version v %} selected="selected"{% endifequal %}>{{ v.application }} {{ v }}</option>
             {% endfor %}
           </select>
   &raquo; Interfaces
 {% endblock %}
 
 {% block navboxes %}
+<p class="navbox">
+  <img src="{$ROOT}/silk/arrow_divide.png" />
+  Compare to:
+  <select onchange="window.location.href = this.value">
+    <option value="" selected="selected">--</option>
+    {% for v in versions %}
+      {% ifnotequal v version %}
+        <option value="{% url xpcomref.views.compareappinterfaces leftname=version.application leftversion=version rightname=v.application rightversion=v %}">{{ v.application }} {{ v }}</option>
+      {% endifnotequal %}
+    {% endfor %}
+  </select>
+</p>
 <p class="navbox">
   <img src="{{ MEDIA_URL }}silk/find.png" />
   Filter: <input id="filterbox" type="text" onkeypress="filterChange()"/>

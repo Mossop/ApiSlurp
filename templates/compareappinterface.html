@@ -19,7 +19,7 @@ function toggleVisible() {
               {% ifnotequal v.interface.hash rightinterface.hash %}
                 <option value="{% url xpcomref.views.compareappinterface leftname=v.version.application leftversion=v.version rightname=rightversion.application rightversion=rightversion interface=leftinterface %}"
                         {% ifequal leftversion v.version %} selected="selected"{% endifequal %}>
-                  {{ v.version.application.name }} {{ v.version }}
+                  {{ v.version.application }} {{ v.version }}
                 </option>
               {% endifnotequal %}
             {% endfor %}
@@ -31,7 +31,7 @@ function toggleVisible() {
                           {% ifnotequal v.interface.hash leftinterface.hash %}
                             <option value="{% url xpcomref.views.compareappinterface leftname=leftversion.application leftversion=leftversion rightname=v.version.application rightversion=v.version interface=leftinterface %}"
                                     {% ifequal rightversion v.version %} selected="selected"{% endifequal %}>
-                              {{ v.version.application.name }} {{ v.version }}
+                              {{ v.version.application }} {{ v.version }}
                             </option>
                           {% endifnotequal %}
                         {% endfor %}
