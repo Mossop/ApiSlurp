@@ -65,6 +65,7 @@ def appinterface(request, name, version, interface):
   interface = Interface.objects.get(versions=version, name=interface)
   return render_to_response('appinterface.html', {
     'version': version,
+    'interfaceversions': InterfaceVersion.objects.filter(interface__name=interface.name).order_by('version'),
     'interface': interface,
     'components': interface.componentversioninterface_set.filter(componentversion__version=version),
     'constants': Constant.objects.filter(interface=interface).order_by('line'),
@@ -88,6 +89,7 @@ def appcomponent(request, name, version, contract):
   cv = ComponentVersion.objects.get(version=version, component=component)
   return render_to_response('appcomponent.html', {
     'version': version,
+    'componentversions': ComponentVersion.objects.filter(component__contract=contract).order_by('version'),
     'component': component,
     'componentversion': cv
     }, context_instance=RequestContext(request))

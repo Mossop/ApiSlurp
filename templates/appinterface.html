@@ -5,7 +5,11 @@
 
 {% block breadcrumbs %}
   &raquo; Applications
-  &raquo; {{ version.application.name }} {{ version }}
+  &raquo; <select onchange="window.location.href = this.value">
+            {% for v in interfaceversions %}
+              <option value="{% url xpcomref.views.appinterface name=v.version.application version=v.version interface=interface %}"{% ifequal version v.version %} selected="selected"{% endifequal %}>{{ v.version.application.name }} {{ v.version }}</option>
+            {% endfor %}
+          </select>
   &raquo; <a href="{% url xpcomref.views.appinterfaces name=version.application version=version %}">Interfaces</a>
   &raquo; {{ interface }}
 {% endblock %}
