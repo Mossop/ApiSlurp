@@ -48,6 +48,10 @@
   padding: 10px 10px 10px 10px;
 }
 
+#platforms {
+  float: right;
+}
+
 .body h2 {
   font-size: 120%;
   margin: 0 20px 0.5em 20px;

@@ -118,7 +118,6 @@ class Slurp(object):
     m.comment = self.__mungeComment(member.doccomments)
     m.type = member.type
     m.hash = hashit(self.getHashStringForMember(member))
-    m.url = member.url
     m.line = member.location._lineno
     m.save()
     if member.kind == "method":
@@ -145,6 +144,7 @@ class Slurp(object):
         iv = InterfaceVersion.objects.get(interface=iface, version=version)
       except InterfaceVersion.DoesNotExist:
         iv = InterfaceVersion(version=version, interface=iface)
+        iv.url = interface.url
         iv.save()
     except Interface.DoesNotExist:
       iface = Interface(name=interface.name, iid=interface.attributes.uuid, hash=hash)
@@ -156,12 +156,12 @@ class Slurp(object):
         iface.parent = self.addInterface(seen, used, version, platform, used[interface.base])
       iface.comment = self.__mungeComment(interface.doccomments)
       iface.path = interface.path
-      iface.url = interface.url
       iface.module = interface.module
       iface.save()
       for member in interface.namemap:
         self.addMember(iface, member)
       iv = InterfaceVersion(version=version, interface=iface)
+      iv.url = interface.url
       iv.save()
     try:
       iv.platforms.get(id=platform.id)
@@ -178,7 +178,7 @@ class Slurp(object):
     appname = lines[1].rstrip()
     vername = lines[2].rstrip()
     gecko = lines[5].rstrip()
-    platname = lines[7].rstrip()
+    platname = lines[7].rstrip().lower()
     f.close()
     print "Scanning application data %s %s %s." % (appname, vername, platname)
     try:
@@ -192,9 +192,9 @@ class Slurp(object):
       version = Version(application=app, version=vername, gecko=gecko)
       version.save()
     try:
-      platform = Platform.objects.get(codename=platname)
+      platform = Platform.objects.get(codename=platname.lower())
     except Platform.DoesNotExist:
-      platform = Platform(codename=platname)
+      platform = Platform(codename=platname.lower())
       platform.save()
 
     used = dict()

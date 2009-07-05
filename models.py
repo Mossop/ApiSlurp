@@ -39,7 +39,6 @@ class Interface(models.Model):
   comment = models.TextField()
   module = models.CharField(max_length=20, db_index=True)
   path = models.CharField(max_length=100)
-  url = models.CharField(max_length=200)
   hash = models.CharField(max_length=32)
 
   class Meta:
@@ -80,6 +79,7 @@ class InterfaceVersion(models.Model):
   interface = models.ForeignKey(Interface)
   version = models.ForeignKey(Version)
   platforms = models.ManyToManyField(Platform)
+  url = models.CharField(max_length=200)
 
   class Meta:
     unique_together = ('interface', 'version')
@@ -91,7 +91,6 @@ class Member(models.Model):
   comment = models.TextField()
   type = models.TextField()
   line = models.IntegerField()
-  url = models.CharField(max_length=200)
   hash = models.CharField(max_length=32)
 
   class Meta:

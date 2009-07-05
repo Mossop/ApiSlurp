@@ -62,15 +62,16 @@ def appinterfaces(request, name, version):
 
 def appinterface(request, name, version, interface):
   version = Version.objects.get(version=version, application__name=name)
-  interface = Interface.objects.get(versions=version, name=interface)
+  iv = InterfaceVersion.objects.get(version=version, interface__name=interface)
   return render_to_response('appinterface.html', {
     'version': version,
-    'interfaceversions': InterfaceVersion.objects.filter(interface__name=interface.name).order_by('version'),
-    'interface': interface,
-    'components': interface.componentversioninterface_set.filter(componentversion__version=version),
-    'constants': Constant.objects.filter(interface=interface).order_by('line'),
-    'attributes': Attribute.objects.filter(interface=interface).order_by('lcname'),
-    'methods': Method.objects.filter(interface=interface).order_by('lcname')
+    'interfaceversions': InterfaceVersion.objects.filter(interface__name=interface).order_by('version'),
+    'interface': iv.interface,
+    'interfaceversion': iv,
+    'components': iv.interface.componentversioninterface_set.filter(componentversion__version=version),
+    'constants': Constant.objects.filter(interface=iv.interface).order_by('line'),
+    'attributes': Attribute.objects.filter(interface=iv.interface).order_by('lcname'),
+    'methods': Method.objects.filter(interface=iv.interface).order_by('lcname')
     }, context_instance=RequestContext(request))
   raise Http404
 
@@ -85,12 +86,11 @@ def appcomponents(request, name, version):
 
 def appcomponent(request, name, version, contract):
   version = Version.objects.get(version=version, application__name=name)
-  component = Component.objects.get(versions=version, contract=contract)
-  cv = ComponentVersion.objects.get(version=version, component=component)
+  cv = ComponentVersion.objects.get(version=version, component__contract=contract)
   return render_to_response('appcomponent.html', {
     'version': version,
     'componentversions': ComponentVersion.objects.filter(component__contract=contract).order_by('version'),
-    'component': component,
+    'component': cv.component,
     'componentversion': cv
     }, context_instance=RequestContext(request))
   raise Http404

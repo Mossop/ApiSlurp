@@ -15,12 +15,17 @@
 {% endblock %}
 
 {% block body %}
-{% for interface in componentversion.interfaces.all %}
+{% for cvi in componentversion.componentversioninterface_set.all %}
   {% if forloop.first %}
     <h2>Implements</h2>
     <ul class="implementlist interfaces">
   {% endif %}
-  <li><a href="{% url xpcomref.views.appinterface name=version.application version=version interface=interface %}">{{ interface }}</a></li>
+  <li>
+    <a href="{% url xpcomref.views.appinterface name=version.application version=version interface=cvi.interface %}">{{ cvi.interface }}</a>
+    {% for platform in cvi.platforms.all %}
+      <img src="{{ MEDIA_URL }}images/{{ platform.codename }}16.png" alt="{{ platform }}" title="Supported in {{ platform }}" />
+    {% endfor %}
+  </li>
   {% if forloop.last %}
     </ul>
   {% endif %}

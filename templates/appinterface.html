@@ -29,7 +29,7 @@
 </p>
 <p class="navbox">
   <img src="{{ MEDIA_URL }}silk/script_go.png" />
-  <a href="{{ interface.url }}">View IDL</a>
+  <a href="{{ interfaceversion.url }}">View IDL</a>
 </p>
 <p class="navbox">
   <img src="https://developer.mozilla.org/favicon.ico" />
@@ -38,6 +38,12 @@
 {% endblock %}
 
 {% block body %}
+<div id="platforms">
+  {% for platform in interfaceversion.platforms.all %}
+    <img src="{{ MEDIA_URL }}images/{{ platform.codename }}16.png" alt="{{ platform }}" title="Supported in {{ platform }}" />
+  {% endfor %}
+</div>
+<div style="clear: both"></div>
 {% for cvi in components %}
   {% if forloop.first %}
     <h2>Implemented by</h2>
