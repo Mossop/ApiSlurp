@@ -1,5 +1,6 @@
+{% load idl %}
 <div class="method signature">
-  {% include "includes/idlattributes.html" %}
+  {% idlattributes member %}
   <span class="type">{{ member.type }}</span>
   <span class="name">{{ member.name }}</span>(<span class="paramlist">{% for param in member.parameter_set.all %}{% include "includes/parameter.html" %}{% if not forloop.last %}, {% endif %}{% endfor %}</span>)
 </div>

@@ -1,5 +1,6 @@
+{% load idl %}
 <div class="attribute signature">
-  {% include "includes/idlattributes.html" %}
+  {% idlattributes member %}
   <span class="keyword">{% if member.readonly %}readonly {% endif %}attribute</span>
   <span class="type">{{ member.type }}</span>
   <span class="name">{{ member.name }}</span>
