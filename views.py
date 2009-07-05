@@ -44,6 +44,24 @@ def component(request, contract):
     return redirect('xpcomref.views.appcomponent', name=cv.version.application, version=cv.version, contract=contract)
   raise Http404
 
+def searchinterfaces(request, string):
+  interfaces = Interface.objects.filter(name__icontains=string).values_list('name', flat=True).order_by('lcname').distinct()
+  if interfaces.count() == 1:
+    return interface(request, interfaces[0])
+  return render_to_response('searchinterfaces.html', {
+    'string': string,
+    'interfaces': interfaces
+    }, context_instance=RequestContext(request))
+
+def searchcomponents(request, string):
+  components = Component.objects.filter(contract__icontains=string).values_list('contract', flat=True).order_by('contract').distinct()
+  if components.count() == 1:
+    return component(request, components[0])
+  return render_to_response('searchcomponents.html', {
+    'string': string,
+    'components': components
+    }, context_instance=RequestContext(request))
+
 def appinterfaces(request, name, version):
   version = Version.objects.get(version=version, application__name=name)
   modules = []

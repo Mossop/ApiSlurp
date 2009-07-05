@@ -1,0 +1,16 @@
+{% extends "apidoc.html" %}
+
+{% block title %}Interface search for {{ string }}{% endblock %}
+{% block header %}Interface search for {{ string }}{% endblock %}
+
+{% block body %}
+  {% for interface in interfaces %}
+    {% if forloop.first %}
+      <ul>
+    {% endif %}
+      <li><a href="{% url xpcomref.views.interface name=interface %}">{{ interface }}</a></li>
+    {% if forloop.last %}
+      </ul>
+    {% endif %}
+  {% endfor %}
+{% endblock body %}

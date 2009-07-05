@@ -1,0 +1,16 @@
+{% extends "apidoc.html" %}
+
+{% block title %}Component search for {{ string }}{% endblock %}
+{% block header %}Component search for {{ string }}{% endblock %}
+
+{% block body %}
+  {% for component in components %}
+    {% if forloop.first %}
+      <ul>
+    {% endif %}
+      <li><a href="{% url xpcomref.views.component contract=component %}">{{ component }}</a></li>
+    {% if forloop.last %}
+      </ul>
+    {% endif %}
+  {% endfor %}
+{% endblock body %}
