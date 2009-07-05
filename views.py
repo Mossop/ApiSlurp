@@ -1,5 +1,5 @@
 from django.core.urlresolvers import reverse
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.template import RequestContext
 from xpcomref.models import *
@@ -27,10 +27,10 @@ def interfaces(request):
 
 def interface(request, name):
   ivs = InterfaceVersion.objects.filter(interface__name=name).order_by('version')
-  if ivs.count() > 0:
-    iv = ivs[ivs.count() - 1]
-    return redirect('xpcomref.views.appinterface', name=iv.version.application, version=iv.version, interface=name)
-  raise Http404
+  if ivs.count() == 0:
+    raise Http404
+  iv = ivs[ivs.count() - 1]
+  return redirect('xpcomref.views.appinterface', name=iv.version.application, version=iv.version, interface=name)
 
 def components(request):
   return render_to_response('components.html', {
@@ -39,10 +39,10 @@ def components(request):
 
 def component(request, contract):
   cvs = ComponentVersion.objects.filter(component__contract=contract).order_by('version')
-  if cvs.count() > 0:
-    cv = cvs[cvs.count() - 1]
-    return redirect('xpcomref.views.appcomponent', name=cv.version.application, version=cv.version, contract=contract)
-  raise Http404
+  if cvs.count() == 0:
+    raise Http404
+  cv = cvs[cvs.count() - 1]
+  return redirect('xpcomref.views.appcomponent', name=cv.version.application, version=cv.version, contract=contract)
 
 def searchinterfaces(request, string):
   interfaces = Interface.objects.filter(name__icontains=string).values_list('name', flat=True).order_by('lcname').distinct()
@@ -63,7 +63,7 @@ def searchcomponents(request, string):
     }, context_instance=RequestContext(request))
 
 def appinterfaces(request, name, version):
-  version = Version.objects.get(version=version, application__name=name)
+  version = get_object_or_404(Version, version=version, application__name=name)
   modules = []
   mods = Interface.objects.filter(versions=version).values_list('module', flat=True).order_by('module').distinct()
   for module in mods:
@@ -76,11 +76,10 @@ def appinterfaces(request, name, version):
     'versions': Version.objects.filter(application=version.application),
     'modules': modules
     }, context_instance=RequestContext(request))
-  raise Http404
 
 def appinterface(request, name, version, interface):
-  version = Version.objects.get(version=version, application__name=name)
-  iv = InterfaceVersion.objects.get(version=version, interface__name=interface)
+  version = get_object_or_404(Version, version=version, application__name=name)
+  iv = get_object_or_404(InterfaceVersion, version=version, interface__name=interface)
   return render_to_response('appinterface.html', {
     'version': version,
     'interfaceversions': InterfaceVersion.objects.filter(interface__name=interface).order_by('version'),
@@ -91,31 +90,28 @@ def appinterface(request, name, version, interface):
     'attributes': Attribute.objects.filter(interface=iv.interface).order_by('lcname'),
     'methods': Method.objects.filter(interface=iv.interface).order_by('lcname')
     }, context_instance=RequestContext(request))
-  raise Http404
 
 def appcomponents(request, name, version):
-  version = Version.objects.get(version=version, application__name=name)
+  version = get_object_or_404(Version, version=version, application__name=name)
   return render_to_response('appcomponents.html', {
     'version': version,
     'versions': Version.objects.filter(application=version.application),
     'components': Component.objects.filter(versions=version).values_list('contract', flat=True).order_by('contract')
     }, context_instance=RequestContext(request))
-  raise Http404
 
 def appcomponent(request, name, version, contract):
-  version = Version.objects.get(version=version, application__name=name)
-  cv = ComponentVersion.objects.get(version=version, component__contract=contract)
+  version = get_object_or_404(Version, version=version, application__name=name)
+  cv = get_object_or_404(ComponentVersion, version=version, component__contract=contract)
   return render_to_response('appcomponent.html', {
     'version': version,
     'componentversions': ComponentVersion.objects.filter(component__contract=contract).order_by('version'),
     'component': cv.component,
     'componentversion': cv
     }, context_instance=RequestContext(request))
-  raise Http404
 
 def compareappinterfaces(request, leftname, leftversion, rightname, rightversion):
-  leftv = Version.objects.get(version=leftversion, application__name=leftname)
-  rightv = Version.objects.get(version=rightversion, application__name=rightname)
+  leftv = get_object_or_404(Version, version=leftversion, application__name=leftname)
+  rightv = get_object_or_404(Version, version=rightversion, application__name=rightname)
   if leftv.version > rightv.version:
     [leftv, rightv] = [rightv, leftv]
 
@@ -148,12 +144,12 @@ def compareappinterfaces(request, leftname, leftversion, rightname, rightversion
     }, context_instance=RequestContext(request))
 
 def compareappinterface(request, leftname, leftversion, rightname, rightversion, interface):
-  leftv = Version.objects.get(version=leftversion, application__name=leftname)
-  rightv = Version.objects.get(version=rightversion, application__name=rightname)
+  leftv = get_object_or_404(Version, version=leftversion, application__name=leftname)
+  rightv = get_object_or_404(Version, version=rightversion, application__name=rightname)
   if leftv.version > rightv.version:
     [leftv, rightv] = [rightv, leftv]
-  leftinterface = Interface.objects.get(versions=leftv, name=interface)
-  rightinterface = Interface.objects.get(versions=rightv, name=interface)
+  leftinterface = get_object_or_404(Interface, versions=leftv, name=interface)
+  rightinterface = get_object_or_404(Interface, versions=rightv, name=interface)
 
   constants = []
   left = list(Constant.objects.filter(interface=leftinterface).order_by('line'))
@@ -228,4 +224,3 @@ def compareappinterface(request, leftname, leftversion, rightname, rightversion,
     'attributes': attributes,
     'methods': methods
     }, context_instance=RequestContext(request))
-  raise Http404
