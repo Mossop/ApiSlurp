@@ -1,0 +1,7 @@
+[{"model": "xpcomref.platform", "pk": 1,
+  "fields": {"codename": "linux", "name": "Linux"}},
+ {"model": "xpcomref.platform", "pk": 2,
+  "fields": {"codename": "darwin", "name": "Mac OSX"}},
+ {"model": "xpcomref.platform", "pk": 3,
+  "fields": {"codename": "winnt", "name": "Windows"}}
+]
