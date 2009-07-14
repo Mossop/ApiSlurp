@@ -41,7 +41,7 @@
 {% endblock %}
 
 {% block body %}
-<div class="filtersection">
+<div class="filtersection removed">
   <h2>Interfaces removed between {{ leftversion.application }} {{ leftversion }} and {{ rightversion.application }} {{ rightversion }}</h2>
   <ul class="interfacelist">
   {% for interface in removed %}
@@ -52,7 +52,7 @@
   </ul>
 </div>
 
-<div class="filtersection">
+<div class="filtersection added">
   <h2>Interfaces added between {{ leftversion.application }} {{ leftversion }} and {{ rightversion.application }} {{ rightversion }}</h2>
   <ul class="interfacelist">
   {% for interface in added %}
@@ -63,7 +63,7 @@
   </ul>
 </div>
 
-<div class="filtersection">
+<div class="filtersection modified">
   <h2>Interfaces changed between {{ leftversion.application }} {{ leftversion }} and {{ rightversion.application }} {{ rightversion }}</h2>
   <ul class="interfacelist">
   {% for interface in modified %}
@@ -74,7 +74,7 @@
   </ul>
 </div>
 
-<div class="filtersection">
+<div class="filtersection unchanged">
   <h2>Interfaces not changed between {{ leftversion.application }} {{ leftversion }} and {{ rightversion.application }} {{ rightversion }}</h2>
   <ul class="interfacelist">
   {% for interface in unchanged %}

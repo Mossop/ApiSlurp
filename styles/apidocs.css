@@ -120,6 +120,10 @@
   -moz-column-count: 2;
 }
 
+.filtersection {
+  padding: 1px;
+}
+
 .variants {
   vertical-align: super;
   font-size: 70%;
@@ -156,11 +160,13 @@
 }
 
 
-.added .after {
+tr.added .after,
+div.added {
   background-color: lightgreen;
 }
 
-.removed .before {
+tr.removed .before,
+div.removed {
   background-color: rgb(255, 204, 153);
 }
 
