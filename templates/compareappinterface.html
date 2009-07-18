@@ -59,13 +59,17 @@ function toggleVisible() {
   </tr>
   <tr class="signaturerow">
     <td class="before idl">
-      {% with leftinterface as interface %}
-        {% include "includes/interface.html" %}
+      {% with leftversion as version %}
+        {% with leftinterface as interface %}
+          {% include "includes/interface.html" %}
+        {% endwith %}
       {% endwith %}
     </td>
     <td class="after idl">
-      {% with rightinterface as interface %}
-        {% include "includes/interface.html" %}
+      {% with rightversion as version %}
+        {% with rightinterface as interface %}
+          {% include "includes/interface.html" %}
+        {% endwith %}
       {% endwith %}
     </td>
   </tr>
