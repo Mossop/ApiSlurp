@@ -1,0 +1,5 @@
+#! /bin/sh
+
+export PYTHONPATH=~/mozilla/source/trunk/xpcom/idl-parser:~/workspace
+export DJANGO_SETTINGS_MODULE=apislurp.settings
+python slurp.py applications sources

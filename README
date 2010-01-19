@@ -1,0 +1,45 @@
+This is a Django web application for displaying XPCOM interfaces and their
+differences across multiple application versions. Add it to a regular Django
+setup, normally the app is called xpcomref.
+
+A script (buildapi) builds the database for the web application using data
+provided from built versions of the application and the original source code.
+
+Data about applications must be gathered by dropping dumpcomponents.js into the
+application's components directory and then running the application with a clean
+profile. After startup an "apislurp" directory will be created on the desktop
+and a series of files written there. The component will log its progress to the
+standard text console. Once completed the application should be quit as it may
+have become unstable. These data files, along with any xpt file shipped with the
+application should be placed into the applications directory as follows:
+
+applications
+- <Application name>
+  - <Application version>
+    - platform (contains the version of the platform this app is based on)
+    - <OS>
+      - application (built by dumpcomponents.js)
+      - components (built by dumpcomponents.js)
+      - interfaces (built by dumpcomponents.js)
+      - compreg.dat (built by dumpcomponents.js)
+      - xpti.dat (built by dumpcomponents.js)
+      - *.xpt (copied from the application)
+
+There should also be a source directory as follows:
+
+sources
+- platform
+  - <Platform version> (matches the text in the platform file in the applications directory)
+    - source (contains the URL where the source code can be viewed)
+    - full copy of the source idls for this version of the platform
+
+These directories only need exist on one machine to build the initial database.
+Running the "buildapi" script will scan these directories and generate the
+database which may then be transferred to a webhost.
+
+The following is probably necessary in Django's root urls.py:
+
+urlpatterns = patterns('',
+  (r'^(?P<path>(?:images|styles|silk|scripts)/.*)$', 'django.views.static.serve', {'document_root': 'xpcomref'}),
+  (r'', include('apislurp.xpcomref.urls'))
+)
